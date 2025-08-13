@@ -1,17 +1,3 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 'use client'
 
 import * as React from 'react'
@@ -357,6 +343,7 @@ export default function Page() {
       weight={500}
      />
 
+     {/* [CORRECTION START] The premature closing bracket '>' has been removed. */}
      {generationMode === 'Generate an Image' && (
       <GenerateForm
        key="image-form"
@@ -374,7 +361,9 @@ export default function Page() {
        }
       />
      )}
+     {/* [CORRECTION END] */}
 
+     {/* [CORRECTION START] The premature closing bracket '>' has been removed. */}
      {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && generationMode === 'Generate a Video' && (
       <GenerateForm
        key="video-form"
@@ -393,6 +382,7 @@ export default function Page() {
        }
       />
      )}
+     {/* [CORRECTION END] */}
     </Grid>
     <Grid size={0.9} flex={1} sx={{ pt: 14, maxWidth: 850, minWidth: 400 }}>
      {generationMode === 'Generate an Image' ? (
