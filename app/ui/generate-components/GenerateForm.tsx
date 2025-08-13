@@ -2,7 +2,6 @@
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //   https://www.apache.org/licenses/LICENSE-2.0
@@ -722,9 +721,11 @@ export default function GenerateForm({
        }
       </Accordion>
      )}
+
       {/* 
         [MODIFICATION START] 
-        The entire "attributes" Accordion has been commented out to remove it from the UI.
+        The entire "attributes" Accordion has been commented out to remove it from the UI
+        for BOTH Image and Video generation modes.
       */}
       {/*
      <Accordion
