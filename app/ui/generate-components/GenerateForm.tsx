@@ -54,8 +54,6 @@ import CustomTooltip from '../ux-components/Tooltip'
 import GenerateSettings from './GenerateSettings'
 import ImageToPromptModal from './ImageToPromptModal'
 import { ReferenceBox } from './ReferenceBox'
-
-// [MODIFICATION] Import the new PromptBuilder component using a relative path
 import PromptBuilder from './PromptBuilder'
 
 import theme from '../../theme'
@@ -63,6 +61,8 @@ const { palette } = theme
 
 import { useAppContext } from '../../context/app-context'
 import { generateImage } from '../../api/imagen/action'
+
+// [CORRECTION] All aliased paths (@/) are replaced with relative paths (../../)
 import {
  chipGroupFieldsI,
  GenerateImageFormFields,
@@ -74,7 +74,7 @@ import {
  ReferenceObjectInit,
  selectFieldsI,
 } from '../../api/generate-image-utils'
-import { EditImageFormFields } from '../../api/edit-utils' // Using relative path
+import { EditImageFormFields } from '../../api/edit-utils'
 import {
  GenerateVideoFormFields,
  GenerateVideoFormI,
@@ -84,8 +84,8 @@ import {
  tempVeo3specificSettings,
  VideoGenerationFieldsI,
  videoGenerationUtils,
-} from '../../api/generate-video-utils' // Using relative path
-import { generateVideo } from '../../api/veo/action' // Using relative path
+} from '../../api/generate-video-utils'
+import { generateVideo } from '../../api/veo/action'
 import { getOrientation, VideoInterpolBox } from './VideoInterpolBox'
 import { AudioSwitch } from '../ux-components/AudioButton'
 
