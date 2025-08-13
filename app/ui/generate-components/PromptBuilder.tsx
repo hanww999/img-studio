@@ -43,7 +43,8 @@ import {
   RestartAlt,
   AutoFixHigh, // Generate Professional Prompt
 } from '@mui/icons-material';
-import { initialPromptData, promptBuilderOptions, PromptData } from '@/app/api/prompt-builder-utils';
+// [MODIFICATION] Changed the import path to a relative path
+import { initialPromptData, promptBuilderOptions, PromptData } from '../../api/prompt-builder-utils';
 import theme from '../../theme';
 const { palette } = theme;
 
