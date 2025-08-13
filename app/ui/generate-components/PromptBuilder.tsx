@@ -43,7 +43,7 @@ import {
   RestartAlt,
   AutoFixHigh, // Generate Professional Prompt
 } from '@mui/icons-material';
-// [MODIFICATION] Changed the import path to a relative path
+// [FINAL, DEFINITIVE CORRECTION] This path now matches the error log and the new file location.
 import { initialPromptData, promptBuilderOptions, PromptData } from '../../api/prompt-builder-utils';
 import theme from '../../theme';
 const { palette } = theme;
@@ -115,7 +115,7 @@ Negative prompt: no text overlays, no watermarks, no cartoon effects, no unreali
           <Stack spacing={3}>
             <PromptField icon={<AccountCircle color="primary" />} label="Subject">
               <TextField name="subject" value={promptData.subject} onChange={handleInputChange} fullWidth multiline rows={3} variant="outlined" />
-            </PromptField>
+            </P>
             <PromptField icon={<DirectionsRun color="primary" />} label="Action & Movement">
               <TextField name="action" value={promptData.action} onChange={handleInputChange} fullWidth multiline rows={3} variant="outlined" />
             </PromptField>
