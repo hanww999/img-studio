@@ -1,17 +1,3 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 'use client';
 
 import React, { useState } from 'react';
@@ -43,7 +29,6 @@ import {
   RestartAlt,
   AutoFixHigh, // Generate Professional Prompt
 } from '@mui/icons-material';
-// [FINAL, DEFINITIVE CORRECTION] This path now matches the error log and the new file location.
 import { initialPromptData, promptBuilderOptions, PromptData } from '../../api/prompt-builder-utils';
 import theme from '../../theme';
 const { palette } = theme;
@@ -115,7 +100,7 @@ Negative prompt: no text overlays, no watermarks, no cartoon effects, no unreali
           <Stack spacing={3}>
             <PromptField icon={<AccountCircle color="primary" />} label="Subject">
               <TextField name="subject" value={promptData.subject} onChange={handleInputChange} fullWidth multiline rows={3} variant="outlined" />
-            </P>
+            </PromptField>
             <PromptField icon={<DirectionsRun color="primary" />} label="Action & Movement">
               <TextField name="action" value={promptData.action} onChange={handleInputChange} fullWidth multiline rows={3} variant="outlined" />
             </PromptField>
@@ -141,6 +126,7 @@ Negative prompt: no text overlays, no watermarks, no cartoon effects, no unreali
             <PromptField icon={<Theaters color="primary" />} label="Context & Scene">
               <TextField name="context" value={promptData.context} onChange={handleInputChange} fullWidth multiline rows={3} variant="outlined" />
             </PromptField>
+            {/* [SYNTAX FIX] The closing tag was </P> and is now correctly </PromptField> */}
             <PromptField icon={<Palette color="primary" />} label="Visual Style">
               <FormControl fullWidth variant="outlined">
                 <InputLabel>Choose visual style...</InputLabel>
