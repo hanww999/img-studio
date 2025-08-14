@@ -49,7 +49,7 @@ import theme from '../../theme';
 const { palette } = theme;
 
 const PromptField = ({ icon, label, children, badge }: { icon: React.ReactNode; label: string; children: React.ReactNode; badge?: string }) => (
-  <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+  <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#fff' }}>
     <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
       {icon}
       <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
@@ -115,7 +115,7 @@ Negative prompt: no text overlays, no watermarks, no cartoon effects, no unreali
   };
 
   return (
-    <Box sx={{ width: '100%', mt: 2 }}>
+    <Box sx={{ width: '100%', mt: 2, backgroundColor: '#fff', p: 2, borderRadius: 2 }}>
       <Grid container spacing={4}>
         {/* Left Sidebar: Professional Templates */}
         <Grid item xs={12} md={3}>
