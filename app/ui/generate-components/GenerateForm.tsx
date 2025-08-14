@@ -33,6 +33,8 @@ import {
 } from '@mui/material'
 import {
  ArrowDownward as ArrowDownwardIcon,
+ ArrowLeft,
+ ArrowRight,
  Autorenew,
  Close as CloseIcon,
  Lightbulb,
@@ -43,6 +45,7 @@ import {
 
 import { CustomizedAccordion, CustomizedAccordionSummary } from '../ux-components/Accordion-SX'
 import { CustomizedAvatarButton, CustomizedIconButton, CustomizedSendButton } from '../ux-components/Button-SX'
+import FormInputChipGroup from '../ux-components/InputChipGroup'
 import FormInputDropdown from '../ux-components/InputDropdown'
 import { FormInputText } from '../ux-components/InputText'
 import { GeminiSwitch } from '../ux-components/GeminiButton'
@@ -51,7 +54,6 @@ import CustomTooltip from '../ux-components/Tooltip'
 import GenerateSettings from './GenerateSettings'
 import ImageToPromptModal from './ImageToPromptModal'
 import { ReferenceBox } from './ReferenceBox'
-// [MODIFICATION] Import the new PromptBuilder component
 import PromptBuilder from './PromptBuilder'
 
 import theme from '../../theme'
@@ -60,6 +62,7 @@ const { palette } = theme
 import { useAppContext } from '../../context/app-context'
 import { generateImage } from '../../api/imagen/action'
 import {
+ chipGroupFieldsI,
  GenerateImageFormFields,
  GenerateImageFormI,
  ImageGenerationFieldsI,
@@ -78,6 +81,7 @@ import {
  OperationMetadataI,
  tempVeo3specificSettings,
  VideoGenerationFieldsI,
+ videoGenerationUtils,
 } from '../../api/generate-video-utils'
 import { generateVideo } from '../../api/veo/action'
 import { getOrientation, VideoInterpolBox } from './VideoInterpolBox'
@@ -316,7 +320,7 @@ export default function GenerateForm({
       </Accordion>
      )}
       
-      {/* [MODIFICATION] This is the original, untouched "Image to video" Accordion */}
+      {/* This is the original, untouched "Image to video" Accordion */}
      {generationType === 'Video' && (isOnlyITVavailable || isAdvancedFeaturesAvailable) && (
       <Accordion disableGutters expanded={expanded === 'interpolation'} onChange={handleChange('interpolation')} sx={CustomizedAccordion}>
        <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
@@ -327,7 +331,7 @@ export default function GenerateForm({
       </Accordion>
      )}
 
-      {/* [MODIFICATION] This is the NEW, SEPARATE Accordion for the Prompt Builder */}
+      {/* This is the NEW, SEPARATE Accordion for the Prompt Builder */}
       {generationType === 'Video' && (
         <Accordion disableGutters expanded={expanded === 'prompt-builder'} onChange={handleChange('prompt-builder')} sx={CustomizedAccordion}>
           <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel2-content" id="panel2-header" sx={CustomizedAccordionSummary}>
@@ -335,7 +339,7 @@ export default function GenerateForm({
               Video / prompt attributes
             </Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{ p: 0, backgroundColor: 'transparent' }}>
+          <AccordionDetails sx={{ p: 0, backgroundColor: 'transparent', borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
             <PromptBuilder />
           </AccordionDetails>
         </Accordion>
