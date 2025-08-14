@@ -246,7 +246,7 @@ export async function getPromptFromImageFromGemini(
   Composition: medium shots capturing both interviewer and subjects, environmental context
   Ambiance: natural daylight with urban atmosphere, street lighting
   Audio: clear interview audio: 'What's the most interesting thing that happened to you today?' with authentic street ambiance
-  Negative prompt: no text overlays, no watermarks, no cartoon effects, no unrealistic proportions, no blurry faces, no distorted hands, no artificial lighting, no oversaturation, no low resolution artifacts, no compression noise, no camera shake, no poor audio quality, no lip-sync issues, no unnatural movements
+ 
   Instructions:
   1. Maintain the structure of the example prompt, including Subject, Context, Action, Style, Camera, Composition, Ambiance, Audio, and Negative prompt.
   2. Vary the scenes and contexts to avoid repetition.
