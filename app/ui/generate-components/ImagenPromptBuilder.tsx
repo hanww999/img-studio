@@ -33,6 +33,7 @@ import {
  RestartAlt,
  CheckCircle,
   AutoFixHigh,
+  ContentCopy, // FIX: Import the Copy icon
 } from '@mui/icons-material';
 import { initialImagenPromptData, imagenPromptBuilderOptions, ImagenPromptData } from '../../api/imagen-prompt-builder-utils';
 import theme from '../../theme';
@@ -63,39 +64,44 @@ export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProp
   setPromptData((prev) => ({ ...prev, [name]: value }));
  };
 
+  // FIX: Reformat the prompt string for readability with labels and newlines
  const generateFinalPromptString = () => {
-    const coreParts = [
-        promptData.styleMedium,
-        promptData.subject,
-        promptData.detailedDescription,
-        promptData.environment,
-    ].filter(Boolean);
+    const sections = [
+        { label: 'Style / Medium', value: promptData.styleMedium },
+        { label: 'Subject', value: promptData.subject },
+        { label: 'Detailed Description', value: promptData.detailedDescription },
+        { label: 'Environment / Background', value: promptData.environment },
+        { label: 'Composition / View', value: promptData.composition },
+        { label: 'Lighting', value: promptData.lighting },
+        { label: 'Color Scheme', value: promptData.colorScheme },
+        { label: 'Lens Type', value: promptData.lensType },
+        { label: 'Camera Settings', value: promptData.cameraSettings },
+        { label: 'Film Type', value: promptData.filmType },
+        { label: 'Quality', value: promptData.quality },
+    ];
 
-    const styleParts = [
-        promptData.composition,
-        promptData.lighting,
-        promptData.colorScheme,
-    ].filter(Boolean);
-
-    const photoParts = [
-        promptData.lensType,
-        promptData.cameraSettings,
-        promptData.filmType,
-        promptData.quality,
-    ].filter(Boolean);
-
-    let finalPrompt = [...coreParts, ...styleParts, ...photoParts].join(', ');
+    let prompt = sections
+        .filter(section => section.value) // Only include sections that have a value
+        .map(section => `${section.label}: ${section.value}`) // Format as "Label: Value"
+        .join('\n'); // Join each section with a newline
 
     if (promptData.negativePrompt) {
-        finalPrompt += ` --no ${promptData.negativePrompt}`;
+        prompt += `\n\nNegative Prompt: ${promptData.negativePrompt}`;
     }
     
-    return finalPrompt;
+    return prompt;
   }
 
   const handleGeneratePrompt = () => {
     const finalPrompt = generateFinalPromptString();
     setGeneratedPrompt(finalPrompt);
+  };
+
+  // FIX: Add a handleCopy function for the new button
+  const handleCopy = () => {
+    if (generatedPrompt) {
+      navigator.clipboard.writeText(generatedPrompt);
+    }
   };
 
  const handleApplyPrompt = () => {
@@ -109,7 +115,6 @@ export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProp
  };
 
  return (
-    // FIX: Removed the redundant background color style from this Box.
   <Box sx={{ width: '100%', p: 1 }}>
     <Grid container spacing={3}>
         {/* Column 1: Core Components */}
@@ -141,7 +146,7 @@ export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProp
             </Paper>
         </Grid>
 
-        {/* Column 3: Exclusions & Actions */}
+        {/* Column 3: Exclusions */}
         <Grid item xs={12} md={4}>
             <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <SectionTitle title="Exclusions (Negative Prompt)" />
@@ -161,7 +166,11 @@ export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProp
 
     {generatedPrompt && (
         <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.100', border: '1px solid', borderColor: 'grey.300' }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>Your Generated Prompt</Typography>
+            {/* FIX: Add a Stack to hold the title and the new Copy button */}
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Your Generated Prompt</Typography>
+                <Button variant="text" startIcon={<ContentCopy />} onClick={handleCopy}>Copy</Button>
+            </Stack>
             <Box component="pre" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', m: 0, p: 2, backgroundColor: '#fff', borderRadius: 1, fontFamily: 'monospace', border: '1px solid', borderColor: 'grey.300' }}>
                 {generatedPrompt}
             </Box>
