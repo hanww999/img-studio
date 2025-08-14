@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      https://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,21 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use client'
+'use client';
 
-import * as React from 'react'
-import Box from '@mui/material/Box'
-import Image from 'next/image'
-import icon from '../public/ImgStudioLogo.svg'
-import GoogleSignInButton from './ui/ux-components/GoogleSignInButton'
-import { pages } from './routes'
-import { useRouter } from 'next/navigation'
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Image from 'next/image';
+import icon from '../public/ImgStudioLogo.svg';
+import GoogleSignInButton from './ui/ux-components/GoogleSignInButton';
+import { pages } from './routes';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
-  const router = useRouter()
+  const router = useRouter();
   const handleClick = () => {
-    router.push(pages.Generate.href)
-  }
+    // --- 原始代码 ---
+    // router.push(pages.Generate.href)
+
+    // +++ 修改后代码 +++
+    // 将跳转目标从不存在的 pages.Generate 修改为 pages.GenerateImage
+    router.push(pages.GenerateImage.href);
+  };
 
   return (
     <main>
@@ -37,5 +42,5 @@ export default function Page() {
         </Box>
       </Box>
     </main>
-  )
+  );
 }
