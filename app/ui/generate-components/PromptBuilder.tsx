@@ -43,10 +43,16 @@ import {
  ContentCopy,
  RestartAlt,
  AutoFixHigh,
+  CheckCircle, // Icon for the apply button
 } from '@mui/icons-material';
 import { initialPromptData, promptBuilderOptions, professionalTemplates, PromptData } from '../../api/prompt-builder-utils';
 import theme from '../../theme';
 const { palette } = theme;
+
+// FIX: Define props for the component, including the onApply callback
+interface PromptBuilderProps {
+    onApply: (prompt: string) => void;
+}
 
 const PromptField = ({ icon, label, children, badge }: { icon: React.ReactNode; label: string; children: React.ReactNode; badge?: string }) => (
  <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#fff' }}>
@@ -67,7 +73,8 @@ const PromptField = ({ icon, label, children, badge }: { icon: React.ReactNode; 
  </Paper>
 );
 
-export default function PromptBuilder() {
+// FIX: Use the new props interface
+export default function PromptBuilder({ onApply }: PromptBuilderProps) {
  const [promptData, setPromptData] = useState<PromptData>(initialPromptData);
  const [generatedPrompt, setGeneratedPrompt] = useState('');
  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -88,8 +95,8 @@ export default function PromptBuilder() {
   setGeneratedPrompt('');
  };
 
- const handleGeneratePrompt = () => {
-  const finalPrompt = `Subject: ${promptData.subject}
+ const generateFinalPromptString = () => {
+    return `Subject: ${promptData.subject}
 Context: ${promptData.context}
 Action: ${promptData.action}
 Style: ${promptData.visualStyle}
@@ -99,8 +106,18 @@ Ambiance: ${promptData.lighting}
 Audio: ${promptData.audio}
 
 Negative prompt: no text overlays, no watermarks, no cartoon effects, no unrealistic proportions, no blurry faces, no distorted hands, no artificial lighting, no oversaturation, no low resolution artifacts, no compression noise, no camera shake, no poor audio quality, no lip-sync issues, no unnatural movements`;
+  }
+
+ const handleGeneratePrompt = () => {
+  const finalPrompt = generateFinalPromptString();
   setGeneratedPrompt(finalPrompt);
  };
+
+  // FIX: This function now calls the onApply callback passed from the parent
+  const handleApplyPrompt = () => {
+    const finalPrompt = generatedPrompt || generateFinalPromptString();
+    onApply(finalPrompt);
+  }
 
  const handleReset = () => {
   setPromptData(initialPromptData);
@@ -115,11 +132,11 @@ Negative prompt: no text overlays, no watermarks, no cartoon effects, no unreali
  };
 
  return (
-  <Box sx={{ width: '100%', mt: 2, backgroundColor: '#fff', p: 3, borderRadius: 2 }}>
-    {/* FIX STARTS HERE: Grid layout is changed from md={3}/md={9} to md={2}/md={10} */}
-   <Grid container spacing={2}>
+    // FIX: Removed the outer Box with margin, as it's now inside a DialogContent
+  <Box sx={{ width: '100%', backgroundColor: '#fff' }}>
+   <Grid container spacing={3}>
     {/* Left Sidebar: Professional Templates */}
-    <Grid item xs={12} md={2}>
+    <Grid item xs={12} md={3} lg={2}>
      <Stack spacing={2}>
       {professionalTemplates.map((template) => (
        <Card key={template.title} variant="outlined" sx={{ borderColor: selectedTemplate === template.title ? 'primary.main' : 'rgba(0, 0, 0, 0.12)', borderWidth: 2, backgroundColor: '#fff' }}>
@@ -144,8 +161,7 @@ Negative prompt: no text overlays, no watermarks, no cartoon effects, no unreali
     </Grid>
 
     {/* Right Side: Prompt Builder */}
-    <Grid item xs={12} md={10}>
-    {/* FIX ENDS HERE */}
+    <Grid item xs={12} md={9} lg={10}>
      <Grid container spacing={2}>
       <Grid item xs={12} md={6}><PromptField icon={<AccountCircle color="primary" />} label="Subject" badge="Core"><TextField name="subject" value={promptData.subject} onChange={handleInputChange} fullWidth multiline rows={4} variant="outlined" placeholder="Describe the main character or object..." /></PromptField></Grid>
       <Grid item xs={12} md={6}><PromptField icon={<Theaters color="primary" />} label="Context & Scene"><TextField name="context" value={promptData.context} onChange={handleInputChange} fullWidth multiline rows={4} variant="outlined" placeholder="Describe the environment, location, props..." /></PromptField></Grid>
@@ -158,8 +174,8 @@ Negative prompt: no text overlays, no watermarks, no cartoon effects, no unreali
      </Grid>
 
      <Stack direction="row" spacing={2} justifyContent="center" sx={{ my: 4 }}>
-      <Button variant="contained" startIcon={<AutoFixHigh />} onClick={handleGeneratePrompt} size="large">
-       Generate Professional Prompt
+      <Button variant="outlined" startIcon={<AutoFixHigh />} onClick={handleGeneratePrompt} size="large">
+       Preview Generated Prompt
       </Button>
       <Button variant="text" startIcon={<RestartAlt />} onClick={handleReset}>
        Reset All
@@ -167,12 +183,32 @@ Negative prompt: no text overlays, no watermarks, no cartoon effects, no unreali
      </Stack>
 
      {generatedPrompt && (
-      <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.100' }}>
-       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}><Typography variant="h6" sx={{ fontWeight: 'bold' }}>Your Generated Prompt</Typography><Button variant="contained" startIcon={<ContentCopy />} onClick={handleCopy}>Copy</Button></Stack>
-       <Box component="pre" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', m: 0, p: 1, backgroundColor: '#fff', borderRadius: 1, fontFamily: 'monospace' }}>{generatedPrompt}</Box>
-       <Box sx={{ mt: 2, p: 2, backgroundColor: palette.primary.light, borderRadius: 1 }}><Typography variant="body2" sx={{ color: palette.primary.dark, fontWeight: 'bold' }}>Pro Tip: Copy this prompt and paste it into Veo 3 to generate professional-quality AI videos. The 8-component framework ensures optimal results.</Typography></Box>
+      <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.100', border: '1px solid', borderColor: 'grey.300' }}>
+       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Your Generated Prompt</Typography>
+            <Button variant="text" startIcon={<ContentCopy />} onClick={handleCopy}>Copy</Button>
+        </Stack>
+       <Box component="pre" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', m: 0, p: 2, backgroundColor: '#fff', borderRadius: 1, fontFamily: 'monospace', border: '1px solid', borderColor: 'grey.300' }}>{generatedPrompt}</Box>
+       <Box sx={{ mt: 2, p: 2, backgroundColor: palette.primary.light, borderRadius: 1 }}>
+            <Typography variant="body2" sx={{ color: palette.primary.dark, fontWeight: 'bold' }}>
+                Pro Tip: When you're ready, click "Apply to Form" to use this prompt.
+            </Typography>
+        </Box>
       </Paper>
      )}
+
+      {/* FIX: Main action button to apply the prompt and close the dialog */}
+      <Stack sx={{ mt: 4 }} alignItems="flex-end">
+        <Button 
+            variant="contained" 
+            startIcon={<CheckCircle />} 
+            onClick={handleApplyPrompt} 
+            size="large"
+            sx={{ py: 1.5, px: 4 }}
+        >
+            Apply to Form
+        </Button>
+      </Stack>
     </Grid>
    </Grid>
   </Box>
