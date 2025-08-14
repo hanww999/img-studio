@@ -27,6 +27,9 @@ import {
  Avatar,
  Box,
  Button,
+ Dialog,
+ DialogContent,
+ DialogTitle,
  IconButton,
  Stack,
  Typography,
@@ -36,6 +39,7 @@ import {
  ArrowLeft,
  ArrowRight,
  Autorenew,
+ Build as BuildIcon, // Using a new icon for the button
  Close as CloseIcon,
  Lightbulb,
  Mms,
@@ -133,6 +137,18 @@ export default function GenerateForm({
  const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
  setExpanded(isExpanded ? panel : false)
  }
+
+  // FIX: State to control the Prompt Builder Dialog
+  const [promptBuilderOpen, setPromptBuilderOpen] = useState(false);
+
+  // FIX: Function to handle closing the dialog and applying the new prompt
+  const handlePromptBuilderClose = (newPrompt?: string) => {
+    setPromptBuilderOpen(false);
+    if (newPrompt && typeof newPrompt === 'string') {
+      setValue('prompt', newPrompt);
+    }
+  };
+
 
  const [isGeminiRewrite, setIsGeminiRewrite] = useState(true)
  const handleGeminiRewrite = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -320,87 +336,103 @@ export default function GenerateForm({
    </Accordion>
    )}
     
-    {/* FIX STARTS HERE: The "Image to video" Accordion content is now restored. */}
-   {generationType === 'Video' && (isOnlyITVavailable || isAdvancedFeaturesAvailable) && (
+    {generationType === 'Video' && (
    <Accordion disableGutters expanded={expanded === 'interpolation'} onChange={handleChange('interpolation')} sx={CustomizedAccordion}>
     <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
-    <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>
-        {isAdvancedFeaturesAvailable ? 'Image(s) to video & Camera presets' : 'Image to video'}
-    </Typography>
+        <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>
+            Image to video
+        </Typography>
     </AccordionSummary>
-    {isAdvancedFeaturesAvailable && (
-        <AccordionDetails sx={{ pt: 0, pb: 1, height: 'auto' }}>
+    <AccordionDetails sx={{ pt: 1, pb: 1, height: 'auto' }}>
+        {isAdvancedFeaturesAvailable && (
+            <>
+                <Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}>
+                    <VideoInterpolBox label="Base image" sublabel={'(or first frame)'} objectKey="interpolImageFirst" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageFirst} orientation={orientation} />
+                    <ArrowRight color={interpolImageLast.base64Image === '' ? 'secondary' : 'primary'} />
+                    <VideoInterpolBox label="Last frame" sublabel="(optional)" objectKey="interpolImageLast" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageLast} orientation={orientation} />
+                </Stack>
+                <Box sx={{ py: 2 }}>
+                    <FormInputChipGroup name="cameraPreset" label={videoGenerationUtils.cameraPreset.label ?? ''} control={control} setValue={setValue} width="450px" field={videoGenerationUtils.cameraPreset as chipGroupFieldsI} required={false} />
+                </Box>
+            </>
+        )}
+        {isOnlyITVavailable && (
             <Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}>
-                <VideoInterpolBox
-                    label="Base image"
-                    sublabel={'(or first frame)'}
-                    objectKey="interpolImageFirst"
-                    onNewErrorMsg={onNewErrorMsg}
-                    setValue={setValue}
-                    interpolImage={interpolImageFirst}
-                    orientation={orientation}
-                />
-                <ArrowRight color={interpolImageLast.base64Image === '' ? 'secondary' : 'primary'} />
-                <VideoInterpolBox
-                    label="Last frame"
-                    sublabel="(optional)"
-                    objectKey="interpolImageLast"
-                    onNewErrorMsg={onNewErrorMsg}
-                    setValue={setValue}
-                    interpolImage={interpolImageLast}
-                    orientation={orientation}
-                />
-            </Stack>
-            <Box sx={{ py: 2 }}>
-                <FormInputChipGroup
-                    name="cameraPreset"
-                    label={videoGenerationUtils.cameraPreset.label ?? ''}
-                    control={control}
-                    setValue={setValue}
-                    width="450px"
-                    field={videoGenerationUtils.cameraPreset as chipGroupFieldsI}
-                    required={false}
-                />
-            </Box>
-        </AccordionDetails>
-    )}
-    {isOnlyITVavailable && (
-        <AccordionDetails sx={{ pt: 0, pb: 1, height: 'auto' }}>
-            <Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}>
-                <VideoInterpolBox
-                    label="Base image"
-                    sublabel={'(input)'}
-                    objectKey="interpolImageFirst"
-                    onNewErrorMsg={onNewErrorMsg}
-                    setValue={setValue}
-                    interpolImage={interpolImageFirst}
-                    orientation={orientation}
-                />
+                <VideoInterpolBox label="Base image" sublabel={'(input)'} objectKey="interpolImageFirst" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageFirst} orientation={orientation} />
                 <Typography color={palette.warning.main} sx={{ fontSize: '0.85rem', fontWeight: 400, pt: 2, width: '70%' }}>
                     {'For now, Veo 3 does not support Image Interpolation and Camera Presets, switch to Veo 2 to use them!'}
                 </Typography>
             </Stack>
-        </AccordionDetails>
-    )}
+        )}
+        {!isAdvancedFeaturesAvailable && !isOnlyITVavailable && (
+            <Typography sx={{ p: 2, color: 'text.secondary' }}>
+                Image to video features are not available for the currently selected model. Please select Veo 2 or Veo 3 to see available options.
+            </Typography>
+        )}
+    </AccordionDetails>
    </Accordion>
    )}
-    {/* FIX ENDS HERE */}
 
-   {/* This is the NEW, SEPARATE Accordion for the Prompt Builder */}
-   {generationType === 'Video' && (
-    <Accordion disableGutters expanded={expanded === 'prompt-builder'} onChange={handleChange('prompt-builder')} sx={CustomizedAccordion}>
-     <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel2-content" id="panel2-header" sx={CustomizedAccordionSummary}>
-      <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>
-       Video / Prompt Builder
-      </Typography>
-     </AccordionSummary>
-     <AccordionDetails sx={{ p: 0, backgroundColor: 'transparent', borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
-      <PromptBuilder />
-     </AccordionDetails>
-    </Accordion>
-   )}
+    {/* 
+        FIX START: Replaced Accordion with a Button to open a full-width Dialog.
+        This provides the necessary space for the Prompt Builder.
+    */}
+    {generationType === 'Video' && (
+        <Box sx={{ mt: 2 }}>
+            <Button
+                variant="outlined"
+                fullWidth
+                startIcon={<BuildIcon />}
+                onClick={() => setPromptBuilderOpen(true)}
+                sx={{ 
+                    py: 1.5, 
+                    justifyContent: 'flex-start', 
+                    textTransform: 'none', 
+                    fontSize: '1rem',
+                    fontWeight: 500,
+                }}
+            >
+                Open Video Prompt Builder
+            </Button>
+        </Box>
+    )}
+    {/* FIX END */}
+
   </Box>
   </form>
+
+  {/* 
+      FIX START: Definition of the Dialog that will contain the PromptBuilder.
+      It's set to be full-width and extra-large for maximum space.
+  */}
+  <Dialog
+    open={promptBuilderOpen}
+    onClose={() => handlePromptBuilderClose()}
+    fullWidth={true}
+    maxWidth="xl" // This is the key to making it very wide
+  >
+    <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+      Video / Prompt Builder
+      <IconButton
+        aria-label="close"
+        onClick={() => handlePromptBuilderClose()}
+        sx={{
+          position: 'absolute',
+          right: 8,
+          top: 8,
+          color: (theme) => theme.palette.grey[500],
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+    </DialogTitle>
+    <DialogContent dividers>
+        {/* Pass the callback function to the builder */}
+        <PromptBuilder onApply={handlePromptBuilderClose} />
+    </DialogContent>
+  </Dialog>
+  {/* FIX END */}
+
   <ImageToPromptModal open={imageToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setImageToPromptOpen={setImageToPromptOpen} target={generationType} />
  </>
  )
