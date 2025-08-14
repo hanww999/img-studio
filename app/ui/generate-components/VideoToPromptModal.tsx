@@ -139,7 +139,28 @@ export default function VideoToPromptModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} TransitionComponent={Transition} PaperProps={{ sx: { p: 1, maxWidth: '70%', width: '60%', borderRadius: 1 } }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      TransitionComponent={Transition}
+      PaperProps={{
+        sx: {
+          p: 1,
+          maxWidth: '70%',
+          width: '60%',
+          borderRadius: 1,
+          // 强制浅色背景与深色文字，与 ImageToPromptModal 对齐
+          background: palette.background?.paper ?? 'white',
+          color: palette.text?.primary ?? 'black',
+          // 与 ImageToPromptModal 保持一致的布局属性（便于视觉对齐）
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          height: 'auto',
+          minHeight: '63%',
+        }
+      }}
+    >
       <IconButton aria-label="close" onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8, color: palette.secondary.dark }}>
         <Close sx={{ fontSize: '1.5rem', '&:hover': { color: palette.primary.main } }} />
       </IconButton>
