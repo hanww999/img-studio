@@ -115,19 +115,13 @@ Negative prompt: no text overlays, no watermarks, no cartoon effects, no unreali
   };
 
   return (
-    <Box sx={{ width: '100%', mt: 2, backgroundColor: '#fff', p: 2, borderRadius: 2 }}>
+    <Box sx={{ width: '100%', mt: 2, backgroundColor: '#fff', p: 3, borderRadius: 2 }}>
       <Grid container spacing={4}>
         {/* Left Sidebar: Professional Templates */}
         <Grid item xs={12} md={3}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Professional Templates
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Choose from professional templates
-          </Typography>
           <Stack spacing={2}>
             {professionalTemplates.map((template) => (
-              <Card key={template.title} variant="outlined" sx={{ borderColor: selectedTemplate === template.title ? 'primary.main' : 'rgba(0, 0, 0, 0.12)', borderWidth: 2 }}>
+              <Card key={template.title} variant="outlined" sx={{ borderColor: selectedTemplate === template.title ? 'primary.main' : 'rgba(0, 0, 0, 0.12)', borderWidth: 2, backgroundColor: '#fff' }}>
                 <CardActionArea onClick={() => handleTemplateClick(template)}>
                   <CardContent>
                     <Stack direction="row" spacing={2} alignItems="center">
@@ -150,19 +144,12 @@ Negative prompt: no text overlays, no watermarks, no cartoon effects, no unreali
 
         {/* Right Side: Prompt Builder */}
         <Grid item xs={12} md={9}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Prompt Builder
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            8-component professional framework
-          </Typography>
-
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}><PromptField icon={<AccountCircle color="primary" />} label="Subject" badge="Core"><TextField name="subject" value={promptData.subject} onChange={handleInputChange} fullWidth multiline rows={4} variant="outlined" placeholder="Describe the main character or object..." /></PromptField></Grid>
             <Grid item xs={12} md={6}><PromptField icon={<Theaters color="primary" />} label="Context & Scene"><TextField name="context" value={promptData.context} onChange={handleInputChange} fullWidth multiline rows={4} variant="outlined" placeholder="Describe the environment, location, props..." /></PromptField></Grid>
             <Grid item xs={12} md={6}><PromptField icon={<DirectionsRun color="primary" />} label="Action & Movement"><TextField name="action" value={promptData.action} onChange={handleInputChange} fullWidth multiline rows={4} variant="outlined" placeholder="Describe specific actions, gestures..." /></PromptField></Grid>
-            <Grid item xs={12} md={6}><PromptField icon={<Palette color="primary" />} label="Visual Style"><FormControl fullWidth variant="outlined"><InputLabel id="visual-style-label">Choose visual style...</InputLabel><Select labelId="visual-style-label" id="visual-style-select" name="visualStyle" value={promptData.visualStyle} onChange={handleSelectChange} label="Choose visual style...">{promptBuilderOptions.visualStyle.map((item) => (<MenuItem key={item} value={item}>{item}</MenuItem>))}</Select></FormControl></PromptField></Grid>
-            <Grid item xs={12} md={6}><PromptField icon={<Videocam color="primary" />} label="Camera Movement"><FormControl fullWidth variant="outlined"><InputLabel id="camera-movement-label">Choose camera movement...</InputLabel><Select labelId="camera-movement-label" id="camera-movement-select" name="cameraMovement" value={promptData.cameraMovement} onChange={handleSelectChange} label="Choose camera movement...">{promptBuilderOptions.cameraMovement.map((item) => (<MenuItem key={item} value={item}>{item}</MenuItem>))}</Select></FormControl></PromptField></Grid>
+            <Grid item xs={12} md={6}><PromptField icon={<Palette color="primary" />} label="Visual Style"><FormControl fullWidth variant="outlined"><InputLabel id="visual-style-label">Choose visual style...</InputLabel><Select MenuProps={{ PaperProps: { sx: { backgroundColor: 'white' } } }} labelId="visual-style-label" id="visual-style-select" name="visualStyle" value={promptData.visualStyle} onChange={handleSelectChange} label="Choose visual style...">{promptBuilderOptions.visualStyle.map((item) => (<MenuItem key={item} value={item}>{item}</MenuItem>))}</Select></FormControl></PromptField></Grid>
+            <Grid item xs={12} md={6}><PromptField icon={<Videocam color="primary" />} label="Camera Movement"><FormControl fullWidth variant="outlined"><InputLabel id="camera-movement-label">Choose camera movement...</InputLabel><Select MenuProps={{ PaperProps: { sx: { backgroundColor: 'white' } } }} labelId="camera-movement-label" id="camera-movement-select" name="cameraMovement" value={promptData.cameraMovement} onChange={handleSelectChange} label="Choose camera movement...">{promptBuilderOptions.cameraMovement.map((item) => (<MenuItem key={item} value={item}>{item}</MenuItem>))}</Select></FormControl></PromptField></Grid>
             <Grid item xs={12} md={6}><PromptField icon={<FilterCenterFocus color="primary" />} label="Composition"><TextField name="composition" value={promptData.composition} onChange={handleInputChange} fullWidth multiline rows={1} variant="outlined" placeholder="Describe framing, depth of field..." /></PromptField></Grid>
             <Grid item xs={12} md={6}><PromptField icon={<WbSunny color="primary" />} label="Lighting & Ambiance"><TextField name="lighting" value={promptData.lighting} onChange={handleInputChange} fullWidth multiline rows={1} variant="outlined" placeholder="Describe lighting, mood, and weather..." /></PromptField></Grid>
             <Grid item xs={12} md={6}><PromptField icon={<GraphicEq color="primary" />} label="Audio Description" badge="Important"><TextField name="audio" value={promptData.audio} onChange={handleInputChange} fullWidth multiline rows={4} variant="outlined" placeholder="Describe narration, sound effects, music..." /></PromptField></Grid>
