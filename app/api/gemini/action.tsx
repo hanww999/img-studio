@@ -121,32 +121,32 @@ export async function getFullReferenceDescription(base64Image: string, type: str
     "If a meaningful and detailed analysis of the image's style cannot be generated according to these exacting rules, or if the image is too ambiguous, respond with the single word 'error'.";
 
   if (type === 'Person') {
-    activeCommonDetailedInstructions = generalCommonDetailedInstructions;
+    activeCommonDetailedInstructions = generalCommonDetailedInstructions
     specificPromptInstructions =
       'Provide an exceptionally detailed and meticulous description of the primary person in this image, focusing strictly on their physical appearance. Break down their appearance into specific regions and features, describing each with precision. ' +
       'Detail their apparent age range and gender. For their hair, describe its color nuances, style from roots to ends, length, texture (e.g., fine, coarse, wavy, straight, coily), and any specific characteristics like parting, layers, or highlights. ' +
       'For their face, provide granular details about eye color, iris patterns if visible, eye shape, eyelashes, eyebrows (shape, thickness, color), nose (shape of bridge, nostrils, tip), mouth and lip characteristics (shape, fullness, color, texture), chin, jawline, and skin (tone, texture, any visible pores or fine lines if clear). Describe any static facial expression (e.g., a gentle smile, a neutral look) by detailing the muscle positioning. ' +
       'Describe their build or physique (e.g., slender, muscular, average) if discernible. Enumerate and describe any unique identifying features like glasses (detailing frame style, material, color, lens appearance), tattoos (location, colors, subject matter if clear), scars, or birthmarks with precision. ' +
-      '**The description must NOT mention any clothing, attire, or accessories other than the specified glasses.**';
+      '**The description must NOT mention any clothing, attire, or accessories other than the specified glasses.**'
   } else if (type === 'Animal') {
-    activeCommonDetailedInstructions = generalCommonDetailedInstructions;
+    activeCommonDetailedInstructions = generalCommonDetailedInstructions
     specificPromptInstructions =
       'Provide an exceptionally detailed and meticulous description of the primary animal in this image, focusing strictly on its physical characteristics. Break down its appearance into specific features and describe each with precision. ' +
       'Detail its species and breed (if identifiable). For its coat or covering, describe the primary and secondary color(s) and shades, intricate patterns (e.g., spots, stripes, patches – noting their shape, size, color, and exact distribution on the body), and texture (e.g., smooth, shaggy, sleek, dense, sparse, glossy, matte) of its fur, feathers, scales, or skin. ' +
       'Describe its approximate size, overall build (e.g., slender, robust, delicate, muscular), and specific body shape and proportions. ' +
       "Enumerate and describe any distinctive physical features with specificity: the shape and size of its head, ear shape and position (e.g., pricked, floppy, tufted), eye color and pupil shape, muzzle or beak (length, width, shape, color, nostril details), presence and nature of teeth or fangs if visible, tongue if visible, horns or antlers (size, shape, texture, color, number of points if applicable), neck (length, thickness), legs (number, length, thickness, joint appearance), paws or hooves or claws (shape, color, number of digits, claw details), tail (length, shape, covering, how it's held if static and characteristic), and any unique markings or physical traits not covered by general patterning. " +
-      'If discernible, mention its apparent age (e.g., juvenile, adult, very old based on physical indicators). ';
+      'If discernible, mention its apparent age (e.g., juvenile, adult, very old based on physical indicators). '
   } else if (type === 'Product') {
-    activeCommonDetailedInstructions = generalCommonDetailedInstructions;
+    activeCommonDetailedInstructions = generalCommonDetailedInstructions
     specificPromptInstructions =
       'Provide an exceptionally detailed and meticulous description of the primary product in this image, focusing strictly on its physical attributes. Break down the product into its constituent parts, components, and surfaces, describing each with precision, as if conducting a thorough visual inspection for a catalog or engineering specification. ' +
       'Detail its exact type (e.g., specific type of chair, smartphone model, winter jacket). Identify brand and model if any markings or distinct design cues are visible. ' +
-      'For its materials, specify all visible types (e.g., polished chrome, brushed aluminum, matte plastic, specific wood like oak or walnut, type of fabric like corduroy or canvas, glass, ceramic) and describe their textures (e.g., grained, ribbed, dimpled, woven) and finishes (e.g., glossy, matte, satin, metallic). ' +
+      'For its materials, specify all visible types (e.g., polished chrome, brushed aluminum, matte plastic, specific wood like oak or walnut, type of fabric like corduroy or canvas, glass, ceramic) and describe their textures (e.g., smooth, grained, ribbed, dimpled, woven) and finishes (e.g., glossy, matte, satin, metallic). ' +
       'Describe all colors and shades present, and any patterns or graphical elements. Detail its overall shape and geometry, approximate dimensions or proportions if inferable. ' +
       'Describe each specific design element meticulously: for a jacket, this would include the collar type (e.g., stand-up, notch lapel), fastening mechanisms (e.g., specific type of zipper, buttons - their material, shape, and how they attach, snaps, Velcro), pocket design (e.g., welt, patch, zippered - their placement, size, flap details), cuff and hem finishing, stitching type and visibility, lining if visible, and any logos or tags. For a phone, describe screen borders, button placement and shape, port types and locations, camera lens arrangement, and casing details. For furniture, describe legs, supports, surfaces, joinery if visible, and hardware. ' +
-      'Note any visible aspects of its construction, assembly, seams, or edges. The goal is a comprehensive inventory of all its visual characteristics. ';
+      'Note any visible aspects of its construction, assembly, seams, or edges. The goal is a comprehensive inventory of all its visual characteristics. '
   } else if (type === 'Style') {
-    activeCommonDetailedInstructions = styleCommonDetailedInstructions;
+    activeCommonDetailedInstructions = styleCommonDetailedInstructions
     specificPromptInstructions =
       'Analyze and describe the overall artistic and visual style of this image with meticulous and analytical detail. ' +
       'Elaborate on stylistic elements such as: the dominant aesthetic (e.g., minimalist, vintage, surreal, abstract, modern, photorealistic, painterly, graphic novel art, cyberpunk, solarpunk), elaborating on how specific visual choices achieve this effect; ' +
@@ -154,15 +154,15 @@ export async function getFullReferenceDescription(base64Image: string, type: str
       'lighting techniques – the quality (hard, soft), direction, intensity, color of light, and its precise impact on mood, form, texture, and creation of highlights and shadows (e.g., volumetric lighting, neon glow, diffuse, chiaroscuro); ' +
       "compositional choices – adherence to or deviation from principles like the rule of thirds, leading lines, symmetry/asymmetry, balance, framing, viewpoint (e.g., low-angle, high-angle, eye-level), perspective (e.g., linear, atmospheric), and depth of field, and their effect on the viewer's focus and interpretation of the style; " +
       'prevalent textures (e.g., weathered stone, metallic sheen, organic overgrowth, digital noise) and patterns, noting their characteristics, repetition, and contribution to the style; ' +
-      'and the overall mood or atmosphere the style distinctively creates (e.g., dystopian, ethereal, gritty, vibrant, mysterious, tranquil). Analyze how these visual and artistic elements interrelate to define the overall style comprehensively. ';
+      'and the overall mood or atmosphere the style distinctively creates (e.g., dystopian, ethereal, gritty, vibrant, mysterious, tranquil). Analyze how these visual and artistic elements interrelate to define the overall style comprehensively. '
   } else {
-    activeCommonDetailedInstructions = generalCommonDetailedInstructions;
+    activeCommonDetailedInstructions = generalCommonDetailedInstructions
     specificPromptInstructions =
       'Identify the single most prominent primary subject in this image. If a singular primary subject is clearly identifiable, ' +
       'provide an exceptionally detailed and meticulous description of its visual characteristics. This includes its specific category (e.g., a particular species of flower, a type of antique clock, a specific pastry, an abstract sculptural form). ' +
       'Then, provide a granular breakdown of its physical appearance: all visible colors and their shades, precise shapes and geometric forms, an estimation of its real-world size if inferable, all discernible textures (e.g., smooth, rough, porous, reflective, matte), types of materials it appears to be made of, and a detailed account of any specific parts, components, segments, layers, or markings. Describe each aspect with precision. ' +
       "If the image does not contain a singular, clearly identifiable primary subject that can be described in such exhaustive detail according to these rules (e.g., it is primarily a complex landscape or cityscape without a single dominant subject easily isolated from its context, or a very abstract pattern where 'subject' is ill-defined for this purpose), " +
-      "or if describing it adequately requires detailing background, location, or actions, then respond with the single word 'Error'. ";
+      "or if describing it adequately requires detailing background, location, or actions, then respond with the single word 'Error'. "
   }
 
   const fullPrompt = specificPromptInstructions + activeCommonDetailedInstructions;
@@ -221,38 +221,66 @@ export async function getPromptFromImageFromGemini(
     model: geminiModel,
   });
 
-  const imagenPromptTemplate = `Generate a highly detailed text prompt, suitable for a text-to-image model such as Imagen 3, to recreate the uploaded image with maximum accuracy. The prompt should describe these aspects of the image:
-  1. **Subject:** Main objects/figures, appearance, features, species (if applicable), clothing, pose, actions. Be extremely specific (e.g., "a fluffy ginger cat with emerald green eyes sitting on a windowsill" instead of "a cat").
-  2. **Composition:** Arrangement of subjects (centered, off-center, foreground, background), perspective/camera angle (close-up, wide shot, bird's-eye view).
-  3. **Setting:** Environment, location, time of day, weather. Be specific (e.g., "a dimly lit, ornate library with towering bookshelves" instead of "a library").
-  4. **Style:** Artistic style (photorealistic, oil painting, watercolor, cartoon, pixel art, abstract). Mention specific artists if relevant.
-  5. **Lighting:** Lighting conditions (bright sunlight, soft indoor lighting, dramatic shadows, backlighting), direction and intensity of light.
-  6. **Color Palette:** Dominant colors, overall color scheme (vibrant, muted, monochromatic, warm, cool).
-  7. **Texture:** Textures of objects and surfaces (smooth, rough, furry, metallic, glossy).
-  8. **Mood/Atmosphere:** Overall feeling or emotion (serene, joyful, mysterious, ominous).
+  const imagenPromptTemplate = `Your Role:
+  You are an expert prompt engineer for advanced text-to-image models like Google Imagen. Your mission is to convert a user's basic idea into a single, highly-detailed, and technically precise prompt by systematically combining descriptive elements.
 
-  **Output Format:** I want the prompt to be ONLY a single paragraph of text, directly usable by the text-to-image model. **Do not add any conversational filler, preambles, or extra sentences like "Text-to-Image Prompt:". Do not format the output as a list or use any special characters like <0xC2><0xA0>.**
-  **Example Output (Correct Format): "A photorealistic image of a Ragdoll or Birman cat with light cream and beige long fur, sitting upright on a kitchen counter or appliance with its paws tucked beneath it. The cat has bright blue eyes, a small pink nose, and pointed, tufted ears. Its tail is long and fluffy, draping down behind it. The background is slightly blurred and features a dark horizontal band suggesting an appliance, and a glass partition with black metal frames. The lighting is soft and diffused, illuminating the cat evenly. The dominant colors are light cream, beige, white, blue, and black. The overall style is realistic photography with a focus on detail and natural lighting. The image conveys a sense of calmness and gentle curiosity."
-  **Important:** The prompt must be highly descriptive, prioritizing the most visually important elements for accurate recreation. The prompt can be up to 75 tokens.`;
+  Core Directive:
+  You must follow the structured categories below to build a comprehensive prompt. The final output should be a single, coherent descriptive paragraph designed to maximize image quality, realism, and artistic impact.
+
+  Prompt Constituent Elements:
+
+  Core Components: This is the foundation of the image.
+
+  Style/Medium: Define the overall artistic form. E.g., cinematic photograph, oil painting, 3D render, charcoal sketch.
+  Subject: Clearly and vividly describe the central object or figure. Use expressive adjectives. E.g., a majestic lion, a solitary lighthouse.
+  Detailed Description: Elaborate on the subject's specific features, pose, expression, and texture. E.g., with a thick golden mane, looking directly and intensely at the camera.
+  Environment/Background: Establish the setting, time of day, weather, and atmosphere. E.g., in the Serengeti during a vibrant sunset.
+  Photographic & Artistic Style: These are the key technical details that define the visual execution.
+
+  Composition/View: Specify the camera's framing and perspective. E.g., close-up shot, wide-angle shot, low-angle view, portrait.
+  Lighting: Describe the type, direction, and quality of the light. E.g., dramatic golden hour lighting, soft, diffused light from a window.
+  Color Scheme: Define the dominant color palette and mood. E.g., warm tones, monochromatic blue palette, vibrant and saturated colors.
+  Technical Parameters: For ultimate realism, include specific photographic settings:
+  Lens Type: E.g., shot on an 85mm lens (to influence perspective and depth of field).
+  Camera Settings: E.g., f/1.8 aperture (to create a shallow depth of field and blurred background).
+  Film Type: E.g., emulating the look of Portra 800 film (for specific color rendition and grain).
+  Quality: Emphasize the desired level of detail and fidelity. E.g., 8k, photorealistic, hyperdetailed, intricate textures.
+  Final Output Format:
+
+  Combine all the above elements into a single, flowing descriptive paragraph in English.
+  Use commas to connect the descriptive phrases, creating a dense and informative command.
+  Do not use conversational preambles, explanations, or lists in the final output. Output the prompt directly.
+  Example (Based on the provided image):
+  cinematic photograph, a majestic lion with a golden mane, looking directly at the camera, in the Serengeti during sunset. A close-up shot with golden hour lighting and warm tones, shot on an 85mm lens at f/1.8, emulating the look of Portra 800 film, 8k, photorealistic, hyperdetailed.`; // 内容与您提供的一致，此处省略
 
   const veoPromptTemplate = `You are an AI prompt engineer specializing in generating video prompts for Veo3. Your task is to create new prompts based on a provided example, ensuring variety in scenes.
 
   Example Prompt:
+
   Subject: Marcus, a confident street interviewer in his late 20s, wearing trendy casual clothing
+
   Context: busy urban street with pedestrians and city life in background, natural street environment
+
   Action: approaches people with microphone, engaging in spontaneous conversations with genuine curiosity
+
   Style: documentary street style with natural lighting, authentic urban aesthetic
+
   Camera: handheld documentary style with dynamic movement, following action naturally
+
   Composition: medium shots capturing both interviewer and subjects, environmental context
+
   Ambiance: natural daylight with urban atmosphere, street lighting
+
   Audio: clear interview audio: 'What's the most interesting thing that happened to you today?' with authentic street ambiance
- 
+
+
   Instructions:
+
   1. Maintain the structure of the example prompt, including Subject, Context, Action, Style, Camera, Composition, Ambiance, Audio, and Negative prompt.
   2. Vary the scenes and contexts to avoid repetition.
   3. Ensure the prompts are suitable for generating realistic and engaging video content with Veo3.
   4. Focus on creating prompts that capture authentic and natural moments.
-  5. Avoid any elements that would result in unrealistic or artificial-looking videos, as specified in the Negative prompt.`;
+  5. Avoid any elements that would result in unrealistic or artificial-looking videos, as specified in the Negative prompt.`; 
 
   let finalPrompt = '';
   const basePrompt = target === 'Image' ? imagenPromptTemplate : veoPromptTemplate;
@@ -282,16 +310,14 @@ export async function getPromptFromImageFromGemini(
     text: finalPrompt,
   };
 
-  // [NEW] Define generation configuration, including temperature
   const generationConfig = {
-    temperature: 0.2, // A balanced value for creative yet accurate descriptions
+    temperature: 0.2,
     topP: 0.95,
-    maxOutputTokens: 8192, // Set a reasonable limit for the output
+    maxOutputTokens: 8192,
   };
 
   const reqData = {
     contents: [{ role: 'user', parts: [imagePart, textPart] }],
-    // [NEW] Add the generationConfig to the request
     generationConfig: generationConfig,
   };
 
@@ -312,6 +338,101 @@ export async function getPromptFromImageFromGemini(
     console.error(JSON.stringify(await truncateLog(error), undefined, 4));
     return {
       error: 'Error while getting prompt from Image with Gemini.',
+    };
+  }
+}
+
+// [新增] 用于从 GCS 上的视频生成 Prompt 的新函数
+export async function getPromptFromVideoFromGemini(gcsUri: string) {
+  const generativeModel = vertexAI.getGenerativeModel({
+    model: geminiModel, // 确保这是支持视频理解的模型，例如 gemini-1.5-pro
+  });
+
+  // 这是发送给 Gemini 的视频部分
+  const videoPart = {
+    file_data: {
+      mimeType: 'video/mp4', // 假设为 mp4，可以根据上传文件类型动态设置
+      fileUri: gcsUri,
+    },
+  };
+
+  // 这是指导 Gemini 如何分析视频的文本提示词
+  const textPart = {
+    text: `You are an expert AI video analyst and prompt engineer. Your function is to deconstruct a provided video clip and reverse-engineer a detailed, structured prompt suitable for a text-to-video model like Veo. Your analysis must be meticulous, capturing the essence of the video's narrative, style, and technical execution.
+
+Core Directive:
+Analyze the input video clip with precision. For each of the categories below, you must extract the most salient visual, auditory, and narrative information. The goal is to create a prompt that, if given to a text-to-video model, would generate a clip that is thematically, stylistically, and dynamically similar to the original video.
+
+Analysis & Prompt Generation Process:
+
+Subject: Identify the primary character(s) or object(s) of focus. Describe their appearance, clothing, age, species, demeanor, and any defining features observed in the video.
+
+Example Analysis: The video focuses on a man in his late 20s who looks confident and is dressed in fashionable street clothes.
+Example Output: Subject: Marcus, a confident street interviewer in his late 20s, wearing trendy casual clothing
+Context: Describe the environment, location, and background elements. Note the time of day, the overall setting (e.g., urban, natural, indoor), and the general activity occurring in the background.
+
+Example Analysis: The scene is a busy city street during the day with many people walking by.
+Example Output: Context: busy urban street with pedestrians and city life in background, natural street environment
+Action: Detail the specific actions, movements, and interactions performed by the subject(s) throughout the clip. Describe the sequence of events from beginning to end.
+
+Example Analysis: The man is walking up to different people, holding out a microphone, and asking them questions. He seems curious and the interactions are not staged.
+Example Output: Action: approaches people with microphone, engaging in spontaneous conversations with genuine curiosity
+Style: Analyze the overall visual aesthetic. Determine if it is documentary, cinematic, vintage, high-fashion, etc. Describe the visual treatment and color grading.
+
+Example Analysis: The video looks like a real documentary. The lighting isn't artificial, and it feels like authentic city life.
+Example Output: Style: documentary street style with natural lighting, authentic urban aesthetic
+Camera: Describe the camera work. Note if it is static, handheld, a drone shot, or on a dolly. Describe any specific movements like pans, tilts, zooms, or how it follows the subject.
+
+Example Analysis: The camera is not steady; it moves around as if someone is holding it, following the interviewer.
+Example Output: Camera: handheld documentary style with dynamic movement, following action naturally
+Composition: Analyze the framing and shot types used (e.g., close-ups, medium shots, wide shots). Describe how subjects and the environment are arranged within the frame.
+
+Example Analysis: The shots are mostly from the waist up, showing both the interviewer and the person he's talking to, with the city visible around them.
+Example Output: Composition: medium shots capturing both interviewer and subjects, environmental context
+Ambiance: Describe the lighting conditions and the overall mood they create. Note any atmospheric elements that contribute to the scene's feel.
+
+Example Analysis: It's daytime, and the light seems natural. The overall feeling is that of a normal day in a city.
+Example Output: Ambiance: natural daylight with urban atmosphere, street lighting
+Audio: Transcribe any clear, key dialogue or specify the most important sound effects, background noises, or music cues. Capture the essence of the audio landscape.
+
+Example Analysis: I can clearly hear the interviewer ask a specific question, and the sounds of the city (traffic, people talking) are in the background.
+Example Output: Audio: clear interview audio: 'What's the most interesting thing that happened to you today?' with authentic street ambiance
+Negative prompt: Based on the video's professional quality and style, specify what should be excluded to prevent common generation errors and maintain authenticity.
+
+Example Analysis: The video is realistic and well-shot. It is not animated, blurry, or staged.
+Example Output: Negative prompt: unrealistic, artificial, staged, poor lighting, animation, blurry
+Final Output Format:
+
+You must generate the prompt using the exact structure and labels from the example.
+Each category (Subject, Context, etc.) must be on a new line and start with the category name followed by a colon.
+Do not add any conversational text, preambles, or explanations. Your output should be only the structured prompt itself.`,
+  };
+
+  const generationConfig = {
+    temperature: 0.4,
+    topP: 0.95,
+    maxOutputTokens: 8192,
+  };
+
+  const reqData = {
+    contents: [{ role: 'user', parts: [videoPart, textPart] }],
+    generationConfig: generationConfig,
+  };
+
+  try {
+    const resp = await generativeModel.generateContent(reqData);
+    const contentResponse = await resp.response;
+
+    if ('error' in contentResponse) throw Error(await cleanResult(contentResponse.error));
+
+    const newDescription = contentResponse.candidates[0].content.parts[0].text.replace(/ +/g, ' ').trimEnd();
+
+    if (newDescription.includes('Error')) return '(Could not generate a prompt from the video.)';
+    else return newDescription;
+  } catch (error: any) {
+    console.error(JSON.stringify(await truncateLog(error), undefined, 4));
+    return {
+      error: 'Error while getting prompt from Video with Gemini.',
     };
   }
 }
