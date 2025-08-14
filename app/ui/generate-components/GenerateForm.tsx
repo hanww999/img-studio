@@ -54,7 +54,6 @@ import CustomTooltip from '../ux-components/Tooltip'
 import GenerateSettings from './GenerateSettings'
 import ImageToPromptModal from './ImageToPromptModal'
 import { ReferenceBox } from './ReferenceBox'
-// [MODIFICATION] Import the new PromptBuilder component
 import PromptBuilder from './PromptBuilder'
 
 import theme from '../../theme'
