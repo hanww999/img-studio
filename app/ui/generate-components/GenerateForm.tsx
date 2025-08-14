@@ -388,7 +388,7 @@ export default function GenerateForm({
     </Dialog>
    </ThemeProvider>
 
-   <ImageToPromptModal open={imageToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setImageToPromptOpen={setImageToPromptOpen} target={'image'} />
+   <ImageToPromptModal open={imageToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setImageToPromptOpen={setImageToPromptOpen} target={'Image'} />
     
    {/* [新增] & [已修复] */}
    <ThemeProvider theme={lightTheme}>
