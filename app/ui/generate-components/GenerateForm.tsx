@@ -18,7 +18,7 @@ import {
 } from '@mui/icons-material';
 
 import { CustomizedAccordion, CustomizedAccordionSummary } from '../ux-components/Accordion-SX';
-import { CustomizedAvatarButton, CustomizedIconButton, CustomizedSendButton } from '../ux-components/Button-SX';
+import { CustomizedSendButton } from '../ux-components/Button-SX';
 import FormInputChipGroup from '../ux-components/InputChipGroup';
 import FormInputDropdown from '../ux-components/InputDropdown';
 import { FormInputText } from '../ux-components/InputText';
@@ -57,6 +57,17 @@ const lightTheme = createTheme({
     text: { primary: '#000', secondary: '#424242' }
   },
 });
+
+// 为图标按钮定义一个统一的深色样式
+const darkIconButtonStyle = {
+  bgcolor: '#424242', // 深灰色背景
+  color: 'white',      // 白色图标
+  width: 32,
+  height: 32,
+  '&:hover': {
+    bgcolor: '#616161', // 鼠标悬停时颜色变浅
+  },
+};
 
 interface GenerateFormProps {
   generationType: 'Image' | 'Video';
@@ -271,18 +282,30 @@ export default function GenerateForm({
               {errorMsg}
             </Alert>
           )}
-          <FormInputText name="prompt" control={control} label={`${optionalVeoPrompt ? '(Optional)' : ''} Prompt - What would you like to generate?`} required={!optionalVeoPrompt} rows={4} promptIndication={`${promptIndication}${isAudioAvailable ? ', audio (dialogue/ sound effects/ music/ ambiant sounds)' : ''}`} />
+          <FormInputText name="prompt" control={control} label={`${optionalVeoPrompt ? '(Optional)' : ''} Prompt - What would you like to generate?`} required={!optionalVeoPrompt} rows={5} promptIndication={`${promptIndication}${isAudioAvailable ? ', audio (dialogue/ sound effects/ music/ ambiant sounds)' : ''}`} />
           <Stack justifyContent="flex-end" direction="row" gap={1} pb={2}>
             {generationType === 'Video' && (
               <CustomTooltip title="Video to prompt generator" size="small">
-                <IconButton onClick={() => setVideoToPromptOpen(true)} aria-label="Video Prompt Generator" disableRipple sx={{ px: 0.5 }}>
-                  <Avatar sx={{ ...CustomizedAvatarButton }}><MovieIcon sx={{ fontSize: '1.3rem' }} /></Avatar>
+                <IconButton onClick={() => setVideoToPromptOpen(true)} aria-label="Video Prompt Generator" disableRipple sx={{ p: 0 }}>
+                  <Avatar sx={darkIconButtonStyle}><MovieIcon sx={{ fontSize: '1.3rem' }} /></Avatar>
                 </IconButton>
               </CustomTooltip>
             )}
-            <CustomTooltip title="Image to prompt generator" size="small"><IconButton onClick={() => setImageToPromptOpen(true)} aria-label="Prompt Generator" disableRipple sx={{ px: 0.5 }}><Avatar sx={{ ...CustomizedAvatarButton }}><Mms sx={{ fontSize: '1.3rem' }} /></Avatar></IconButton></CustomTooltip>
-            <CustomTooltip title="Get prompt ideas" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())} aria-label="Random prompt" disableRipple sx={{ px: 0.5 }}><Avatar sx={{ ...CustomizedAvatarButton }}><Lightbulb sx={{ fontSize: '1.3rem' }} /></Avatar></IconButton></CustomTooltip>
-            <CustomTooltip title="Reset all fields" size="small"><IconButton disabled={isLoading} onClick={() => onReset()} aria-label="Reset form" disableRipple sx={{ px: 0.5 }}><Avatar sx={{ ...CustomizedAvatarButton }}><Autorenew sx={{ fontSize: '1.3rem' }} /></Avatar></IconButton></CustomTooltip>
+            <CustomTooltip title="Image to prompt generator" size="small">
+              <IconButton onClick={() => setImageToPromptOpen(true)} aria-label="Prompt Generator" disableRipple sx={{ p: 0 }}>
+                <Avatar sx={darkIconButtonStyle}><Mms sx={{ fontSize: '1.3rem' }} /></Avatar>
+              </IconButton>
+            </CustomTooltip>
+            <CustomTooltip title="Get prompt ideas" size="small">
+              <IconButton onClick={() => setValue('prompt', getRandomPrompt())} aria-label="Random prompt" disableRipple sx={{ p: 0 }}>
+                <Avatar sx={darkIconButtonStyle}><Lightbulb sx={{ fontSize: '1.3rem' }} /></Avatar>
+              </IconButton>
+            </CustomTooltip>
+            <CustomTooltip title="Reset all fields" size="small">
+              <IconButton disabled={isLoading} onClick={() => onReset()} aria-label="Reset form" disableRipple sx={{ p: 0 }}>
+                <Avatar sx={darkIconButtonStyle}><Autorenew sx={{ fontSize: '1.3rem' }} /></Avatar>
+              </IconButton>
+            </CustomTooltip>
             <GenerateSettings control={control} setValue={setValue} generalSettingsFields={currentModel.includes('veo-3.0') ? tempVeo3specificSettings : generationFields.settings} advancedSettingsFields={generationFields.advancedSettings} warningMessage={currentModel.includes('veo-3.0') ? 'NB: for now, Veo 3 has fewer setting options than Veo 2!' : ''} />
             {isAudioAvailable && (<CustomTooltip title="Add audio to your video" size="small"><AudioSwitch checked={isVideoWithAudio} onChange={handleVideoAudioCheck} /></CustomTooltip>)}
             {currentModel.includes('imagen') && !hasReferences && (<CustomTooltip title="Have Gemini enhance your prompt" size="small"><GeminiSwitch checked={isGeminiRewrite} onChange={handleGeminiRewrite} /></CustomTooltip>)}
@@ -389,11 +412,9 @@ export default function GenerateForm({
 
       <ImageToPromptModal open={imageToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setImageToPromptOpen={setImageToPromptOpen} target={generationType} />
       
-      {/* [修改] 将 VideoToPromptModal 包裹在 ThemeProvider 中 */}
       <ThemeProvider theme={lightTheme}>
         <VideoToPromptModal open={videoToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setVideoToPromptOpen={setVideoToPromptOpen} />
       </ThemeProvider>
-      {/* [/修改] */}
     </>
   );
 }
