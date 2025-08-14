@@ -45,8 +45,8 @@ steps:
         '_NEXT_PUBLIC_TEAM_BUCKET=${_NEXT_PUBLIC_TEAM_BUCKET}',
         '--build-arg',
         '_NEXT_PUBLIC_EXPORT_FIELDS_OPTIONS_URI=${_NEXT_PUBLIC_EXPORT_FIELDS_OPTIONS_URI}',
-        - '--build-arg',
-        - '_NEXT_PUBLIC_GCS_UPLOAD_BUCKET=${_NEXT_PUBLIC_GCS_UPLOAD_BUCKET}',
+        '--build-arg',
+        '_NEXT_PUBLIC_GCS_UPLOAD_BUCKET=${_NEXT_PUBLIC_GCS_UPLOAD_BUCKET}',
         '.',
       ]
 images:
