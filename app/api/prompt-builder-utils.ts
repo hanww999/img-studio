@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// 定义 Prompt Builder 中所有字段的数据结构
+import { SportsEsports, TheaterComedy, Videocam } from '@mui/icons-material';
+
+// Defines the data structure for all fields in the Prompt Builder
 export interface PromptData {
   subject: string;
   context: string;
@@ -24,9 +26,17 @@ export interface PromptData {
   audio: string;
 }
 
-// 定义字段的初始默认值
+// Defines the structure for a single Professional Template
+export interface Template {
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  data: PromptData;
+}
+
+// Default values for the fields when no template is selected
 export const initialPromptData: PromptData = {
-  subject: 'Alex, a 25-year old travel vlogger with authentic energy, wearing casual outdoor gear',
+  subject: 'A 25-year old travel vlogger with authentic energy, wearing casual outdoor gear',
   context: 'standing on a scenic mountain overlook during golden hour, backpack and hiking equipment visible',
   action: 'speaks directly to camera while gesturing toward breathtaking landscape, natural and conversational',
   visualStyle: '',
@@ -36,7 +46,7 @@ export const initialPromptData: PromptData = {
   audio: "enthusiastic narration: 'After 6 hours of hiking, this view makes every step worth it!' with gentle wind and nature sounds",
 };
 
-// 定义所有下拉菜单的选项
+// Options for the dropdown menus in the Prompt Builder
 export const promptBuilderOptions = {
   visualStyle: [
     'cinematic corporate style with warm color grading',
@@ -67,3 +77,43 @@ export const promptBuilderOptions = {
     'low angle shot for dramatic effect',
   ],
 };
+
+// Data for the Professional Templates sidebar
+export const professionalTemplates: Template[] = [
+  {
+    title: 'Horror/Thriller Scene',
+    description: 'Professional template',
+    icon: TheaterComedy,
+    data: {
+      subject: 'A lone detective, haunted by his past, holding a flickering flashlight.',
+      context: 'Inside a derelict, abandoned asylum during a thunderstorm. Dust motes dance in the flashlight beam.',
+      action: 'He cautiously pushes open a heavy, creaking door, revealing a long, dark corridor. His breath is visible in the cold air.',
+      visualStyle: 'film noir with dramatic chiaroscuro lighting',
+      cameraMovement: 'slow push-in for emotional emphasis',
+      composition: 'Extreme close-up on the detective\'s wide, fearful eyes, with the dark hallway reflected in them.',
+      lighting: 'Harsh, directional light from the flashlight, creating long, distorted shadows. Occasional flashes of lightning illuminate the scene.',
+      audio: 'The sound of dripping water, distant thunder, and the detective\'s own ragged breathing. A sudden, sharp, unidentifiable noise echoes from the end of the hall.',
+    },
+  },
+  {
+    title: 'Video Game Trailer',
+    description: 'Professional template',
+    icon: SportsEsports,
+    data: {
+      subject: 'A futuristic cyborg warrior, clad in glowing neon armor, wielding a plasma sword.',
+      context: 'On the rain-slicked rooftops of a sprawling, Blade Runner-esque cyberpunk city at night.',
+      action: 'The warrior dashes and leaps between skyscrapers, deflecting laser fire from flying drones with their sword in a fluid, acrobatic sequence.',
+      visualStyle: 'high-end commercial production values with perfect lighting',
+      cameraMovement: 'tracking shot following subject movement',
+      composition: 'Dynamic wide shots showing the scale of the city, intercut with tight action shots of the swordplay.',
+      lighting: 'Vibrant neon glow from holographic advertisements reflecting off wet surfaces, creating a high-contrast, colorful scene.',
+      audio: 'An epic, high-energy electronic music track with heavy bass, mixed with the sounds of plasma sword clashes, explosions, and futuristic vehicle whooshes.',
+    },
+  },
+  {
+    title: 'Cinematic Vlog',
+    description: 'Professional template',
+    icon: Videocam,
+    data: initialPromptData, // Uses the default data as a base
+  },
+];
