@@ -54,6 +54,7 @@ import CustomTooltip from '../ux-components/Tooltip'
 import GenerateSettings from './GenerateSettings'
 import ImageToPromptModal from './ImageToPromptModal'
 import { ReferenceBox } from './ReferenceBox'
+// [MODIFICATION] Import the new PromptBuilder component
 import PromptBuilder from './PromptBuilder'
 
 import theme from '../../theme'
@@ -336,7 +337,7 @@ export default function GenerateForm({
         <Accordion disableGutters expanded={expanded === 'prompt-builder'} onChange={handleChange('prompt-builder')} sx={CustomizedAccordion}>
           <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel2-content" id="panel2-header" sx={CustomizedAccordionSummary}>
             <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>
-              Video / prompt attributes
+              Video / Prompt Builder
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0, backgroundColor: 'transparent', borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
