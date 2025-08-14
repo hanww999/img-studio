@@ -32,10 +32,10 @@ import {
 import {
  RestartAlt,
  CheckCircle,
-  AutoFixHigh, // FIX: Import icon for the preview button
+  AutoFixHigh,
 } from '@mui/icons-material';
 import { initialImagenPromptData, imagenPromptBuilderOptions, ImagenPromptData } from '../../api/imagen-prompt-builder-utils';
-import theme from '../../theme'; // FIX: Import theme for palette access
+import theme from '../../theme';
 const { palette } = theme;
 
 interface ImagenPromptBuilderProps {
@@ -51,7 +51,6 @@ const SectionTitle = ({ title }: { title: string }) => (
 
 export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProps) {
  const [promptData, setPromptData] = useState<ImagenPromptData>(initialImagenPromptData);
-  // FIX: Add state to hold the generated prompt for preview
  const [generatedPrompt, setGeneratedPrompt] = useState('');
 
  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -87,7 +86,6 @@ export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProp
 
     let finalPrompt = [...coreParts, ...styleParts, ...photoParts].join(', ');
 
-    // Use a more robust way to add the negative prompt to avoid confusion
     if (promptData.negativePrompt) {
         finalPrompt += ` --no ${promptData.negativePrompt}`;
     }
@@ -95,26 +93,24 @@ export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProp
     return finalPrompt;
   }
 
-  // FIX: Add handler for the preview button
   const handleGeneratePrompt = () => {
     const finalPrompt = generateFinalPromptString();
     setGeneratedPrompt(finalPrompt);
   };
 
  const handleApplyPrompt = () => {
-    // Ensure the latest data is used, whether previewed or not
     const finalPrompt = generatedPrompt || generateFinalPromptString();
     onApply(finalPrompt);
   }
 
  const handleReset = () => {
   setPromptData(initialImagenPromptData);
-  setGeneratedPrompt(''); // Also reset the preview
+  setGeneratedPrompt('');
  };
 
  return (
-    // FIX: Add a wrapping Box with white background and padding for consistency
-  <Box sx={{ width: '100%', p: 3, backgroundColor: '#fff' }}>
+    // FIX: Removed the redundant background color style from this Box.
+  <Box sx={{ width: '100%', p: 1 }}>
     <Grid container spacing={3}>
         {/* Column 1: Core Components */}
         <Grid item xs={12} md={4}>
@@ -154,7 +150,6 @@ export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProp
         </Grid>
     </Grid>
 
-    {/* FIX: Add action buttons and preview area */}
     <Stack direction="row" spacing={2} justifyContent="center" sx={{ my: 4 }}>
         <Button variant="outlined" startIcon={<AutoFixHigh />} onClick={handleGeneratePrompt} size="large">
             Preview Generated Prompt
