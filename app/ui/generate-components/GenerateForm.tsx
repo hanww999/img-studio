@@ -125,19 +125,10 @@ export default function GenerateForm({
  })
  const { appContext } = useAppContext()
 
- const [expanded, setExpanded] = React.useState<string | false>('prompt-builder')
+ const [expanded, setExpanded] = React.useState<string | false>(false)
  const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
   setExpanded(isExpanded ? panel : false)
  }
- useEffect(() => {
-  if (generationType === 'Video') {
-   if (initialITVimage && initialITVimage.base64Image !== '') {
-      setExpanded('interpolation');
-    } else {
-      setExpanded('prompt-builder');
-    }
-  }
- }, [initialITVimage, generationType])
 
  const [isGeminiRewrite, setIsGeminiRewrite] = useState(true)
  const handleGeminiRewrite = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -324,6 +315,8 @@ export default function GenerateForm({
        </AccordionDetails>
       </Accordion>
      )}
+      
+      {/* [MODIFICATION] This is the original, untouched "Image to video" Accordion */}
      {generationType === 'Video' && (isOnlyITVavailable || isAdvancedFeaturesAvailable) && (
       <Accordion disableGutters expanded={expanded === 'interpolation'} onChange={handleChange('interpolation')} sx={CustomizedAccordion}>
        <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
@@ -334,7 +327,7 @@ export default function GenerateForm({
       </Accordion>
      )}
 
-      {/* [FINAL IMPLEMENTATION] The new Prompt Builder is wrapped in a collapsible Accordion */}
+      {/* [MODIFICATION] This is the NEW, SEPARATE Accordion for the Prompt Builder */}
       {generationType === 'Video' && (
         <Accordion disableGutters expanded={expanded === 'prompt-builder'} onChange={handleChange('prompt-builder')} sx={CustomizedAccordion}>
           <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel2-content" id="panel2-header" sx={CustomizedAccordionSummary}>
@@ -342,7 +335,7 @@ export default function GenerateForm({
               Video / prompt attributes
             </Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{ p: 2 }}>
+          <AccordionDetails sx={{ p: 0, backgroundColor: 'transparent' }}>
             <PromptBuilder />
           </AccordionDetails>
         </Accordion>
