@@ -59,7 +59,6 @@ import GenerateSettings from './GenerateSettings'
 import ImageToPromptModal from './ImageToPromptModal'
 import { ReferenceBox } from './ReferenceBox'
 import PromptBuilder from './PromptBuilder'
-// FIX: Import the new Imagen Prompt Builder
 import ImagenPromptBuilder from './ImagenPromptBuilder'
 
 import theme from '../../theme'
@@ -148,7 +147,6 @@ export default function GenerateForm({
     }
   };
 
-  // FIX: Add state and handler for the new Imagen Prompt Builder
   const [imagenPromptBuilderOpen, setImagenPromptBuilderOpen] = useState(false);
   const handleImagenPromptBuilderClose = (newPrompt?: string) => {
     setImagenPromptBuilderOpen(false);
@@ -330,7 +328,21 @@ export default function GenerateForm({
    <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>{'Generate'}</Button>
    </Stack>
 
-    {/* FIX: This is the button for the IMAGEN prompt builder */}
+    {/* FIX: Swapped the order of the two blocks below */}
+   {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
+   <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')} sx={CustomizedAccordion}>
+    <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
+    <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>{'Subject & Style reference(s)'}</Typography>
+    </AccordionSummary>
+    <AccordionDetails sx={{ pt: 0, pb: 1, height: 'auto' }}>
+    <Stack direction="column" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={1} sx={{ pt: 0, pb: 1 }}>
+     {referenceObjects.map((refObj, index) => (<ReferenceBox key={refObj.objectKey + index + '_box'} objectKey={refObj.objectKey} currentReferenceObject={refObj} onNewErrorMsg={onNewErrorMsg} control={control} setValue={setValue} removeReferenceObject={removeReferenceObject} addAdditionalRefObject={() => {}} refPosition={index} refCount={referenceObjects.length} />))}
+    </Stack>
+    {referenceObjects.length < maxReferences && (<Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start' }}><Button variant="contained" onClick={() => addNewRefObject()} disabled={referenceObjects.length >= maxReferences} sx={{ ...CustomizedSendButton, ...{ fontSize: '0.8rem', px: 0 } }}>{'Add'}</Button></Box>)}
+    </AccordionDetails>
+   </Accordion>
+   )}
+
     {generationType === 'Image' && (
         <Box sx={{ mt: 2 }}>
             <Button
@@ -350,20 +362,6 @@ export default function GenerateForm({
             </Button>
         </Box>
     )}
-
-   {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
-   <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')} sx={CustomizedAccordion}>
-    <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
-    <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>{'Subject & Style reference(s)'}</Typography>
-    </AccordionSummary>
-    <AccordionDetails sx={{ pt: 0, pb: 1, height: 'auto' }}>
-    <Stack direction="column" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={1} sx={{ pt: 0, pb: 1 }}>
-     {referenceObjects.map((refObj, index) => (<ReferenceBox key={refObj.objectKey + index + '_box'} objectKey={refObj.objectKey} currentReferenceObject={refObj} onNewErrorMsg={onNewErrorMsg} control={control} setValue={setValue} removeReferenceObject={removeReferenceObject} addAdditionalRefObject={() => {}} refPosition={index} refCount={referenceObjects.length} />))}
-    </Stack>
-    {referenceObjects.length < maxReferences && (<Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start' }}><Button variant="contained" onClick={() => addNewRefObject()} disabled={referenceObjects.length >= maxReferences} sx={{ ...CustomizedSendButton, ...{ fontSize: '0.8rem', px: 0 } }}>{'Add'}</Button></Box>)}
-    </AccordionDetails>
-   </Accordion>
-   )}
     
     {generationType === 'Video' && (
    <Accordion disableGutters expanded={expanded === 'interpolation'} onChange={handleChange('interpolation')} sx={CustomizedAccordion}>
@@ -437,7 +435,6 @@ export default function GenerateForm({
     </DialogContent>
   </Dialog>
 
-  {/* FIX: Add the Dialog for the new Imagen Prompt Builder */}
   <Dialog open={imagenPromptBuilderOpen} onClose={() => handleImagenPromptBuilderClose()} fullWidth={true} maxWidth="xl">
     <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
       Imagen / Prompt Builder
