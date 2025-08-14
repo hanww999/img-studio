@@ -1,16 +1,15 @@
-// app/routes.tsx
 export const pages = {
   GenerateImage: {
     name: 'Generate an Image',
     description: 'Create new images from scratch or with references',
-    href: '/generate?mode=image', // FIX: Point to the same page with a URL parameter
+    href: '/generate?mode=image', // 使用查询参数区分模式
     status: 'true',
   },
   GenerateVideo: {
     name: 'Generate a Video',
-    description: 'Create new videos from text or images',
-    href: '/generate?mode=video', // FIX: Point to the same page with a URL parameter
-    status: 'true',
+    description: 'Create new videos from scratch or with references',
+    href: '/generate?mode=video', // 使用查询参数区分模式
+    status: process.env.NEXT_PUBLIC_VEO_ENABLED, // 视频生成依赖 VEO
   },
   Edit: {
     name: 'Edit',
@@ -24,4 +23,4 @@ export const pages = {
     href: '/library',
     status: 'true',
   },
-}
+};
