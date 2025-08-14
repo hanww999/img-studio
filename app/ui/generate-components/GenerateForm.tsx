@@ -51,6 +51,8 @@ import CustomTooltip from '../ux-components/Tooltip'
 import GenerateSettings from './GenerateSettings'
 import ImageToPromptModal from './ImageToPromptModal'
 import { ReferenceBox } from './ReferenceBox'
+// [MODIFICATION] Import the new PromptBuilder component
+import PromptBuilder from './PromptBuilder'
 
 import theme from '../../theme'
 const { palette } = theme
@@ -123,7 +125,7 @@ export default function GenerateForm({
  })
  const { appContext } = useAppContext()
 
- const [expanded, setExpanded] = React.useState<string | false>('attributes')
+ const [expanded, setExpanded] = React.useState<string | false>('prompt-builder')
  const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
   setExpanded(isExpanded ? panel : false)
  }
@@ -132,7 +134,7 @@ export default function GenerateForm({
    if (initialITVimage && initialITVimage.base64Image !== '') {
       setExpanded('interpolation');
     } else {
-      setExpanded('attributes');
+      setExpanded('prompt-builder');
     }
   }
  }, [initialITVimage, generationType])
@@ -331,6 +333,20 @@ export default function GenerateForm({
        {isOnlyITVavailable && (<AccordionDetails sx={{ pt: 0, pb: 1, height: 'auto' }}>{/* ... content ... */}</AccordionDetails>)}
       </Accordion>
      )}
+
+      {/* [FINAL IMPLEMENTATION] The new Prompt Builder is wrapped in a collapsible Accordion */}
+      {generationType === 'Video' && (
+        <Accordion disableGutters expanded={expanded === 'prompt-builder'} onChange={handleChange('prompt-builder')} sx={CustomizedAccordion}>
+          <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel2-content" id="panel2-header" sx={CustomizedAccordionSummary}>
+            <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>
+              Video / prompt attributes
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2 }}>
+            <PromptBuilder />
+          </AccordionDetails>
+        </Accordion>
+      )}
     </Box>
    </form>
    <ImageToPromptModal open={imageToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setImageToPromptOpen={setImageToPromptOpen} target={generationType} />
