@@ -13,7 +13,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import {
   ArrowDownward as ArrowDownwardIcon, ArrowLeft, ArrowRight, Autorenew,
   Build as BuildIcon, Close as CloseIcon, Lightbulb, Mms,
-  Movie as MovieIcon, // [新增] 导入 MovieIcon
+  Movie as MovieIcon,
   Send as SendIcon, WatchLater as WatchLaterIcon,
 } from '@mui/icons-material';
 
@@ -27,7 +27,7 @@ import CustomTooltip from '../ux-components/Tooltip';
 
 import GenerateSettings from './GenerateSettings';
 import ImageToPromptModal from './ImageToPromptModal';
-import VideoToPromptModal from './VideoToPromptModal'; // [新增] 导入新组件
+import VideoToPromptModal from './VideoToPromptModal';
 import { ReferenceBox } from './ReferenceBox';
 import PromptBuilder from './PromptBuilder';
 import ImagenPromptBuilder from './ImagenPromptBuilder';
@@ -201,7 +201,7 @@ export default function GenerateForm({
   }
 
   const [imageToPromptOpen, setImageToPromptOpen] = useState(false);
-  const [videoToPromptOpen, setVideoToPromptOpen] = useState(false); // [新增]
+  const [videoToPromptOpen, setVideoToPromptOpen] = useState(false);
   const getRandomPrompt = () => randomPrompts[Math.floor(Math.random() * randomPrompts.length)];
 
   useEffect(() => { if (initialPrompt) setValue('prompt', initialPrompt) }, [initialPrompt, setValue]);
@@ -272,24 +272,36 @@ export default function GenerateForm({
             </Alert>
           )}
           <FormInputText name="prompt" control={control} label={`${optionalVeoPrompt ? '(Optional)' : ''} Prompt - What would you like to generate?`} required={!optionalVeoPrompt} rows={4} promptIndication={`${promptIndication}${isAudioAvailable ? ', audio (dialogue/ sound effects/ music/ ambiant sounds)' : ''}`} />
-          <Stack justifyContent="flex-end" direction="row" gap={1} pb={2}>
-            {/* [新增 & 已修复] Video-to-Prompt 按钮，仅在视频模式下显示 */}
+          
+          {/* [已修复] 增加 spacing 和 alignItems 来修复布局压缩和对齐问题 */}
+          <Stack justifyContent="flex-end" direction="row" spacing={2} alignItems="center" sx={{ pb: 2 }}>
             {generationType === 'Video' && (
               <CustomTooltip title="Video to prompt generator" size="small">
-                <IconButton onClick={() => setVideoToPromptOpen(true)} aria-label="Video Prompt Generator" disableRipple sx={{ px: 0.5 }}>
+                <IconButton onClick={() => setVideoToPromptOpen(true)} aria-label="Video Prompt Generator" disableRipple sx={{ p: 0 }}>
                   <Avatar sx={CustomizedAvatarButton}><MovieIcon sx={{ fontSize: '1.2rem' }} /></Avatar>
                 </IconButton>
               </CustomTooltip>
             )}
-            {/* [已修复] 为所有按钮恢复样式 */}
-            <CustomTooltip title="Image to prompt generator" size="small"><IconButton onClick={() => setImageToPromptOpen(true)} aria-label="Prompt Generator" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Mms sx={{ fontSize: '1.2rem' }} /></Avatar></IconButton></CustomTooltip>
-            <CustomTooltip title="Get prompt ideas" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())} aria-label="Random prompt" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Lightbulb sx={{ fontSize: '1.2rem' }} /></Avatar></IconButton></CustomTooltip>
-            <CustomTooltip title="Reset all fields" size="small"><IconButton disabled={isLoading} onClick={() => onReset()} aria-label="Reset form" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Autorenew sx={{ fontSize: '1.2rem' }} /></Avatar></IconButton></CustomTooltip>
+            <CustomTooltip title="Image to prompt generator" size="small">
+                <IconButton onClick={() => setImageToPromptOpen(true)} aria-label="Prompt Generator" disableRipple sx={{ p: 0 }}>
+                    <Avatar sx={CustomizedAvatarButton}><Mms sx={{ fontSize: '1.2rem' }} /></Avatar>
+                </IconButton>
+            </CustomTooltip>
+            <CustomTooltip title="Get prompt ideas" size="small">
+                <IconButton onClick={() => setValue('prompt', getRandomPrompt())} aria-label="Random prompt" disableRipple sx={{ p: 0 }}>
+                    <Avatar sx={CustomizedAvatarButton}><Lightbulb sx={{ fontSize: '1.2rem' }} /></Avatar>
+                </IconButton>
+            </CustomTooltip>
+            <CustomTooltip title="Reset all fields" size="small">
+                <IconButton disabled={isLoading} onClick={() => onReset()} aria-label="Reset form" disableRipple sx={{ p: 0 }}>
+                    <Avatar sx={CustomizedAvatarButton}><Autorenew sx={{ fontSize: '1.2rem' }} /></Avatar>
+                </IconButton>
+            </CustomTooltip>
             
             <GenerateSettings control={control} setValue={setValue} generalSettingsFields={currentModel.includes('veo-3.0') ? tempVeo3specificSettings : generationFields.settings} advancedSettingsFields={generationFields.advancedSettings} warningMessage={currentModel.includes('veo-3.0') ? 'NB: for now, Veo 3 has fewer setting options than Veo 2!' : ''} />
             {isAudioAvailable && (<CustomTooltip title="Add audio to your video" size="small"><AudioSwitch checked={isVideoWithAudio} onChange={handleVideoAudioCheck} /></CustomTooltip>)}
             {currentModel.includes('imagen') && !hasReferences && (<CustomTooltip title="Have Gemini enhance your prompt" size="small"><GeminiSwitch checked={isGeminiRewrite} onChange={handleGeminiRewrite} /></CustomTooltip>)}
-            <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={{ ...CustomizedSendButton, ...{ height: '34px', width: '130px', fontSize: '0.9rem', mt: '1px' } }}>{'Generate'}</Button>
+            <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={{ ...CustomizedSendButton, height: '36px', width: '130px', fontSize: '0.9rem' }}>{'Generate'}</Button>
           </Stack>
 
           {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
@@ -362,7 +374,6 @@ export default function GenerateForm({
         </Box>
       </form>
 
-      {/* [已修复] 为 ThemeProvider 提供有效的主题 */}
       <ThemeProvider theme={lightTheme}>
         <Dialog open={promptBuilderOpen} onClose={() => handlePromptBuilderClose()} fullWidth={true} maxWidth="xl">
           <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
@@ -377,7 +388,6 @@ export default function GenerateForm({
         </Dialog>
       </ThemeProvider>
 
-      {/* [已修复] 为 ThemeProvider 提供有效的主题 */}
       <ThemeProvider theme={lightTheme}>
         <Dialog open={imagenPromptBuilderOpen} onClose={() => handleImagenPromptBuilderClose()} fullWidth={true} maxWidth="xl">
           <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
@@ -394,7 +404,6 @@ export default function GenerateForm({
 
       <ImageToPromptModal open={imageToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setImageToPromptOpen={setImageToPromptOpen} target={'Image'} />
       
-      {/* [新增] & [已修复] */}
       <ThemeProvider theme={lightTheme}>
         <VideoToPromptModal open={videoToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setVideoToPromptOpen={setVideoToPromptOpen} />
       </ThemeProvider>
