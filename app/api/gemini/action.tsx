@@ -1,17 +1,3 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 'use server';
 
 const { VertexAI } = require('@google-cloud/vertexai');
@@ -29,7 +15,7 @@ export async function truncateLog(obj: any, maxLength = 300) {
     if (typeof truncatedObj[key] === 'string' && truncatedObj[key].length > maxLength) {
       truncatedObj[key] = truncatedObj[key].slice(0, maxLength) + '...';
     } else if (typeof truncatedObj[key] === 'object') {
-      truncatedObj[key] = await truncateLog(truncatedObj[key], maxLength); // await is needed for recursion
+      truncatedObj[key] = await truncateLog(truncatedObj[key], maxLength);
     }
   }
 
@@ -115,7 +101,6 @@ export async function getFullReferenceDescription(base64Image: string, type: str
   let specificPromptInstructions = '';
   let activeCommonDetailedInstructions = '';
 
-  // This is the set of common instructions for most types (Person, Animal, Product, Default)
   const generalCommonDetailedInstructions =
     " Your primary goal is to generate an exceptionally detailed, meticulous, and comprehensive description of the primary subject's visual attributes. " +
     '**The entire description should be concise, ideally around 100-120 words, and must not exceed 130 words.** ' +
@@ -124,9 +109,8 @@ export async function getFullReferenceDescription(base64Image: string, type: str
     '2. The description must focus exclusively on the visual attributes of the primary subject itself. ' +
     "3. Do NOT describe the subject's actions, what the subject is doing, its location, the surrounding environment, or the background. Confine the description strictly to the physical appearance of the subject. " +
     '4. Ensure the description paints a clear and vivid visual picture as if under close inspection, focusing on objective visual facts. ' +
-    "If you cannot satisfy the primary goal (an exceptionally detailed, subject-focused visual description) while strictly adhering to all the numbered rules, or if the image content does not clearly match the requested type, is ambiguous, or if a meaningful description of a singular primary subject cannot be generated, then respond with the single word 'error'."; // Changed 'Error' to 'error'
+    "If you cannot satisfy the primary goal (an exceptionally detailed, subject-focused visual description) while strictly adhering to all the numbered rules, or if the image content does not clearly match the requested type, is ambiguous, or if a meaningful description of a singular primary subject cannot be generated, then respond with the single word 'error'.";
 
-  // These are the tailored common instructions specifically for the 'Style' type
   const styleCommonDetailedInstructions =
     " Your primary goal is to generate an exceptionally detailed, meticulous, and comprehensive analysis of the image's overall artistic and visual style. " +
     '**The entire description should be concise, ideally around 100-120 words, and must not exceed 130 words.** ' +
@@ -228,11 +212,10 @@ export async function getFullReferenceDescription(base64Image: string, type: str
   }
 }
 
-// [MODIFIED FUNCTION]
 export async function getPromptFromImageFromGemini(
   base64Image: string,
   target: 'Image' | 'Video',
-  userQuery?: string // [MODIFIED] Added optional userQuery parameter
+  userQuery?: string
 ) {
   const generativeModel = vertexAI.getGenerativeModel({
     model: geminiModel,
@@ -254,38 +237,27 @@ export async function getPromptFromImageFromGemini(
 
   const veoPromptTemplate = `You are an AI prompt engineer specializing in generating video prompts for Veo3. Your task is to create new prompts based on a provided example, ensuring variety in scenes.
 
-Example Prompt:
+  Example Prompt:
+  Subject: Marcus, a confident street interviewer in his late 20s, wearing trendy casual clothing
+  Context: busy urban street with pedestrians and city life in background, natural street environment
+  Action: approaches people with microphone, engaging in spontaneous conversations with genuine curiosity
+  Style: documentary street style with natural lighting, authentic urban aesthetic
+  Camera: handheld documentary style with dynamic movement, following action naturally
+  Composition: medium shots capturing both interviewer and subjects, environmental context
+  Ambiance: natural daylight with urban atmosphere, street lighting
+  Audio: clear interview audio: 'What's the most interesting thing that happened to you today?' with authentic street ambiance
+  Negative prompt: no text overlays, no watermarks, no cartoon effects, no unrealistic proportions, no blurry faces, no distorted hands, no artificial lighting, no oversaturation, no low resolution artifacts, no compression noise, no camera shake, no poor audio quality, no lip-sync issues, no unnatural movements
+  Instructions:
+  1. Maintain the structure of the example prompt, including Subject, Context, Action, Style, Camera, Composition, Ambiance, Audio, and Negative prompt.
+  2. Vary the scenes and contexts to avoid repetition.
+  3. Ensure the prompts are suitable for generating realistic and engaging video content with Veo3.
+  4. Focus on creating prompts that capture authentic and natural moments.
+  5. Avoid any elements that would result in unrealistic or artificial-looking videos, as specified in the Negative prompt.`;
 
-Subject: Marcus, a confident street interviewer in his late 20s, wearing trendy casual clothing
-
-Context: busy urban street with pedestrians and city life in background, natural street environment
-
-Action: approaches people with microphone, engaging in spontaneous conversations with genuine curiosity
-
-Style: documentary street style with natural lighting, authentic urban aesthetic
-
-Camera: handheld documentary style with dynamic movement, following action naturally
-
-Composition: medium shots capturing both interviewer and subjects, environmental context
-
-Ambiance: natural daylight with urban atmosphere, street lighting
-
-Audio: clear interview audio: 'What's the most interesting thing that happened to you today?' with authentic street ambiance
-
-Instructions:
-
-1. Maintain the structure of the example prompt, including Subject, Context, Action, Style, Camera, Composition, Ambiance, Audio, and Negative prompt.
-2. Vary the scenes and contexts to avoid repetition.
-3. Ensure the prompts are suitable for generating realistic and engaging video content with Veo3.
-4. Focus on creating prompts that capture authentic and natural moments.
-5. Avoid any elements that would result in unrealistic or artificial-looking videos, as specified in the Negative prompt..`;
-
-  // [NEW] Dynamically build the final prompt based on user input
   let finalPrompt = '';
   const basePrompt = target === 'Image' ? imagenPromptTemplate : veoPromptTemplate;
 
   if (userQuery && userQuery.trim() !== '') {
-    // If the user provides a query, create a more complex "meta-prompt"
     finalPrompt = `A user has provided an image and a specific request. Your task is to generate a new, comprehensive prompt that incorporates the user's request while still being suitable for the target model (${target}).
 
     **User's Request:** "${userQuery}"
@@ -297,7 +269,6 @@ Instructions:
     ${basePrompt}
     `;
   } else {
-    // If no user query, use the base prompt as before
     finalPrompt = basePrompt;
   }
 
@@ -308,12 +279,20 @@ Instructions:
     },
   };
   const textPart = {
-    // [MODIFIED] Use the dynamically constructed finalPrompt
     text: finalPrompt,
+  };
+
+  // [NEW] Define generation configuration, including temperature
+  const generationConfig = {
+    temperature: 0.2, // A balanced value for creative yet accurate descriptions
+    topP: 0.95,
+    maxOutputTokens: 8192, // Set a reasonable limit for the output
   };
 
   const reqData = {
     contents: [{ role: 'user', parts: [imagePart, textPart] }],
+    // [NEW] Add the generationConfig to the request
+    generationConfig: generationConfig,
   };
 
   try {
