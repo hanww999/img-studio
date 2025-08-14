@@ -1,8 +1,5 @@
 // 文件路径: app/(studio)/generate/GeneratePageClient.tsx
 
-// [注意] 这个文件的内容就是您之前提供的 app/(studio)/generate/page.tsx 的完整代码
-// 我将把上一轮提供的完整代码粘贴在这里
-
 'use client';
 
 import * as React from 'react';
@@ -38,7 +35,7 @@ const BACKOFF_FACTOR = 1.2;
 const MAX_POLLING_ATTEMPTS = 30;
 const JITTER_FACTOR = 0.2;
 
-export default function GeneratePageClient() { // [修改] 组件名
+export default function GeneratePageClient() {
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode');
 
@@ -211,9 +208,14 @@ export default function GeneratePageClient() { // [修改] 组件名
     <Box p={5} sx={{ maxHeight: '100vh' }}>
       <Grid wrap="nowrap" container spacing={6} direction="row" columns={2}>
         <Grid size={1.1} flex={0} sx={{ maxWidth: 700, minWidth: 610 }}>
+          
+          {/* [删除] 移除此处的页面主标题，因为它在白色背景下不可见且多余 */}
+          {/* 
           <Typography variant="h4" component="h1" sx={{ mb: 4, fontWeight: 500, color: 'white' }}>
             {generationMode}
-          </Typography>
+          </Typography> 
+          */}
+
           {generationMode === 'Generate an Image' && (
             <GenerateForm key="image-form" generationType="Image" isLoading={isLoading} onRequestSent={handleRequestSent} onImageGeneration={handleImageGeneration} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={ImageRandomPrompts} generationFields={imageGenerationUtils} initialPrompt={initialPrompt ?? ''} promptIndication={'Describe your image...'} />
           )}
@@ -221,7 +223,8 @@ export default function GeneratePageClient() { // [修改] 组件名
             <GenerateForm key="video-form" generationType="Video" isLoading={isLoading} onRequestSent={handleRequestSent} onVideoPollingStart={handleVideoPollingStart} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={VideoRandomPrompts} generationFields={videoGenerationUtils} initialPrompt={initialPrompt ?? ''} initialITVimage={initialITVimage ?? undefined} promptIndication={'Describe your video...'} />
           )}
         </Grid>
-        <Grid size={0.9} flex={1} sx={{ pt: 14, maxWidth: 850, minWidth: 400 }}>
+        {/* [修改] 调整右侧内容区域的顶部内边距，使其与左侧表单对齐 */}
+        <Grid size={0.9} flex={1} sx={{ pt: 5.5, maxWidth: 850, minWidth: 400 }}>
           {generationMode === 'Generate an Image' ? (
             <OutputImagesDisplay isLoading={isLoading} generatedImagesInGCS={generatedImages} generatedCount={generatedCount} isPromptReplayAvailable={true} />
           ) : (
