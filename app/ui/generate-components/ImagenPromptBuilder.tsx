@@ -32,8 +32,11 @@ import {
 import {
  RestartAlt,
  CheckCircle,
+  AutoFixHigh, // FIX: Import icon for the preview button
 } from '@mui/icons-material';
 import { initialImagenPromptData, imagenPromptBuilderOptions, ImagenPromptData } from '../../api/imagen-prompt-builder-utils';
+import theme from '../../theme'; // FIX: Import theme for palette access
+const { palette } = theme;
 
 interface ImagenPromptBuilderProps {
     onApply: (prompt: string) => void;
@@ -48,6 +51,8 @@ const SectionTitle = ({ title }: { title: string }) => (
 
 export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProps) {
  const [promptData, setPromptData] = useState<ImagenPromptData>(initialImagenPromptData);
+  // FIX: Add state to hold the generated prompt for preview
+ const [generatedPrompt, setGeneratedPrompt] = useState('');
 
  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
   const { name, value } = e.target;
@@ -65,7 +70,7 @@ export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProp
         promptData.subject,
         promptData.detailedDescription,
         promptData.environment,
-    ].filter(Boolean); // Filter out empty strings
+    ].filter(Boolean);
 
     const styleParts = [
         promptData.composition,
@@ -82,24 +87,34 @@ export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProp
 
     let finalPrompt = [...coreParts, ...styleParts, ...photoParts].join(', ');
 
+    // Use a more robust way to add the negative prompt to avoid confusion
     if (promptData.negativePrompt) {
-        finalPrompt += `\n\nNegative Prompt: ${promptData.negativePrompt}`;
+        finalPrompt += ` --no ${promptData.negativePrompt}`;
     }
     
     return finalPrompt;
   }
 
- const handleApplyPrompt = () => {
+  // FIX: Add handler for the preview button
+  const handleGeneratePrompt = () => {
     const finalPrompt = generateFinalPromptString();
+    setGeneratedPrompt(finalPrompt);
+  };
+
+ const handleApplyPrompt = () => {
+    // Ensure the latest data is used, whether previewed or not
+    const finalPrompt = generatedPrompt || generateFinalPromptString();
     onApply(finalPrompt);
   }
 
  const handleReset = () => {
   setPromptData(initialImagenPromptData);
+  setGeneratedPrompt(''); // Also reset the preview
  };
 
  return (
-  <Box sx={{ width: '100%', p: 1 }}>
+    // FIX: Add a wrapping Box with white background and padding for consistency
+  <Box sx={{ width: '100%', p: 3, backgroundColor: '#fff' }}>
     <Grid container spacing={3}>
         {/* Column 1: Core Components */}
         <Grid item xs={12} md={4}>
@@ -135,13 +150,40 @@ export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProp
             <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <SectionTitle title="Exclusions (Negative Prompt)" />
                 <TextField name="negativePrompt" label="Negative Prompt" value={promptData.negativePrompt} onChange={handleInputChange} fullWidth multiline rows={10} placeholder="Things to exclude: blurry, text, watermark, bad anatomy..." sx={{ flexGrow: 1 }} />
-                <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
-                    <Button variant="text" startIcon={<RestartAlt />} onClick={handleReset}>Reset</Button>
-                    <Button variant="contained" startIcon={<CheckCircle />} onClick={handleApplyPrompt} size="large">Apply to Form</Button>
-                </Stack>
             </Paper>
         </Grid>
     </Grid>
+
+    {/* FIX: Add action buttons and preview area */}
+    <Stack direction="row" spacing={2} justifyContent="center" sx={{ my: 4 }}>
+        <Button variant="outlined" startIcon={<AutoFixHigh />} onClick={handleGeneratePrompt} size="large">
+            Preview Generated Prompt
+        </Button>
+        <Button variant="text" startIcon={<RestartAlt />} onClick={handleReset}>
+            Reset All
+        </Button>
+    </Stack>
+
+    {generatedPrompt && (
+        <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.100', border: '1px solid', borderColor: 'grey.300' }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>Your Generated Prompt</Typography>
+            <Box component="pre" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', m: 0, p: 2, backgroundColor: '#fff', borderRadius: 1, fontFamily: 'monospace', border: '1px solid', borderColor: 'grey.300' }}>
+                {generatedPrompt}
+            </Box>
+        </Paper>
+    )}
+
+    <Stack sx={{ mt: 4 }} alignItems="flex-end">
+        <Button 
+            variant="contained" 
+            startIcon={<CheckCircle />} 
+            onClick={handleApplyPrompt} 
+            size="large"
+            sx={{ py: 1.5, px: 4 }}
+        >
+            Apply to Form
+        </Button>
+    </Stack>
   </Box>
  );
 }
