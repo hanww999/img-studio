@@ -328,7 +328,6 @@ export default function GenerateForm({
    <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>{'Generate'}</Button>
    </Stack>
 
-    {/* FIX: Swapped the order of the two blocks below */}
    {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
    <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')} sx={CustomizedAccordion}>
     <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
@@ -442,7 +441,8 @@ export default function GenerateForm({
         <CloseIcon />
       </IconButton>
     </DialogTitle>
-    <DialogContent dividers>
+    {/* FIX: The style is applied directly to the DialogContent component */}
+    <DialogContent dividers sx={{ backgroundColor: '#fff' }}>
         <ImagenPromptBuilder onApply={handleImagenPromptBuilderClose} />
     </DialogContent>
   </Dialog>
