@@ -409,7 +409,7 @@ Do not add any conversational text, preambles, or explanations. Your output shou
   };
 
   const generationConfig = {
-    temperature: 0.4,
+    temperature: 0.2,
     topP: 0.95,
     maxOutputTokens: 8192,
   };
