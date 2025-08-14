@@ -1,19 +1,8 @@
 // Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// ... (license header)
 
-import * as React from 'react'
-import { useEffect, useState } from 'react'
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Box,
@@ -27,25 +16,24 @@ import {
   Stack,
   TextField,
   Typography,
-} from '@mui/material'
-import { TransitionProps } from '@mui/material/transitions'
-import { Check, Close, Replay } from '@mui/icons-material'
+} from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
+import { Check, Close, Replay, Send } from '@mui/icons-material'; // [新增] 导入 Send 图标
 
-import theme from '../../theme'
-import ImageDropzone from './ImageDropzone'
-import { set } from 'react-hook-form'
-import { getPromptFromImageFromGemini } from '@/app/api/gemini/action'
-import { CustomizedSendButton } from '../ux-components/Button-SX'
-const { palette } = theme
+import theme from '../../theme';
+import ImageDropzone from './ImageDropzone';
+import { getPromptFromImageFromGemini } from '@/app/api/gemini/action';
+import { CustomizedSendButton } from '../ux-components/Button-SX';
+const { palette } = theme;
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
-    children: React.ReactElement<any, any>
+    children: React.ReactElement<any, any>;
   },
   ref: React.Ref<unknown>
 ) {
-  return <Slide direction="up" ref={ref} {...props} />
-})
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 export default function ImageToPromptModal({
   open,
@@ -53,53 +41,74 @@ export default function ImageToPromptModal({
   setImageToPromptOpen,
   target,
 }: {
-  open: boolean
-  setNewPrompt: (newPormpt: string) => void
-  setImageToPromptOpen: (state: boolean) => void
-  target: 'Image' | 'Video'
+  open: boolean;
+  setNewPrompt: (newPormpt: string) => void;
+  setImageToPromptOpen: (state: boolean) => void;
+  target: 'Image' | 'Video';
 }) {
-  const [image, setImage] = useState<string | null>(null)
-  const [prompt, setPrompt] = useState('')
-  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false)
-  const [errorMsg, setErrorMsg] = useState('')
+  const [image, setImage] = useState<string | null>(null);
+  const [prompt, setPrompt] = useState('');
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  
+  // [新增] State 用于管理用户输入的文本
+  const [userQuery, setUserQuery] = useState('');
 
+  // [删除] 不再需要这个 useEffect，因为我们不再自动生成 prompt
+  /*
   useEffect(() => {
     if (image !== '' && image !== null && prompt === '') {
-      getPromptFromImage()
+      getPromptFromImage();
     }
-  }, [image])
+  }, [image]);
+  */
 
+  // [修改] 函数现在接收用户查询作为参数
   const getPromptFromImage = async () => {
-    setIsGeneratingPrompt(true)
-    try {
-      const geminiReturnedPrompt = await getPromptFromImageFromGemini(image as string, target)
-
-      if (!(typeof geminiReturnedPrompt === 'object' && 'error' in geminiReturnedPrompt))
-        setPrompt(geminiReturnedPrompt as string)
-    } catch (error) {
-      console.error(error)
-      error && setErrorMsg(error.toString())
-    } finally {
-      setIsGeneratingPrompt(false)
+    // 如果没有图片，则不执行任何操作
+    if (!image) {
+      setErrorMsg('Please upload an image first.');
+      return;
     }
-  }
+    
+    setIsGeneratingPrompt(true);
+    setErrorMsg(''); // 清除旧的错误信息
+    setPrompt(''); // 清除旧的 prompt
+
+    try {
+      // [修改] 将 userQuery 传递给后端 API
+      const geminiReturnedPrompt = await getPromptFromImageFromGemini(image as string, target, userQuery);
+
+      if (typeof geminiReturnedPrompt === 'object' && 'error' in geminiReturnedPrompt) {
+        setErrorMsg(geminiReturnedPrompt.error);
+      } else {
+        setPrompt(geminiReturnedPrompt as string);
+      }
+    } catch (error: any) {
+      console.error(error);
+      setErrorMsg(error.toString());
+    } finally {
+      setIsGeneratingPrompt(false);
+    }
+  };
 
   const onValidate = () => {
-    if (prompt) setNewPrompt(prompt)
-    onClose()
-  }
+    if (prompt) setNewPrompt(prompt);
+    onClose();
+  };
 
   const onReset = () => {
-    setErrorMsg('')
-    setIsGeneratingPrompt(false)
-    setImage(null)
-    setPrompt('')
-  }
+    setErrorMsg('');
+    setIsGeneratingPrompt(false);
+    setImage(null);
+    setPrompt('');
+    setUserQuery(''); // [新增] 同时重置用户输入
+  };
 
   const onClose = () => {
-    setImageToPromptOpen(false)
-    onReset()
-  }
+    setImageToPromptOpen(false);
+    onReset();
+  };
 
   return (
     <Dialog
@@ -113,8 +122,9 @@ export default function ImageToPromptModal({
           justifyContent: 'center',
           alignItems: 'left',
           p: 1,
-          cursor: 'pointer',
-          height: '63%',
+          cursor: 'default', // [修改] 避免整个对话框都是指针样式
+          height: 'auto', // [修改] 高度自适应
+          minHeight: '63%', // 保持最小高度
           maxWidth: '70%',
           width: '60%',
           borderRadius: 1,
@@ -165,10 +175,10 @@ export default function ImageToPromptModal({
           />
           <Stack
             direction="column"
-            spacing={2.5}
-            justifyContent="flex-end"
+            spacing={2} // [修改] 调整间距
+            justifyContent="space-between" // [修改] 更好地分布元素
             alignItems="flex-end"
-            sx={{ width: '100%' }}
+            sx={{ width: '100%', height: 340 }} // [修改] 固定高度以对齐
           >
             <Box sx={{ position: 'relative', width: '100%' }}>
               {isGeneratingPrompt && (
@@ -178,38 +188,66 @@ export default function ImageToPromptModal({
                   color="primary"
                   sx={{
                     position: 'absolute',
-                    bottom: 8,
-                    left: 8,
+                    top: '50%',
+                    left: '50%',
+                    marginTop: '-15px', // 居中
+                    marginLeft: '-15px', // 居中
                     zIndex: 1,
                   }}
                 />
               )}
               <TextField
                 label="Generated prompt"
-                disabled={!(image !== null && image !== '' && !isGeneratingPrompt)}
+                disabled
                 error={errorMsg !== ''}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
+                helperText={errorMsg} // [新增] 显示错误信息
+                value={isGeneratingPrompt ? 'Generating...' : prompt}
                 multiline
-                rows={11}
-                defaultValue="Upload image first"
-                sx={{ width: '98%' }}
+                rows={6} // [修改] 减少行数以容纳新输入框
+                sx={{ width: '98%', opacity: isGeneratingPrompt ? 0.5 : 1 }}
               />
             </Box>
-            <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="flex-end">
+
+            {/* [新增] 用户输入的文本框 */}
+            <TextField
+              label="Ask something specific about the image (optional)"
+              value={userQuery}
+              onChange={(e) => setUserQuery(e.target.value)}
+              disabled={isGeneratingPrompt || !image}
+              multiline
+              rows={2}
+              sx={{ width: '98%' }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  getPromptFromImage();
+                }
+              }}
+            />
+            
+            <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="flex-end" sx={{ width: '100%' }}>
+              {/* [新增] 独立的生成按钮 */}
               <Button
-                onClick={() => onReset()}
+                onClick={getPromptFromImage}
                 variant="contained"
-                disabled={!(image !== null && image !== '' && !isGeneratingPrompt && prompt !== '')}
-                endIcon={<Replay />}
+                disabled={!image || isGeneratingPrompt}
+                endIcon={<Send />}
                 sx={CustomizedSendButton}
+              >
+                {'Generate'}
+              </Button>
+              <Button
+                onClick={onReset}
+                variant="outlined" // [修改] 样式
+                disabled={isGeneratingPrompt}
+                endIcon={<Replay />}
               >
                 {'Reset'}
               </Button>
               <Button
-                onClick={() => onValidate()}
+                onClick={onValidate}
                 variant="contained"
-                disabled={!(image !== null && image !== '' && !isGeneratingPrompt && prompt !== '')}
+                disabled={!prompt || isGeneratingPrompt}
                 endIcon={<Check />}
                 sx={CustomizedSendButton}
               >
@@ -220,5 +258,5 @@ export default function ImageToPromptModal({
         </Stack>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
