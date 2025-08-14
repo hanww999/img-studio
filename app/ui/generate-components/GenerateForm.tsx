@@ -39,7 +39,7 @@ import {
  ArrowLeft,
  ArrowRight,
  Autorenew,
- Build as BuildIcon, // Using a new icon for the button
+ Build as BuildIcon,
  Close as CloseIcon,
  Lightbulb,
  Mms,
@@ -59,6 +59,8 @@ import GenerateSettings from './GenerateSettings'
 import ImageToPromptModal from './ImageToPromptModal'
 import { ReferenceBox } from './ReferenceBox'
 import PromptBuilder from './PromptBuilder'
+// FIX: Import the new Imagen Prompt Builder
+import ImagenPromptBuilder from './ImagenPromptBuilder'
 
 import theme from '../../theme'
 const { palette } = theme
@@ -138,10 +140,7 @@ export default function GenerateForm({
  setExpanded(isExpanded ? panel : false)
  }
 
-  // FIX: State to control the Prompt Builder Dialog
   const [promptBuilderOpen, setPromptBuilderOpen] = useState(false);
-
-  // FIX: Function to handle closing the dialog and applying the new prompt
   const handlePromptBuilderClose = (newPrompt?: string) => {
     setPromptBuilderOpen(false);
     if (newPrompt && typeof newPrompt === 'string') {
@@ -149,6 +148,14 @@ export default function GenerateForm({
     }
   };
 
+  // FIX: Add state and handler for the new Imagen Prompt Builder
+  const [imagenPromptBuilderOpen, setImagenPromptBuilderOpen] = useState(false);
+  const handleImagenPromptBuilderClose = (newPrompt?: string) => {
+    setImagenPromptBuilderOpen(false);
+    if (newPrompt && typeof newPrompt === 'string') {
+      setValue('prompt', newPrompt);
+    }
+  };
 
  const [isGeminiRewrite, setIsGeminiRewrite] = useState(true)
  const handleGeminiRewrite = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -322,6 +329,28 @@ export default function GenerateForm({
    {currentModel.includes('imagen') && !hasReferences && (<CustomTooltip title="Have Gemini enhance your prompt" size="small"><GeminiSwitch checked={isGeminiRewrite} onChange={handleGeminiRewrite} /></CustomTooltip>)}
    <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>{'Generate'}</Button>
    </Stack>
+
+    {/* FIX: This is the button for the IMAGEN prompt builder */}
+    {generationType === 'Image' && (
+        <Box sx={{ mt: 2 }}>
+            <Button
+                variant="outlined"
+                fullWidth
+                startIcon={<BuildIcon />}
+                onClick={() => setImagenPromptBuilderOpen(true)}
+                sx={{ 
+                    py: 1.5, 
+                    justifyContent: 'flex-start', 
+                    textTransform: 'none', 
+                    fontSize: '1rem',
+                    fontWeight: 500,
+                }}
+            >
+                Open Imagen Prompt Builder
+            </Button>
+        </Box>
+    )}
+
    {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
    <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')} sx={CustomizedAccordion}>
     <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
@@ -373,10 +402,6 @@ export default function GenerateForm({
    </Accordion>
    )}
 
-    {/* 
-        FIX START: Replaced Accordion with a Button to open a full-width Dialog.
-        This provides the necessary space for the Prompt Builder.
-    */}
     {generationType === 'Video' && (
         <Box sx={{ mt: 2 }}>
             <Button
@@ -396,42 +421,34 @@ export default function GenerateForm({
             </Button>
         </Box>
     )}
-    {/* FIX END */}
 
   </Box>
   </form>
 
-  {/* 
-      FIX START: Definition of the Dialog that will contain the PromptBuilder.
-      It's set to be full-width and extra-large for maximum space.
-  */}
-  <Dialog
-    open={promptBuilderOpen}
-    onClose={() => handlePromptBuilderClose()}
-    fullWidth={true}
-    maxWidth="xl" // This is the key to making it very wide
-  >
+  <Dialog open={promptBuilderOpen} onClose={() => handlePromptBuilderClose()} fullWidth={true} maxWidth="xl">
     <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
       Video / Prompt Builder
-      <IconButton
-        aria-label="close"
-        onClick={() => handlePromptBuilderClose()}
-        sx={{
-          position: 'absolute',
-          right: 8,
-          top: 8,
-          color: (theme) => theme.palette.grey[500],
-        }}
-      >
+      <IconButton aria-label="close" onClick={() => handlePromptBuilderClose()} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
         <CloseIcon />
       </IconButton>
     </DialogTitle>
     <DialogContent dividers>
-        {/* Pass the callback function to the builder */}
         <PromptBuilder onApply={handlePromptBuilderClose} />
     </DialogContent>
   </Dialog>
-  {/* FIX END */}
+
+  {/* FIX: Add the Dialog for the new Imagen Prompt Builder */}
+  <Dialog open={imagenPromptBuilderOpen} onClose={() => handleImagenPromptBuilderClose()} fullWidth={true} maxWidth="xl">
+    <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+      Imagen / Prompt Builder
+      <IconButton aria-label="close" onClick={() => handleImagenPromptBuilderClose()} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
+        <CloseIcon />
+      </IconButton>
+    </DialogTitle>
+    <DialogContent dividers>
+        <ImagenPromptBuilder onApply={handleImagenPromptBuilderClose} />
+    </DialogContent>
+  </Dialog>
 
   <ImageToPromptModal open={imageToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setImageToPromptOpen={setImageToPromptOpen} target={generationType} />
  </>
