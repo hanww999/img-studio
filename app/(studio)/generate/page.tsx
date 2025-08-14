@@ -17,12 +17,10 @@ import { ChipGroup } from '../../ui/ux-components/InputChipGroup'
 import OutputVideosDisplay from '../../ui/transverse-components/VeoOutputVideosDisplay'
 import { downloadMediaFromGcs } from '../../api/cloud-storage/action'
 import { getAspectRatio } from '../../ui/edit-components/EditImageDropzone'
-// FIX: Import useSearchParams to read URL query parameters
 import { useSearchParams } from 'next/navigation'
 
 const { palette } = theme
 
-// ... (Video Polling Constants remain the same) ...
 const INITIAL_POLLING_INTERVAL_MS = 6000
 const MAX_POLLING_INTERVAL_MS = 60000
 const BACKOFF_FACTOR = 1.2
@@ -30,11 +28,9 @@ const MAX_POLLING_ATTEMPTS = 30
 const JITTER_FACTOR = 0.2
 
 export default function Page() {
-  // FIX: Read the 'mode' from the URL to set the initial state
   const searchParams = useSearchParams()
   const initialMode = searchParams.get('mode') === 'video' ? 'Generate a Video' : 'Generate an Image'
   const [generationMode, setGenerationMode] = useState(initialMode)
-
   const [isLoading, setIsLoading] = useState(false)
   const [generatedImages, setGeneratedImages] = useState<ImageI[]>([])
   const [generatedVideos, setGeneratedVideos] = useState<VideoI[]>([])
@@ -42,7 +38,6 @@ export default function Page() {
   const [generationErrorMsg, setGenerationErrorMsg] = useState('')
   const { appContext, error: appContextError, setAppContext } = useAppContext()
 
-  // FIX: Update the component's state if the URL parameter changes
   useEffect(() => {
     const mode = searchParams.get('mode')
     if (mode === 'video' && generationMode !== 'Generate a Video') {
@@ -52,21 +47,22 @@ export default function Page() {
     }
   }, [searchParams, generationMode])
 
-
  // Handle 'Replay prompt' from Library
  const [initialPrompt, setInitialPrompt] = useState<string | null>(null)
  useEffect(() => {
  if (appContext && appContext.promptToGenerateImage) {
   setGenerationMode('Generate an Image')
   setInitialPrompt(appContext.promptToGenerateImage)
-  setAppContext((prev) => ({ ...prev, promptToGenerateImage: '' }))
+    // FIX: Ensure we spread a valid object, not null
+  setAppContext((prev) => ({ ...(prev || appContextDataDefault), promptToGenerateImage: '' }))
  }
  if (appContext && appContext.promptToGenerateVideo) {
   setGenerationMode('Generate a Video')
   setInitialPrompt(appContext.promptToGenerateVideo)
-  setAppContext((prev) => ({ ...prev, promptToGenerateVideo: '' }))
+    // FIX: Ensure we spread a valid object, not null
+  setAppContext((prev) => ({ ...(prev || appContextDataDefault), promptToGenerateVideo: '' }))
  }
- }, [appContext, setAppContext]) // Simplified dependency array
+ }, [appContext, setAppContext])
 
  // Handle Image to video from generated or edited image
  const [initialITVimage, setInitialITVimage] = useState<InterpolImageI | null>(null)
@@ -84,7 +80,8 @@ export default function Page() {
     ratio: getAspectRatio(img.width, img.height), width: img.width, height: img.height,
    }
    setInitialITVimage(initialITVimage as InterpolImageI)
-   setAppContext((prev) => ({ ...prev, imageToVideo: '' }))
+    // FIX: Ensure we spread a valid object, not null
+   setAppContext((prev) => ({ ...(prev || appContextDataDefault), imageToVideo: '' }))
    }
    img.onerror = () => { throw Error('Error loading image.') }
    img.src = newImage
@@ -92,9 +89,9 @@ export default function Page() {
   }
  }
  fetchAndSetImage()
- }, [appContext, setAppContext]) // Simplified dependency array
+ }, [appContext, setAppContext])
 
- // ... (All video polling logic and other handlers remain exactly the same) ...
+ // ... (All other logic, handlers, and the polling useEffect remain exactly the same) ...
   const [pollingOperationName, setPollingOperationName] = useState<string | null>(null)
   const [operationMetadata, setOperationMetadata] = useState<OperationMetadataI | null>(null)
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null)
@@ -104,16 +101,51 @@ export default function Page() {
   const generationModeSwitch = ({ clickedValue }: { clickedValue: string }) => {
     if (clickedValue !== generationMode && !isLoading) {
       setGenerationMode(clickedValue)
-      // ... (rest of the function is unchanged)
+      setGenerationErrorMsg('')
+      setGeneratedImages([])
+      setGeneratedVideos([])
+      setInitialPrompt(null)
+      if (timeoutIdRef.current) { clearTimeout(timeoutIdRef.current); timeoutIdRef.current = null; }
+      setPollingOperationName(null)
+      setOperationMetadata(null)
+      setIsLoading(false)
+      if (clickedValue === 'Generate an Image') setInitialITVimage(null)
     }
   }
-  const handleRequestSent = (loading: boolean, count: number) => { /* ... */ }
-  const handleNewErrorMsg = (newErrorMsg: string) => { /* ... */ }
+  const handleRequestSent = (loading: boolean, count: number) => { setIsLoading(loading); setGenerationErrorMsg(''); setGeneratedCount(count); setGeneratedImages([]); setGeneratedVideos([]); }
+  const handleNewErrorMsg = (newErrorMsg: string) => { setIsLoading(false); setGenerationErrorMsg(newErrorMsg); if (timeoutIdRef.current) { clearTimeout(timeoutIdRef.current); timeoutIdRef.current = null; } setPollingOperationName(null); setOperationMetadata(null); }
   const [isPromptReplayAvailable, setIsPromptReplayAvailable] = useState(true)
-  const handleImageGeneration = (newImages: ImageI[]) => { /* ... */ }
-  const handleVideoGenerationComplete = (newVideos: VideoI[]) => { /* ... */ }
-  const handleVideoPollingStart = (operationName: string, metadata: OperationMetadataI) => { /* ... */ }
-  useEffect(() => { /* ... (Video polling useEffect is unchanged) ... */ }, [pollingOperationName, operationMetadata, appContext])
+  const handleImageGeneration = (newImages: ImageI[]) => { setGeneratedImages(newImages); setIsLoading(false); setGeneratedVideos([]); setGenerationErrorMsg(''); }
+  const handleVideoGenerationComplete = (newVideos: VideoI[]) => { setGeneratedVideos(newVideos); setGeneratedImages([]); setGenerationErrorMsg(''); }
+  const handleVideoPollingStart = (operationName: string, metadata: OperationMetadataI) => { if (timeoutIdRef.current) { clearTimeout(timeoutIdRef.current); timeoutIdRef.current = null; } setPollingOperationName(operationName); setOperationMetadata(metadata); pollingAttemptsRef.current = 0; currentPollingIntervalRef.current = INITIAL_POLLING_INTERVAL_MS; }
+  useEffect(() => {
+    const stopPolling = (isSuccess: boolean, finalLoadingState = false) => { if (timeoutIdRef.current) { clearTimeout(timeoutIdRef.current); timeoutIdRef.current = null; } setIsLoading(finalLoadingState); }
+    const poll = async () => {
+      if (!pollingOperationName || !operationMetadata) { stopPolling(false, false); return; }
+      if (pollingAttemptsRef.current >= MAX_POLLING_ATTEMPTS) { handleNewErrorMsg(`Video generation timed out after ${MAX_POLLING_ATTEMPTS} attempts.`); return; }
+      pollingAttemptsRef.current++;
+      try {
+        const statusResult: VideoGenerationStatusResult = await getVideoGenerationStatus(pollingOperationName, appContext, operationMetadata.formData, operationMetadata.prompt);
+        if (!pollingOperationName) { stopPolling(false, false); return; }
+        if (statusResult.done) {
+          if (statusResult.error) { handleNewErrorMsg(statusResult.error); }
+          else if (statusResult.videos && statusResult.videos.length > 0) { handleVideoGenerationComplete(statusResult.videos); stopPolling(true, false); setPollingOperationName(null); setOperationMetadata(null); }
+          else { handleNewErrorMsg('Video generation finished, but no valid results were returned.'); }
+        } else {
+          const jitter = currentPollingIntervalRef.current * JITTER_FACTOR * (Math.random() - 0.5);
+          const nextInterval = Math.round(currentPollingIntervalRef.current + jitter);
+          timeoutIdRef.current = setTimeout(poll, nextInterval);
+          currentPollingIntervalRef.current = Math.min(currentPollingIntervalRef.current * BACKOFF_FACTOR, MAX_POLLING_INTERVAL_MS);
+        }
+      } catch (error: any) {
+        if (!pollingOperationName) { stopPolling(false, false); return; }
+        const errorMessage = error.message || 'An unexpected error occurred while checking the video status.';
+        handleNewErrorMsg(errorMessage);
+      }
+    }
+    if (pollingOperationName && !timeoutIdRef.current) { timeoutIdRef.current = setTimeout(poll, currentPollingIntervalRef.current); }
+    return () => { if (timeoutIdRef.current) { clearTimeout(timeoutIdRef.current); timeoutIdRef.current = null; } }
+  }, [pollingOperationName, operationMetadata, appContext]);
 
 
  if (appContext?.isLoading === true) {
