@@ -13,7 +13,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import {
   ArrowDownward as ArrowDownwardIcon, ArrowLeft, ArrowRight, Autorenew,
   Build as BuildIcon, Close as CloseIcon, Lightbulb, Mms,
-  Movie as MovieIcon, // [新增] 导入 Movie 图标
+  Movie as MovieIcon, // [新增] 导入 MovieIcon
   Send as SendIcon, WatchLater as WatchLaterIcon,
 } from '@mui/icons-material';
 
