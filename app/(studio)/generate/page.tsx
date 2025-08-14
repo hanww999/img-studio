@@ -53,14 +53,20 @@ export default function Page() {
  if (appContext && appContext.promptToGenerateImage) {
   setGenerationMode('Generate an Image')
   setInitialPrompt(appContext.promptToGenerateImage)
-    // FIX: Ensure we spread a valid object, not null
-  setAppContext((prev) => ({ ...(prev || appContextDataDefault), promptToGenerateImage: '' }))
+    // FINAL FIX: Use a safe update pattern that guarantees type correctness.
+  setAppContext((prev) => {
+      const baseState = prev || appContextDataDefault;
+      return { ...baseState, promptToGenerateImage: '' };
+    })
  }
  if (appContext && appContext.promptToGenerateVideo) {
   setGenerationMode('Generate a Video')
   setInitialPrompt(appContext.promptToGenerateVideo)
-    // FIX: Ensure we spread a valid object, not null
-  setAppContext((prev) => ({ ...(prev || appContextDataDefault), promptToGenerateVideo: '' }))
+    // FINAL FIX: Use a safe update pattern that guarantees type correctness.
+  setAppContext((prev) => {
+      const baseState = prev || appContextDataDefault;
+      return { ...baseState, promptToGenerateVideo: '' };
+    })
  }
  }, [appContext, setAppContext])
 
@@ -80,8 +86,11 @@ export default function Page() {
     ratio: getAspectRatio(img.width, img.height), width: img.width, height: img.height,
    }
    setInitialITVimage(initialITVimage as InterpolImageI)
-    // FIX: Ensure we spread a valid object, not null
-   setAppContext((prev) => ({ ...(prev || appContextDataDefault), imageToVideo: '' }))
+    // FINAL FIX: Use a safe update pattern that guarantees type correctness.
+   setAppContext((prev) => {
+        const baseState = prev || appContextDataDefault;
+        return { ...baseState, imageToVideo: '' };
+    })
    }
    img.onerror = () => { throw Error('Error loading image.') }
    img.src = newImage
