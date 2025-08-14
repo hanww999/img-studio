@@ -86,7 +86,6 @@ export default function VideoToPromptModal({
     setPrompt('');
 
     try {
-      // Step 1: Upload video to GCS via our API route
       const formData = new FormData();
       formData.append('file', videoFile);
 
@@ -105,7 +104,6 @@ export default function VideoToPromptModal({
         throw new Error('Server did not return a GCS URI.');
       }
 
-      // Step 2: Call Gemini with the GCS URI
       const geminiReturnedPrompt = await getPromptFromVideoFromGemini(gcsUri);
 
       if (typeof geminiReturnedPrompt === 'object' && 'error' in geminiReturnedPrompt) {
@@ -143,21 +141,34 @@ export default function VideoToPromptModal({
       open={open}
       onClose={onClose}
       TransitionComponent={Transition}
+      // 强制样式：白底、深色文字，并覆盖 DialogContent/Title 的默认 dark 样式
       PaperProps={{
         sx: {
           p: 1,
           maxWidth: '70%',
           width: '60%',
           borderRadius: 1,
-          // 强制浅色背景与深色文字，与 ImageToPromptModal 对齐
-          background: palette.background?.paper ?? 'white',
-          color: palette.text?.primary ?? 'black',
-          // 与 ImageToPromptModal 保持一致的布局属性（便于视觉对齐）
+          bgcolor: '#ffffff',           // 直接用白色，避免依赖全局 palette
+          color: '#000000',             // 直接用深色文本
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'flex-start',
           height: 'auto',
           minHeight: '63%',
+
+          // 下面针对内部 MUI 子组件做覆盖（保险）
+          '& .MuiDialogContent-root': {
+            bgcolor: '#ffffff',
+            color: '#000000',
+          },
+          '& .MuiDialogTitle-root': {
+            bgcolor: '#ffffff',
+            color: '#000000',
+          },
+          '& .MuiTextField-root': {
+            bgcolor: '#ffffff',
+            color: '#000000',
+          }
         }
       }}
     >
@@ -166,16 +177,23 @@ export default function VideoToPromptModal({
       </IconButton>
       <DialogContent sx={{ m: 1 }}>
         <DialogTitle sx={{ p: 0, pb: 3 }}>
-          <Typography sx={{ fontSize: '1.7rem', color: palette.text.primary, fontWeight: 400 }}>
+          <Typography sx={{ fontSize: '1.7rem', color: '#000000', fontWeight: 400 }}>
             Video-to-Prompt Generator
           </Typography>
         </DialogTitle>
         <Stack direction="row" spacing={2.5} sx={{ pt: 2, px: 1 }}>
           <VideoDropzone onVideoSelect={handleVideoSelect} onUploadError={setErrorMsg} />
           <Stack direction="column" spacing={2} justifyContent="space-between" sx={{ width: '100%' }}>
-            {videoFile && <Typography variant="body2" noWrap>Selected: {videoFile.name} ({(videoFile.size / 1024 / 1024).toFixed(2)} MB)</Typography>}
+            {videoFile && <Typography variant="body2" noWrap sx={{ color: '#333' }}>Selected: {videoFile.name} ({(videoFile.size / 1024 / 1024).toFixed(2)} MB)</Typography>}
             {isLoading && <LinearProgress sx={{ width: '98%' }} />}
-            <TextField label="Generated Veo Prompt" disabled value={isLoading ? 'Uploading and analyzing video...' : prompt} multiline rows={8} sx={{ width: '98%' }} />
+            <TextField
+              label="Generated Veo Prompt"
+              disabled
+              value={isLoading ? 'Uploading and analyzing video...' : prompt}
+              multiline
+              rows={8}
+              sx={{ width: '98%', '& .MuiInputBase-root': { bgcolor: '#fff', color: '#000' } }}
+            />
             {errorMsg && <Alert severity="error" sx={{ width: '98%' }}>{errorMsg}</Alert>}
             <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ width: '100%' }}>
               <Button onClick={handleGeneratePrompt} variant="contained" disabled={!videoFile || isLoading} endIcon={<Send />} sx={CustomizedSendButton}>
