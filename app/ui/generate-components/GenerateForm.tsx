@@ -34,6 +34,8 @@ import {
  Stack,
  Typography,
 } from '@mui/material'
+// FIX: Import ThemeProvider and createTheme to enforce a light theme inside the dialogs
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import {
  ArrowDownward as ArrowDownwardIcon,
  ArrowLeft,
@@ -91,6 +93,17 @@ import {
 import { generateVideo } from '../../api/veo/action'
 import { getOrientation, VideoInterpolBox } from './VideoInterpolBox'
 import { AudioSwitch } from '../ux-components/AudioButton'
+
+// FIX: Create a dedicated light theme instance for our dialogs
+const lightTheme = createTheme({
+  palette: {
+    mode: 'light',
+    background: {
+        paper: '#fff', // Ensure paper backgrounds like DialogContent are white
+    }
+  },
+});
+
 
 interface GenerateFormProps {
  generationType: 'Image' | 'Video';
@@ -422,29 +435,35 @@ export default function GenerateForm({
   </Box>
   </form>
 
+  {/* Video Prompt Builder Dialog */}
   <Dialog open={promptBuilderOpen} onClose={() => handlePromptBuilderClose()} fullWidth={true} maxWidth="xl">
-    <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
-      Video / Prompt Builder
-      <IconButton aria-label="close" onClick={() => handlePromptBuilderClose()} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
-        <CloseIcon />
-      </IconButton>
-    </DialogTitle>
-    <DialogContent dividers>
-        <PromptBuilder onApply={handlePromptBuilderClose} />
-    </DialogContent>
+    <ThemeProvider theme={lightTheme}>
+        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+          Video / Prompt Builder
+          <IconButton aria-label="close" onClick={() => handlePromptBuilderClose()} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+            <PromptBuilder onApply={handlePromptBuilderClose} />
+        </DialogContent>
+    </ThemeProvider>
   </Dialog>
 
+  {/* Imagen Prompt Builder Dialog */}
   <Dialog open={imagenPromptBuilderOpen} onClose={() => handleImagenPromptBuilderClose()} fullWidth={true} maxWidth="xl">
-    <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
-      Imagen / Prompt Builder
-      <IconButton aria-label="close" onClick={() => handleImagenPromptBuilderClose()} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
-        <CloseIcon />
-      </IconButton>
-    </DialogTitle>
-    {/* FIX: The style is applied directly to the DialogContent component */}
-    <DialogContent dividers sx={{ backgroundColor: '#fff' }}>
-        <ImagenPromptBuilder onApply={handleImagenPromptBuilderClose} />
-    </DialogContent>
+    {/* FIX: The ThemeProvider wrapper is the key to fixing the color issue */}
+    <ThemeProvider theme={lightTheme}>
+        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+          Imagen / Prompt Builder
+          <IconButton aria-label="close" onClick={() => handleImagenPromptBuilderClose()} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+            <ImagenPromptBuilder onApply={handleImagenPromptBuilderClose} />
+        </DialogContent>
+    </ThemeProvider>
   </Dialog>
 
   <ImageToPromptModal open={imageToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setImageToPromptOpen={setImageToPromptOpen} target={generationType} />
