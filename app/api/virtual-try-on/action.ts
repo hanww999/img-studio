@@ -3,12 +3,23 @@
 'use server';
 
 import { GoogleAuth } from 'google-auth-library';
-// [新增] 导入 GaxiosOptions 类型以解决类型错误
 import { GaxiosOptions } from 'gaxios';
 
 import { appContextDataI } from '../../context/app-context';
 import { VirtualTryOnFormI } from '../virtual-try-on-utils';
 import { ImageI } from '../generate-image-utils';
+
+// [新增] 定义 API 响应的类型接口
+interface Prediction {
+  bytesBase64Encoded?: string;
+  mimeType?: string;
+  // 可以添加其他可能的预测字段
+}
+
+interface PredictionResponse {
+  predictions: Prediction[];
+  // 可以添加其他可能的响应字段
+}
 
 function generateUniqueFolderId() {
   let number = Math.floor(Math.random() * 9) + 1;
@@ -63,7 +74,6 @@ export const generateVtoImage = async (
     },
   };
 
-  // [修改] 为 opts 对象明确指定类型
   const opts: GaxiosOptions = {
     url: apiUrl,
     method: 'POST',
@@ -73,36 +83,44 @@ export const generateVtoImage = async (
   try {
     const res = await client.request(opts);
 
-    if (!res.data.predictions || res.data.predictions.length === 0) {
-      throw new Error('API returned no predictions.');
+    // [修改] 增加类型守卫来安全地处理 'unknown' 类型
+    if (typeof res.data === 'object' && res.data !== null && 'predictions' in res.data) {
+      const responseData = res.data as PredictionResponse;
+
+      if (!responseData.predictions || responseData.predictions.length === 0) {
+        throw new Error('API returned no predictions.');
+      }
+
+      const predictionResult = responseData.predictions[0];
+
+      if (!predictionResult || !predictionResult.bytesBase64Encoded) {
+        throw new Error('Invalid prediction format received from API.');
+      }
+
+      const generatedImageBase64 = predictionResult.bytesBase64Encoded;
+      const mimeType = predictionResult.mimeType || formData.outputFormat;
+
+      const resultImage: ImageI = {
+        src: `data:${mimeType};base64,${generatedImageBase64}`,
+        gcsUri: storageUri,
+        ratio: '',
+        width: 0,
+        height: 0,
+        altText: 'Generated try-on image',
+        key: uniqueId,
+        format: mimeType,
+        prompt: `Try-on with model version: ${formData.modelVersion}`,
+        date: new Date().toISOString(),
+        author: appContext.userID,
+        modelVersion: formData.modelVersion,
+        mode: 'try-on',
+      };
+
+      return resultImage;
+    } else {
+      // 如果 res.data 的结构不符合预期，也抛出错误
+      throw new Error('Unexpected API response structure.');
     }
-
-    const predictionResult = res.data.predictions[0];
-
-    if (!predictionResult || typeof predictionResult !== 'object' || !('bytesBase64Encoded' in predictionResult)) {
-      throw new Error('Invalid prediction format received from API.');
-    }
-
-    const generatedImageBase64 = predictionResult.bytesBase64Encoded as string;
-    const mimeType = (predictionResult.mimeType as string) || formData.outputFormat;
-
-    const resultImage: ImageI = {
-      src: `data:${mimeType};base64,${generatedImageBase64}`,
-      gcsUri: storageUri,
-      ratio: '',
-      width: 0,
-      height: 0,
-      altText: 'Generated try-on image',
-      key: uniqueId,
-      format: mimeType,
-      prompt: `Try-on with model version: ${formData.modelVersion}`,
-      date: new Date().toISOString(),
-      author: appContext.userID,
-      modelVersion: formData.modelVersion,
-      mode: 'try-on',
-    };
-
-    return resultImage;
 
   } catch (error: any) {
     console.error('Error calling Virtual Try-On API:', error);
