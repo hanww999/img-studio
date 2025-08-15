@@ -1,12 +1,20 @@
+// app/api/virtual-try-on/action.ts
+
 'use server';
 
 import { GoogleAuth } from 'google-auth-library';
 import { v1 } from '@google-cloud/aiplatform';
-import { v4 as uuidv4 } from 'uuid';
 
 import { AppContextI } from '../../context/app-context';
 import { VirtualTryOnFormI } from '../virtual-try-on-utils';
 import { ImageI } from '../generate-image-utils';
+
+// [新增] 从您的 imagen/action.ts 中复制过来的函数，以保持一致性
+function generateUniqueFolderId() {
+  let number = Math.floor(Math.random() * 9) + 1;
+  for (let i = 0; i < 12; i++) number = number * 10 + Math.floor(Math.random() * 10);
+  return number.toString();
+}
 
 export const generateVtoImage = async (
   formData: VirtualTryOnFormI,
@@ -34,7 +42,8 @@ export const generateVtoImage = async (
     },
   ];
 
-  const uniqueId = uuidv4();
+  // [修改] 使用您现有的函数来生成唯一 ID
+  const uniqueId = generateUniqueFolderId();
   const outputFileName = `${uniqueId}.png`;
   const storageUri = `gs://${appContext.user.gcsBucket}/vto-generations/${outputFileName}`;
 
