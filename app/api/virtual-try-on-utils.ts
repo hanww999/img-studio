@@ -47,7 +47,7 @@ const virtualTryOnFormFields: {
   ],
  },
   safetySetting: { // <-- 必须有这个对象 (对象值)
-    label: 'Safety Filter',
+    label: 'Safety',
     default: 'block_only_high',
     options: [
       { value: 'block_low_and_above', label: 'Strongest' },
@@ -57,7 +57,7 @@ const virtualTryOnFormFields: {
     ],
   },
  outputFormat: {
-  label: 'Output format', // <-- 同时修复了标签过长的问题
+  label: 'Format', // <-- 同时修复了标签过长的问题
   default: 'image/png',
   options: [
    { value: 'image/png', label: 'PNG' },
