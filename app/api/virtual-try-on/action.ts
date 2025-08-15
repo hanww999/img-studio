@@ -3,124 +3,119 @@
 'use server';
 
 import { GoogleAuth } from 'google-auth-library';
-import { GaxiosOptions } from 'gaxios';
+import { v1 } from '@google-cloud/aiplatform';
+import { v4 as uuidv4 } from 'uuid';
 
-import { appContextDataI } from '../../context/app-context';
+// [修改] 导入 downloadMediaFromGcs 和 AppContextI
+import { AppContextI } from '../../context/app-context';
+import { downloadMediaFromGcs } from '../cloud-storage/action';
 import { VirtualTryOnFormI } from '../virtual-try-on-utils';
 import { ImageI } from '../generate-image-utils';
 
-interface Prediction {
-  bytesBase64Encoded?: string;
-  mimeType?: string;
-}
-
-interface PredictionResponse {
-  predictions: Prediction[];
-}
-
-function generateUniqueFolderId() {
-  let number = Math.floor(Math.random() * 9) + 1;
-  for (let i = 0; i < 12; i++) number = number * 10 + Math.floor(Math.random() * 10);
-  return number.toString();
-}
-
 export const generateVtoImage = async (
   formData: VirtualTryOnFormI,
-  appContext: appContextDataI
+  appContext: AppContextI
 ): Promise<ImageI | { error: string }> => {
-  if (!appContext.gcsURI) {
-    return { error: 'User GCS URI is not configured in the application context.' };
+  if (!appContext.user.gcsBucket) {
+    return { error: 'User GCS bucket is not configured in the application context.' };
   }
 
-  let client;
-  try {
-    const auth = new GoogleAuth({
-      scopes: 'https://www.googleapis.com/auth/cloud-platform',
-    });
-    client = await auth.getClient();
-  } catch (error) {
-    console.error(error);
-    return { error: 'Unable to authenticate your account.' };
-  }
+  const auth = new GoogleAuth({
+    scopes: 'https://www.googleapis.com/auth/cloud-platform',
+  });
+  const clientOptions = {
+    auth: auth,
+    apiEndpoint: `${appContext.location}-aiplatform.googleapis.com`,
+  };
+  const predictionServiceClient = new v1.PredictionServiceClient(clientOptions);
 
-  const location = process.env.NEXT_PUBLIC_VERTEX_API_LOCATION || 'us-central1';
-  const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
-  const modelVersion = formData.modelVersion;
-  const apiUrl = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelVersion}:predict`;
-
-  const uniqueId = generateUniqueFolderId();
-  const outputFileName = `${uniqueId}.png`;
-  const bucketName = appContext.gcsURI.replace('gs://', '');
-  const storageUri = `gs://${bucketName}/vto-generations/${outputFileName}`;
-
-  const reqData = {
-    instances: [
-      {
-        personImage: { image: { bytesBase64Encoded: formData.humanImage.base64Image } },
-        productImages: formData.garmentImages.map(img => ({
-          image: { bytesBase64Encoded: img.base64Image },
-        })),
-      },
-    ],
-    parameters: {
-      sampleCount: parseInt(formData.sampleCount, 10),
-      personGeneration: formData.personGeneration,
-      outputOptions: { mimeType: formData.outputFormat },
-      storageUri: storageUri,
-      ...(formData.seedNumber && { seed: parseInt(formData.seedNumber, 10) }),
+  const instances = [
+    {
+      personImage: { image: { bytesBase64Encoded: formData.humanImage.base64Image } },
+      productImages: formData.garmentImages.map(img => ({
+        image: { bytesBase64Encoded: img.base64Image },
+      })),
     },
+  ];
+
+  const uniqueId = uuidv4();
+  const outputFileName = `${uniqueId}.png`;
+  const storageUri = `gs://${appContext.user.gcsBucket}/vto-generations/${outputFileName}`;
+
+  const parameters: { [key: string]: any } = {
+    sampleCount: parseInt(formData.sampleCount, 10),
+    personGeneration: formData.personGeneration,
+    outputOptions: { mimeType: formData.outputFormat },
+    storageUri: storageUri,
   };
 
-  const opts: GaxiosOptions = {
-    url: apiUrl,
-    method: 'POST',
-    data: reqData,
+  if (formData.seedNumber) {
+    parameters.seed = parseInt(formData.seedNumber, 10);
+  }
+
+  const request = {
+    endpoint: `projects/${appContext.project_id}/locations/${appContext.location}/publishers/google/models/${formData.modelVersion}`,
+    instances: instances.map(instance => v1.helpers.toValue(instance)),
+    parameters: v1.helpers.toValue(parameters),
   };
 
   try {
-    const res = await client.request(opts);
+    const [response] = await predictionServiceClient.predict(request);
 
-    if (typeof res.data === 'object' && res.data !== null && 'predictions' in res.data) {
-      const responseData = res.data as PredictionResponse;
-
-      if (!responseData.predictions || responseData.predictions.length === 0) {
-        throw new Error('API returned no predictions.');
-      }
-
-      const predictionResult = responseData.predictions[0];
-
-      if (!predictionResult || !predictionResult.bytesBase64Encoded) {
-        throw new Error('Invalid prediction format received from API.');
-      }
-
-      const generatedImageBase64 = predictionResult.bytesBase64Encoded;
-      const mimeType = predictionResult.mimeType || formData.outputFormat;
-
-      const resultImage: ImageI = {
-        src: `data:${mimeType};base64,${generatedImageBase64}`,
-        gcsUri: storageUri,
-        ratio: '',
-        width: 0,
-        height: 0,
-        altText: 'Generated try-on image',
-        key: uniqueId,
-        format: mimeType,
-        prompt: `Try-on with model version: ${formData.modelVersion}`,
-        date: new Date().toISOString(),
-        // [修改] 为 appContext.userID 提供一个备用值，以防它是 undefined
-        author: appContext.userID || 'Unknown User',
-        modelVersion: formData.modelVersion,
-        mode: 'try-on',
-      };
-
-      return resultImage;
-    } else {
-      throw new Error('Unexpected API response structure.');
+    if (!response.predictions || response.predictions.length === 0) {
+      throw new Error('API returned no predictions.');
     }
+
+    const predictionResult = v1.helpers.fromValue(response.predictions[0] as any);
+
+    if (!predictionResult || typeof predictionResult !== 'object') {
+      throw new Error('Invalid prediction format: result is not an object.');
+    }
+
+    // [最终修正] 检查 API 是否在响应中返回了错误
+    if ('error' in predictionResult && predictionResult.error) {
+      const apiError = predictionResult.error as { message?: string };
+      throw new Error(`API returned an error: ${apiError.message || 'Unknown error'}`);
+    }
+
+    let generatedImageBase64: string;
+    const mimeType = (predictionResult.mimeType as string) || formData.outputFormat;
+
+    // [最终修正] 检查 API 是否直接返回了 base64 数据
+    if ('bytesBase64Encoded' in predictionResult && predictionResult.bytesBase64Encoded) {
+      generatedImageBase64 = predictionResult.bytesBase64Encoded as string;
+    } else {
+      // 如果没有，就从我们指定的 GCS 路径下载刚刚生成的文件
+      console.log(`Bytes not found in API response, attempting to download from GCS path: ${storageUri}`);
+      const downloadResult = await downloadMediaFromGcs(storageUri);
+      if (downloadResult.error) {
+        throw new Error(`Failed to download generated image from GCS: ${downloadResult.error}`);
+      }
+      generatedImageBase64 = downloadResult.data;
+    }
+
+    const resultImage: ImageI = {
+      src: `data:${mimeType};base64,${generatedImageBase64}`,
+      gcsUri: storageUri,
+      ratio: '',
+      width: 0,
+      height: 0,
+      altText: 'Generated try-on image',
+      key: uniqueId,
+      format: mimeType,
+      prompt: `Try-on with model version: ${formData.modelVersion}`,
+      date: new Date().toISOString(),
+      author: appContext.user.email,
+      modelVersion: formData.modelVersion,
+      mode: 'try-on',
+    };
+
+    return resultImage;
 
   } catch (error: any) {
     console.error('Error calling Virtual Try-On API:', error);
-    const errorMessage = error.response?.data?.error?.message || error.message || 'An unknown error occurred.';
-    return { error: errorMessage };
+    return {
+      error: error.message || 'An unknown error occurred while generating the image.',
+    };
   }
 };
