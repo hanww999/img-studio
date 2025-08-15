@@ -18,9 +18,9 @@ export const generateVtoImage = async (
   formData: VirtualTryOnFormI,
   appContext: appContextDataI
 ): Promise<ImageI | { error: string }> => {
-  // [修改] 直接从 appContext 访问 gcsBucket
-  if (!appContext.gcsBucket) {
-    return { error: 'User GCS bucket is not configured in the application context.' };
+  // [修改] 将 gcsBucket 修正为 gcsURI，与您现有代码保持一致
+  if (!appContext.gcsURI) {
+    return { error: 'User GCS URI is not configured in the application context.' };
   }
 
   let client;
@@ -41,8 +41,9 @@ export const generateVtoImage = async (
 
   const uniqueId = generateUniqueFolderId();
   const outputFileName = `${uniqueId}.png`;
-  // [修改] 直接从 appContext 访问 gcsBucket
-  const storageUri = `gs://${appContext.gcsBucket}/vto-generations/${outputFileName}`;
+  // [修改] 从 gcsURI 中提取 bucket 名称
+  const bucketName = appContext.gcsURI.replace('gs://', '');
+  const storageUri = `gs://${bucketName}/vto-generations/${outputFileName}`;
 
   const reqData = {
     instances: [
@@ -95,7 +96,6 @@ export const generateVtoImage = async (
       format: mimeType,
       prompt: `Try-on with model version: ${formData.modelVersion}`,
       date: new Date().toISOString(),
-      // [修改] 使用 userID 字段，与您的 imagen 代码保持一致
       author: appContext.userID,
       modelVersion: formData.modelVersion,
       mode: 'try-on',
