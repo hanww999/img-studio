@@ -571,3 +571,15 @@ export const ImageRandomPrompts = [
   'A deer running in the forest, fast shutter speed, movement tracking',
   'A photo of the moon, astro photography, wide angle 10mm',
 ]
+
+// [新增] 为 Imagen 4 Ultra 定义特定的设置
+export const imagenUltraSpecificSettings = {
+  sampleCount: {
+    label: 'Quantity of outputs',
+    type: 'chip-group',
+    default: '1',
+    options: ['1'], // 仅允许选项 '1'
+    isDataResetable: false,
+    isFullPromptAdditionalField: false,
+  },
+}
