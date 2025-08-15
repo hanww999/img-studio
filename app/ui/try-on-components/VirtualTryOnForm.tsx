@@ -100,10 +100,11 @@ export default function VirtualTryOnForm({
                 width="100%"
                 required={false}
               />
-              {/* [修改] 遵循 FormInputDropdown 的规则，使用 field 和 styleSize 属性 */}
+              {/* [修改] 同时提供 label 和 field 属性 */}
               <FormInputDropdown
                 name="personGeneration"
                 control={control}
+                label={generationFields.fields.personGeneration.label}
                 field={generationFields.fields.personGeneration}
                 styleSize="small"
                 width="100%"
@@ -112,6 +113,7 @@ export default function VirtualTryOnForm({
               <FormInputDropdown
                 name="outputFormat"
                 control={control}
+                label={generationFields.fields.outputFormat.label}
                 field={generationFields.fields.outputFormat}
                 styleSize="small"
                 width="100%"
