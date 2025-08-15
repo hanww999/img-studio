@@ -1,7 +1,9 @@
+// app/(studio)/try-on/page.tsx
+
 'use client';
 
 import { useState } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography, CircularProgress } from '@mui/material'; // [修改] 导入 CircularProgress
 
 import VirtualTryOnForm from '../../ui/try-on-components/VirtualTryOnForm';
 import TryOnResultDisplay from '../../ui/try-on-components/TryOnResultDisplay';
@@ -39,14 +41,21 @@ export default function TryOnPage() {
       </Typography>
       <Stack direction="row" spacing={4} sx={{ flex: 1, height: 'calc(100% - 48px)' }}>
         <Box sx={{ width: '40%', minWidth: '450px', height: '100%', overflowY: 'auto', pr: 2 }}>
-          <VirtualTryOnForm
-            isLoading={isLoading}
-            errorMsg={errorMsg}
-            generationFields={virtualTryOnFields}
-            onRequestSent={handleRequestSent}
-            onNewErrorMsg={handleNewErrorMsg}
-            onImageGeneration={handleImageGeneration}
-          />
+          {/* [最终修正] 添加一个防御性检查，确保 virtualTryOnFields 已加载 */}
+          {virtualTryOnFields ? (
+            <VirtualTryOnForm
+              isLoading={isLoading}
+              errorMsg={errorMsg}
+              generationFields={virtualTryOnFields}
+              onRequestSent={handleRequestSent}
+              onNewErrorMsg={handleNewErrorMsg}
+              onImageGeneration={handleImageGeneration}
+            />
+          ) : (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <CircularProgress />
+            </Box>
+          )}
         </Box>
         <Box sx={{ flex: 1, height: '100%' }}>
           <TryOnResultDisplay
