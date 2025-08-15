@@ -188,13 +188,18 @@ export default function GenerateForm({
   }, [currentModel, setValue]);
 
   useEffect(() => {
-    if (!isAdvancedFeaturesAvailable) {
-      setValue('cameraPreset', '');
-      setValue('interpolImageLast', { ...InterpolImageDefaults, purpose: 'last' });
-      if (!isOnlyITVavailable) setValue('interpolImageFirst', { ...InterpolImageDefaults, purpose: 'first' });
-    }
-    if (currentModel.includes('veo-2.0')) setValue('resolution', '720p');
-  }, [currentModel, isAdvancedFeaturesAvailable, isOnlyITVavailable, setValue]);
+  if (!isAdvancedFeaturesAvailable) {
+   setValue('cameraPreset', '');
+   setValue('interpolImageLast', { ...InterpolImageDefaults, purpose: 'last' });
+   if (!isOnlyITVavailable) setValue('interpolImageFirst', { ...InterpolImageDefaults, purpose: 'first' });
+  }
+   // [MODIFIED] Set resolution based on the selected model
+  if (currentModel.includes('veo-2.0')) {
+    setValue('resolution', '720p');
+  } else if (currentModel.includes('veo-3.0')) {
+    setValue('resolution', '1080p');
+  }
+ }, [currentModel, isAdvancedFeaturesAvailable, isOnlyITVavailable, setValue]);
 
   interface ModelOption { value: string; label: string; indication?: string; type?: string }
   function manageModelNotFoundError(errorMessage: string, modelOptions: ModelOption[]): string {
