@@ -1,3 +1,4 @@
+// app/api/virtual-try-on/action.ts
 
 'use server';
 
@@ -29,7 +30,6 @@ export const generateVtoImage = async (
   formData: VirtualTryOnFormI,
   appContext: appContextDataI
 ): Promise<ImageI | { error: string }> => {
-  // [最终修正] 遵循 imagen/action.ts 的模式，检查 appContext.gcsURI
   if (!appContext?.gcsURI) {
     return { error: 'User GCS URI is not configured in the application context.' };
   }
@@ -45,7 +45,6 @@ export const generateVtoImage = async (
     return { error: 'Unable to authenticate your account.' };
   }
 
-  // [最终修正] 从环境变量中获取 location 和 project_id，这才是您项目中的正确模式
   const location = process.env.NEXT_PUBLIC_VERTEX_API_LOCATION || 'us-central1';
   const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
   
@@ -58,7 +57,6 @@ export const generateVtoImage = async (
 
   const uniqueId = generateUniqueFolderId();
   const outputFileName = `${uniqueId}.png`;
-  // [最终修正] 使用 appContext.gcsURI 来构建存储路径
   const bucketName = appContext.gcsURI.replace('gs://', '');
   const storageUri = `gs://${bucketName}/vto-generations/${outputFileName}`;
 
@@ -113,9 +111,16 @@ export const generateVtoImage = async (
     } else {
       console.log(`Bytes not found in API response, attempting to download from GCS path: ${storageUri}`);
       const downloadResult = await downloadMediaFromGcs(storageUri);
+      
       if (downloadResult.error) {
         throw new Error(`Failed to download generated image from GCS: ${downloadResult.error}`);
       }
+      
+      // [最终修正] 添加一个绝对必要的检查，以确保 data 存在
+      if (!downloadResult.data) {
+        throw new Error(`Image data is missing after successful download from GCS.`);
+      }
+
       generatedImageBase64 = downloadResult.data;
     }
 
@@ -130,7 +135,6 @@ export const generateVtoImage = async (
       format: mimeType,
       prompt: `Try-on with model version: ${formData.modelVersion}`,
       date: new Date().toISOString(),
-      // [最终修正] 使用 appContext.userID 作为 author
       author: appContext.userID || 'Unknown User',
       modelVersion: formData.modelVersion,
       mode: 'try-on',
