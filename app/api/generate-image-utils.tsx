@@ -104,8 +104,8 @@ export const GenerateImageFormFields = {
   sampleCount: {
     label: 'Quantity of outputs',
     type: 'chip-group',
-    default: '4',
-    options: ['1', '2', '3', '4'],
+    default: '2',
+    options: ['1', '2'],
     isDataResetable: false,
     isFullPromptAdditionalField: false,
   },
