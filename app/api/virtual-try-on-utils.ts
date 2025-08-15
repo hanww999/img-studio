@@ -57,7 +57,7 @@ const virtualTryOnFormFields: {
     ],
   },
  outputFormat: {
-  label: 'Output format', // <-- 同时修复了标签过长的问题
+  label: 'Format', // <-- 同时修复了标签过长的问题
   default: 'image/png',
   options: [
    { value: 'image/png', label: 'PNG' },
