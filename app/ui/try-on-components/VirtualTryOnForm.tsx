@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -41,6 +42,12 @@ export default function VirtualTryOnForm({
   };
 
   const onSubmit: SubmitHandler<VirtualTryOnFormI> = async (formData) => {
+    // [修改] 增加对 appContext 的前置检查
+    if (!appContext) {
+      onNewErrorMsg("Application context is not available. Please try refreshing the page.");
+      return;
+    }
+
     if (!formData.humanImage.base64Image) {
       onNewErrorMsg('Please upload a human model image.');
       return;
@@ -52,6 +59,7 @@ export default function VirtualTryOnForm({
 
     onRequestSent(true);
     try {
+      // 在这里，TypeScript 知道 appContext 不再是 null
       const result = await generateVtoImage(formData, appContext);
       if ('error' in result) {
         throw new Error(result.error);
