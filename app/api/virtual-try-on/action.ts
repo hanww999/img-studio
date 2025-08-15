@@ -4,7 +4,6 @@
 
 import { GoogleAuth } from 'google-auth-library';
 
-// [修改] 将 AppContextI 替换为 appContextDataI
 import { appContextDataI } from '../../context/app-context';
 import { VirtualTryOnFormI } from '../virtual-try-on-utils';
 import { ImageI } from '../generate-image-utils';
@@ -17,10 +16,10 @@ function generateUniqueFolderId() {
 
 export const generateVtoImage = async (
   formData: VirtualTryOnFormI,
-  // [修改] 将 AppContextI 替换为 appContextDataI
   appContext: appContextDataI
 ): Promise<ImageI | { error: string }> => {
-  if (!appContext.user.gcsBucket) {
+  // [修改] 直接从 appContext 访问 gcsBucket
+  if (!appContext.gcsBucket) {
     return { error: 'User GCS bucket is not configured in the application context.' };
   }
 
@@ -42,7 +41,8 @@ export const generateVtoImage = async (
 
   const uniqueId = generateUniqueFolderId();
   const outputFileName = `${uniqueId}.png`;
-  const storageUri = `gs://${appContext.user.gcsBucket}/vto-generations/${outputFileName}`;
+  // [修改] 直接从 appContext 访问 gcsBucket
+  const storageUri = `gs://${appContext.gcsBucket}/vto-generations/${outputFileName}`;
 
   const reqData = {
     instances: [
@@ -95,7 +95,8 @@ export const generateVtoImage = async (
       format: mimeType,
       prompt: `Try-on with model version: ${formData.modelVersion}`,
       date: new Date().toISOString(),
-      author: appContext.user.email,
+      // [修改] 使用 userID 字段，与您的 imagen 代码保持一致
+      author: appContext.userID,
       modelVersion: formData.modelVersion,
       mode: 'try-on',
     };
