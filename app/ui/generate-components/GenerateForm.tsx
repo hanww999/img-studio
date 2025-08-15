@@ -13,7 +13,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import {
   ArrowDownward as ArrowDownwardIcon, ArrowLeft, ArrowRight, Autorenew,
   Build as BuildIcon, Close as CloseIcon, Lightbulb, Mms,
-  Movie as MovieIcon, // [新增] 导入 MovieIcon
+  Movie as MovieIcon,
   Send as SendIcon, WatchLater as WatchLaterIcon,
 } from '@mui/icons-material';
 
@@ -27,7 +27,7 @@ import CustomTooltip from '../ux-components/Tooltip';
 
 import GenerateSettings from './GenerateSettings';
 import ImageToPromptModal from './ImageToPromptModal';
-import VideoToPromptModal from './VideoToPromptModal'; // [新增] 导入新组件
+import VideoToPromptModal from './VideoToPromptModal';
 import { ReferenceBox } from './ReferenceBox';
 import PromptBuilder from './PromptBuilder';
 import ImagenPromptBuilder from './ImagenPromptBuilder';
@@ -40,6 +40,7 @@ import { generateImage } from '../../api/imagen/action';
 import {
   chipGroupFieldsI, GenerateImageFormFields, GenerateImageFormI, ImageGenerationFieldsI,
   ImageI, maxReferences, ReferenceObjectDefaults, ReferenceObjectInit, selectFieldsI,
+  imagenUltraSpecificSettings, // [修改] 导入新的配置对象
 } from '../../api/generate-image-utils';
 import { EditImageFormFields } from '../../api/edit-utils';
 import {
@@ -178,6 +179,14 @@ export default function GenerateForm({
   const isAudioAvailable = currentModel.includes('veo-3.0');
   const isOnlyITVavailable = currentModel.includes('veo-3.0') && !currentModel.includes('fast') && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true';
   const isAdvancedFeaturesAvailable = currentModel.includes('veo-2.0') && process.env.NEXT_PUBLIC_VEO_ADVANCED_ENABLED === 'true';
+
+  // [修改] 当模型切换到 Imagen Ultra 时，自动将输出数量设置为 1
+  useEffect(() => {
+    if (currentModel === 'imagen-4.0-ultra-generate-001') {
+      setValue('sampleCount', '1');
+    }
+  }, [currentModel, setValue]);
+
   useEffect(() => {
     if (!isAdvancedFeaturesAvailable) {
       setValue('cameraPreset', '');
@@ -201,7 +210,7 @@ export default function GenerateForm({
   }
 
   const [imageToPromptOpen, setImageToPromptOpen] = useState(false);
-  const [videoToPromptOpen, setVideoToPromptOpen] = useState(false); // [新增]
+  const [videoToPromptOpen, setVideoToPromptOpen] = useState(false);
   const getRandomPrompt = () => randomPrompts[Math.floor(Math.random() * randomPrompts.length)];
 
   useEffect(() => { if (initialPrompt) setValue('prompt', initialPrompt) }, [initialPrompt, setValue]);
@@ -273,7 +282,6 @@ export default function GenerateForm({
           )}
           <FormInputText name="prompt" control={control} label={`${optionalVeoPrompt ? '(Optional)' : ''} Prompt - What would you like to generate?`} required={!optionalVeoPrompt} rows={7} promptIndication={`${promptIndication}${isAudioAvailable ? ', audio (dialogue/ sound effects/ music/ ambiant sounds)' : ''}`} />
           <Stack justifyContent="flex-end" direction="row" gap={0} pb={3}>
-            {/* [新增] Video-to-Prompt 按钮，仅在视频模式下显示 */}
             {generationType === 'Video' && (
               <CustomTooltip title="Video to prompt generator" size="small">
                 <IconButton onClick={() => setVideoToPromptOpen(true)} aria-label="Video Prompt Generator" disableRipple sx={{ px: 0.5 }}>
@@ -284,7 +292,20 @@ export default function GenerateForm({
             <CustomTooltip title="Image to prompt generator" size="small"><IconButton onClick={() => setImageToPromptOpen(true)} aria-label="Prompt Generator" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Mms sx={CustomizedIconButton} /></Avatar></IconButton></CustomTooltip>
             <CustomTooltip title="Get prompt ideas" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())} aria-label="Random prompt" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Lightbulb sx={CustomizedIconButton} /></Avatar></IconButton></CustomTooltip>
             <CustomTooltip title="Reset all fields" size="small"><IconButton disabled={isLoading} onClick={() => onReset()} aria-label="Reset form" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Autorenew sx={CustomizedIconButton} /></Avatar></IconButton></CustomTooltip>
-            <GenerateSettings control={control} setValue={setValue} generalSettingsFields={currentModel.includes('veo-3.0') ? tempVeo3specificSettings : generationFields.settings} advancedSettingsFields={generationFields.advancedSettings} warningMessage={currentModel.includes('veo-3.0') ? 'NB: for now, Veo 3 has fewer setting options than Veo 2!' : ''} />
+            {/* [修改] 动态修改 GenerateSettings 的 props */}
+            <GenerateSettings
+              control={control}
+              setValue={setValue}
+              generalSettingsFields={
+                currentModel === 'imagen-4.0-ultra-generate-001'
+                  ? { ...generationFields.settings, ...imagenUltraSpecificSettings }
+                  : currentModel.includes('veo-3.0')
+                  ? tempVeo3specificSettings
+                  : generationFields.settings
+              }
+              advancedSettingsFields={generationFields.advancedSettings}
+              warningMessage={currentModel.includes('veo-3.0') ? 'NB: for now, Veo 3 has fewer setting options than Veo 2!' : ''}
+            />
             {isAudioAvailable && (<CustomTooltip title="Add audio to your video" size="small"><AudioSwitch checked={isVideoWithAudio} onChange={handleVideoAudioCheck} /></CustomTooltip>)}
             {currentModel.includes('imagen') && !hasReferences && (<CustomTooltip title="Have Gemini enhance your prompt" size="small"><GeminiSwitch checked={isGeminiRewrite} onChange={handleGeminiRewrite} /></CustomTooltip>)}
             <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>{'Generate'}</Button>
@@ -390,7 +411,6 @@ export default function GenerateForm({
 
       <ImageToPromptModal open={imageToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setImageToPromptOpen={setImageToPromptOpen} target={generationType} />
       
-      {/* [新增] */}
       <VideoToPromptModal open={videoToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setVideoToPromptOpen={setVideoToPromptOpen} />
     </>
   );
