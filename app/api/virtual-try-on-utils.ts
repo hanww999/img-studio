@@ -2,7 +2,6 @@
 
 'use server';
 
-// [修改] 导入您项目中已有的、经过验证的类型接口
 import { chipGroupFieldsI, selectFieldsI } from './generate-image-utils';
 
 export interface VtoImageObjectI {
@@ -23,7 +22,6 @@ export interface VirtualTryOnFormI {
   modelVersion: string;
 }
 
-// [修改] 为所有字段提供精确的类型，确保与 UI 组件的 props 匹配
 const virtualTryOnFormFields: {
   sampleCount: chipGroupFieldsI;
   personGeneration: selectFieldsI;
@@ -35,7 +33,6 @@ const virtualTryOnFormFields: {
     label: 'Quantity of outputs',
     default: '1',
     options: ['1', '2', '3', '4'],
-    // [删除] 移除了不符合 chipGroupFieldsI 类型的 'type' 属性
   },
   personGeneration: {
     label: 'People generation',
@@ -78,7 +75,8 @@ export const VtoImageDefaults: VtoImageObjectI = {
 const formDataDefaults: VirtualTryOnFormI = {
   humanImage: { ...VtoImageDefaults, key: 'human' },
   garmentImages: [{ ...VtoImageDefaults, key: Math.random().toString(36).substring(2, 15) }],
-  sampleCount: virtualTryOnFormFields.sampleCount.default ?? '1',
+  // [修改] 使用 String() 确保类型为字符串，解决类型不匹配问题
+  sampleCount: String(virtualTryOnFormFields.sampleCount.default ?? '1'),
   personGeneration: virtualTryOnFormFields.personGeneration.default ?? 'allow_adult',
   seedNumber: virtualTryOnFormFields.seedNumber.default ?? '',
   outputFormat: virtualTryOnFormFields.outputFormat.default ?? 'image/png',
