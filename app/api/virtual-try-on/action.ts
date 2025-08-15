@@ -19,6 +19,7 @@ function generateUniqueFolderId() {
 interface Prediction {
   bytesBase64Encoded?: string;
   mimeType?: string;
+  gcsUri?: string; // [新增] 明确定义 gcsUri 字段
   error?: { message?: string };
 }
 
@@ -56,9 +57,8 @@ export const generateVtoImage = async (
   const apiUrl = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelVersion}:predict`;
 
   const uniqueId = generateUniqueFolderId();
-  const outputFileName = `${uniqueId}.png`;
-  const bucketName = appContext.gcsURI.replace('gs://', '');
-  const storageUri = `gs://${bucketName}/vto-generations/${outputFileName}`;
+  // [修改] 我们现在将 storageUri 理解为一个文件夹前缀
+  const storageUriPrefix = `gs://${appContext.gcsURI.replace('gs://', '')}/vto-generations/${uniqueId}`;
 
   const reqData = {
     instances: [
@@ -73,7 +73,7 @@ export const generateVtoImage = async (
       sampleCount: parseInt(formData.sampleCount, 10),
       personGeneration: formData.personGeneration,
       outputOptions: { mimeType: formData.outputFormat },
-      storageUri: storageUri,
+      storageUri: storageUriPrefix, // [修改] 告知 API 使用这个前缀
       ...(formData.seedNumber && { seed: parseInt(formData.seedNumber, 10) }),
     },
   };
@@ -105,18 +105,23 @@ export const generateVtoImage = async (
 
     let generatedImageBase64: string;
     const mimeType = predictionResult.mimeType || formData.outputFormat;
+    // [最终修正] 优先使用 API 返回的真实 GCS 路径
+    const finalGcsUri = predictionResult.gcsUri;
+
+    if (!finalGcsUri) {
+        throw new Error('API did not return a GCS URI for the generated image.');
+    }
 
     if (predictionResult.bytesBase64Encoded) {
       generatedImageBase64 = predictionResult.bytesBase64Encoded;
     } else {
-      console.log(`Bytes not found in API response, attempting to download from GCS path: ${storageUri}`);
-      const downloadResult = await downloadMediaFromGcs(storageUri);
+      console.log(`Bytes not found in API response, attempting to download from final GCS path: ${finalGcsUri}`);
+      const downloadResult = await downloadMediaFromGcs(finalGcsUri);
       
       if (downloadResult.error) {
         throw new Error(`Failed to download generated image from GCS: ${downloadResult.error}`);
       }
       
-      // [最终修正] 添加一个绝对必要的检查，以确保 data 存在
       if (!downloadResult.data) {
         throw new Error(`Image data is missing after successful download from GCS.`);
       }
@@ -126,7 +131,7 @@ export const generateVtoImage = async (
 
     const resultImage: ImageI = {
       src: `data:${mimeType};base64,${generatedImageBase64}`,
-      gcsUri: storageUri,
+      gcsUri: finalGcsUri, // [最终修正] 使用从 API 获取的真实路径
       ratio: '',
       width: 0,
       height: 0,
