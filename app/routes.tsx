@@ -12,7 +12,7 @@ export const pages = {
     status: process.env.NEXT_PUBLIC_VTO_ENABLED,
   },
   Edit: {
-    name: 'Edit',
+    name: 'Generate an Edit',
     description: 'Import, edit and transform existing content',
     href: '/edit',
     status: process.env.NEXT_PUBLIC_EDIT_ENABLED,
