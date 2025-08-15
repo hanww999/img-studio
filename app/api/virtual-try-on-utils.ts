@@ -1,3 +1,5 @@
+// app/api/virtual-try-on-utils.ts
+
 import { chipGroupFieldsI, selectFieldsI } from './generate-image-utils';
 
 export interface VtoImageObjectI {
@@ -18,12 +20,13 @@ export interface VirtualTryOnFormI {
   modelVersion: string;
 }
 
+// [修改] 为 modelVersion 添加 label 和 options，以匹配下拉框组件的需要
 const virtualTryOnFormFields: {
   sampleCount: chipGroupFieldsI;
   personGeneration: selectFieldsI;
   outputFormat: selectFieldsI;
   seedNumber: { label?: string; type: string; default: string; isDataResetable: boolean; };
-  modelVersion: { type: string; default: string; isDataResetable: boolean; };
+  modelVersion: selectFieldsI; // [修改] 类型改为 selectFieldsI
 } = {
   sampleCount: {
     label: 'Quantity of outputs',
@@ -54,9 +57,11 @@ const virtualTryOnFormFields: {
     isDataResetable: true,
   },
   modelVersion: {
-    type: 'hidden',
+    label: 'Model', // 虽然不在 UI 上显示，但最好有
     default: 'virtual-try-on-preview-08-04',
-    isDataResetable: false,
+    options: [
+      { value: 'virtual-try-on-preview-08-04', label: 'Try-On v1' }
+    ]
   },
 };
 
