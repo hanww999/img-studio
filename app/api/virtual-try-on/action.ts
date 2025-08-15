@@ -9,16 +9,13 @@ import { appContextDataI } from '../../context/app-context';
 import { VirtualTryOnFormI } from '../virtual-try-on-utils';
 import { ImageI } from '../generate-image-utils';
 
-// [新增] 定义 API 响应的类型接口
 interface Prediction {
   bytesBase64Encoded?: string;
   mimeType?: string;
-  // 可以添加其他可能的预测字段
 }
 
 interface PredictionResponse {
   predictions: Prediction[];
-  // 可以添加其他可能的响应字段
 }
 
 function generateUniqueFolderId() {
@@ -83,7 +80,6 @@ export const generateVtoImage = async (
   try {
     const res = await client.request(opts);
 
-    // [修改] 增加类型守卫来安全地处理 'unknown' 类型
     if (typeof res.data === 'object' && res.data !== null && 'predictions' in res.data) {
       const responseData = res.data as PredictionResponse;
 
@@ -111,14 +107,14 @@ export const generateVtoImage = async (
         format: mimeType,
         prompt: `Try-on with model version: ${formData.modelVersion}`,
         date: new Date().toISOString(),
-        author: appContext.userID,
+        // [修改] 为 appContext.userID 提供一个备用值，以防它是 undefined
+        author: appContext.userID || 'Unknown User',
         modelVersion: formData.modelVersion,
         mode: 'try-on',
       };
 
       return resultImage;
     } else {
-      // 如果 res.data 的结构不符合预期，也抛出错误
       throw new Error('Unexpected API response structure.');
     }
 
