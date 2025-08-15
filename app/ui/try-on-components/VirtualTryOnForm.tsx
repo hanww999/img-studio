@@ -92,7 +92,6 @@ export default function VirtualTryOnForm({
           </AccordionSummary>
           <AccordionDetails>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {/* [修改] 使用展开语法 (...) 来传递 props，并补上缺失的属性 */}
               <FormInputChipGroup
                 name="sampleCount"
                 control={control}
@@ -101,17 +100,20 @@ export default function VirtualTryOnForm({
                 width="100%"
                 required={false}
               />
+              {/* [修改] 遵循 FormInputDropdown 的规则，使用 field 和 styleSize 属性 */}
               <FormInputDropdown
                 name="personGeneration"
                 control={control}
-                {...generationFields.fields.personGeneration}
+                field={generationFields.fields.personGeneration}
+                styleSize="small"
                 width="100%"
                 required={false}
               />
               <FormInputDropdown
                 name="outputFormat"
                 control={control}
-                {...generationFields.fields.outputFormat}
+                field={generationFields.fields.outputFormat}
+                styleSize="small"
                 width="100%"
                 required={false}
               />
