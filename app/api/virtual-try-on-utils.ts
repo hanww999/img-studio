@@ -13,8 +13,6 @@ export interface VtoImageObjectI {
   key: string;
 }
 
-// [删除] 不再需要我们自己定义的 VtoFieldI
-
 export interface VirtualTryOnFormI {
   humanImage: VtoImageObjectI;
   garmentImages: VtoImageObjectI[];
@@ -25,22 +23,22 @@ export interface VirtualTryOnFormI {
   modelVersion: string;
 }
 
-// [修改] 定义字段，并确保它们的类型与导入的接口完全匹配
+// [修改] 为所有字段提供精确的类型，确保与 UI 组件的 props 匹配
 const virtualTryOnFormFields: {
   sampleCount: chipGroupFieldsI;
   personGeneration: selectFieldsI;
   outputFormat: selectFieldsI;
-  seedNumber: { label: string; type: string; default: string; isDataResetable: boolean; };
+  seedNumber: { label?: string; type: string; default: string; isDataResetable: boolean; };
   modelVersion: { type: string; default: string; isDataResetable: boolean; };
 } = {
   sampleCount: {
-    label: 'Quantity of outputs', // label 是必需的
-    type: 'chip-group',
+    label: 'Quantity of outputs',
     default: '1',
     options: ['1', '2', '3', '4'],
+    // [删除] 移除了不符合 chipGroupFieldsI 类型的 'type' 属性
   },
   personGeneration: {
-    label: 'People generation', // label 是必需的
+    label: 'People generation',
     default: 'allow_adult',
     options: [
       { value: 'allow_adult', label: 'Adults only' },
@@ -49,7 +47,7 @@ const virtualTryOnFormFields: {
     ],
   },
   outputFormat: {
-    label: 'Output format', // label 是必需的
+    label: 'Output format',
     default: 'image/png',
     options: [
       { value: 'image/png', label: 'PNG' },
