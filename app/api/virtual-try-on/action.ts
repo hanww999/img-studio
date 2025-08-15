@@ -1,12 +1,14 @@
+// app/api/virtual-try-on/action.ts
+
 'use server';
 
 import { GoogleAuth } from 'google-auth-library';
 
-import { AppContextI } from '../../context/app-context';
+// [修改] 将 AppContextI 替换为 appContextDataI
+import { appContextDataI } from '../../context/app-context';
 import { VirtualTryOnFormI } from '../virtual-try-on-utils';
 import { ImageI } from '../generate-image-utils';
 
-// [复用] 从您的 imagen/action.ts 中复制过来的函数
 function generateUniqueFolderId() {
   let number = Math.floor(Math.random() * 9) + 1;
   for (let i = 0; i < 12; i++) number = number * 10 + Math.floor(Math.random() * 10);
@@ -15,9 +17,13 @@ function generateUniqueFolderId() {
 
 export const generateVtoImage = async (
   formData: VirtualTryOnFormI,
-  appContext: AppContextI
+  // [修改] 将 AppContextI 替换为 appContextDataI
+  appContext: appContextDataI
 ): Promise<ImageI | { error: string }> => {
-  // 1. 认证 (与您的 imagen/action.ts 完全一致)
+  if (!appContext.user.gcsBucket) {
+    return { error: 'User GCS bucket is not configured in the application context.' };
+  }
+
   let client;
   try {
     const auth = new GoogleAuth({
@@ -29,17 +35,11 @@ export const generateVtoImage = async (
     return { error: 'Unable to authenticate your account.' };
   }
 
-  if (!appContext.user.gcsBucket) {
-    return { error: 'User GCS bucket is not configured in the application context.' };
-  }
-
-  // 2. 构建请求 URL (与您的 imagen/action.ts 完全一致)
   const location = process.env.NEXT_PUBLIC_VERTEX_API_LOCATION || 'us-central1';
   const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
   const modelVersion = formData.modelVersion;
   const apiUrl = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelVersion}:predict`;
 
-  // 3. 构建请求体 (根据 VTO API 文档)
   const uniqueId = generateUniqueFolderId();
   const outputFileName = `${uniqueId}.png`;
   const storageUri = `gs://${appContext.user.gcsBucket}/vto-generations/${outputFileName}`;
@@ -58,18 +58,16 @@ export const generateVtoImage = async (
       personGeneration: formData.personGeneration,
       outputOptions: { mimeType: formData.outputFormat },
       storageUri: storageUri,
-      ...(formData.seedNumber && { seed: parseInt(formData.seedNumber, 10) }), // 仅当有 seed 时才添加
+      ...(formData.seedNumber && { seed: parseInt(formData.seedNumber, 10) }),
     },
   };
 
-  // 4. 构建请求选项 (与您的 imagen/action.ts 完全一致)
   const opts = {
     url: apiUrl,
     method: 'POST',
     data: reqData,
   };
 
-  // 5. 发送请求 (与您的 imagen/action.ts 完全一致)
   try {
     const res = await client.request(opts);
 
