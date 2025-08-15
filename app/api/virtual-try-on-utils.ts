@@ -1,7 +1,3 @@
-// app/api/virtual-try-on-utils.ts
-
-'use server';
-
 import { chipGroupFieldsI, selectFieldsI } from './generate-image-utils';
 
 export interface VtoImageObjectI {
@@ -75,7 +71,6 @@ export const VtoImageDefaults: VtoImageObjectI = {
 const formDataDefaults: VirtualTryOnFormI = {
   humanImage: { ...VtoImageDefaults, key: 'human' },
   garmentImages: [{ ...VtoImageDefaults, key: Math.random().toString(36).substring(2, 15) }],
-  // [修改] 使用 String() 确保类型为字符串，解决类型不匹配问题
   sampleCount: String(virtualTryOnFormFields.sampleCount.default ?? '1'),
   personGeneration: virtualTryOnFormFields.personGeneration.default ?? 'allow_adult',
   seedNumber: virtualTryOnFormFields.seedNumber.default ?? '',
