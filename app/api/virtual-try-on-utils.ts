@@ -1,4 +1,9 @@
+// app/api/virtual-try-on-utils.ts
+
 'use server';
+
+// [修改] 导入您项目中已有的、经过验证的类型接口
+import { chipGroupFieldsI, selectFieldsI } from './generate-image-utils';
 
 export interface VtoImageObjectI {
   base64Image: string;
@@ -8,13 +13,7 @@ export interface VtoImageObjectI {
   key: string;
 }
 
-export interface VtoFieldI {
-  label?: string;
-  type: string;
-  default?: string;
-  options?: string[] | { value: string; label: string; }[];
-  isDataResetable: boolean;
-}
+// [删除] 不再需要我们自己定义的 VtoFieldI
 
 export interface VirtualTryOnFormI {
   humanImage: VtoImageObjectI;
@@ -26,40 +25,42 @@ export interface VirtualTryOnFormI {
   modelVersion: string;
 }
 
-const virtualTryOnFormFields: { [key in keyof Omit<VirtualTryOnFormI, 'humanImage' | 'garmentImages'>]: VtoFieldI } = {
+// [修改] 定义字段，并确保它们的类型与导入的接口完全匹配
+const virtualTryOnFormFields: {
+  sampleCount: chipGroupFieldsI;
+  personGeneration: selectFieldsI;
+  outputFormat: selectFieldsI;
+  seedNumber: { label: string; type: string; default: string; isDataResetable: boolean; };
+  modelVersion: { type: string; default: string; isDataResetable: boolean; };
+} = {
   sampleCount: {
-    label: 'Quantity of outputs',
+    label: 'Quantity of outputs', // label 是必需的
     type: 'chip-group',
     default: '1',
     options: ['1', '2', '3', '4'],
-    isDataResetable: false,
   },
   personGeneration: {
-    label: 'People generation',
-    type: 'select',
+    label: 'People generation', // label 是必需的
     default: 'allow_adult',
     options: [
       { value: 'allow_adult', label: 'Adults only' },
       { value: 'allow_all', label: 'Adults & Children' },
       { value: 'dont_allow', label: 'No people' },
     ],
-    isDataResetable: false,
+  },
+  outputFormat: {
+    label: 'Output format', // label 是必需的
+    default: 'image/png',
+    options: [
+      { value: 'image/png', label: 'PNG' },
+      { value: 'image/jpeg', label: 'JPEG' },
+    ],
   },
   seedNumber: {
     label: 'Seed number (optional)',
     type: 'numberInput',
     default: '',
     isDataResetable: true,
-  },
-  outputFormat: {
-    label: 'Output format',
-    type: 'select',
-    default: 'image/png',
-    options: [
-      { value: 'image/png', label: 'PNG' },
-      { value: 'image/jpeg', label: 'JPEG' },
-    ],
-    isDataResetable: false,
   },
   modelVersion: {
     type: 'hidden',
