@@ -1,3 +1,4 @@
+// app/ui/try-on-components/VirtualTryOnForm.tsx
 
 'use client';
 
@@ -6,7 +7,7 @@ import { Box, Stack, Button, Alert, IconButton, Accordion, AccordionSummary, Acc
 import { Send as SendIcon, WatchLater as WatchLaterIcon, Autorenew, ArrowDownward as ArrowDownwardIcon, Close as CloseIcon } from '@mui/icons-material';
 
 import { useAppContext } from '../../context/app-context';
-import { ImageI } from '../../api/generate-image-utils';
+import { ImageI, chipGroupFieldsI, selectFieldsI } from '../../api/generate-image-utils'; // [新增] 导入类型
 import { VirtualTryOnFormI, virtualTryOnFields } from '../../api/virtual-try-on-utils';
 import { generateVtoImage } from '../../api/virtual-try-on/action';
 
@@ -42,12 +43,10 @@ export default function VirtualTryOnForm({
   };
 
   const onSubmit: SubmitHandler<VirtualTryOnFormI> = async (formData) => {
-    // [修改] 增加对 appContext 的前置检查
     if (!appContext) {
       onNewErrorMsg("Application context is not available. Please try refreshing the page.");
       return;
     }
-
     if (!formData.humanImage.base64Image) {
       onNewErrorMsg('Please upload a human model image.');
       return;
@@ -59,7 +58,6 @@ export default function VirtualTryOnForm({
 
     onRequestSent(true);
     try {
-      // 在这里，TypeScript 知道 appContext 不再是 null
       const result = await generateVtoImage(formData, appContext);
       if ('error' in result) {
         throw new Error(result.error);
@@ -94,9 +92,10 @@ export default function VirtualTryOnForm({
           </AccordionSummary>
           <AccordionDetails>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              <FormInputChipGroup name="sampleCount" control={control} setValue={setValue} field={generationFields.fields.sampleCount} />
-              <FormInputDropdown name="personGeneration" control={control} field={generationFields.fields.personGeneration} />
-              <FormInputDropdown name="outputFormat" control={control} field={generationFields.fields.outputFormat} />
+              {/* [修改] 明确地进行类型断言，告诉 TS 我们知道这个字段的类型是正确的 */}
+              <FormInputChipGroup name="sampleCount" control={control} setValue={setValue} field={generationFields.fields.sampleCount as chipGroupFieldsI} />
+              <FormInputDropdown name="personGeneration" control={control} field={generationFields.fields.personGeneration as selectFieldsI} />
+              <FormInputDropdown name="outputFormat" control={control} field={generationFields.fields.outputFormat as selectFieldsI} />
               <FormInputNumberSmall name="seedNumber" control={control} label={generationFields.fields.seedNumber.label} />
             </Stack>
           </AccordionDetails>
