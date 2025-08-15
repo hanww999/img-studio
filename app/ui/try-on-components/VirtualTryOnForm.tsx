@@ -2,13 +2,12 @@
 
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Box, Stack, Button, Alert, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
-import { Send as SendIcon, WatchLater as WatchLaterIcon, Autorenew, ArrowDownward as ArrowDownwardIcon } from '@mui/icons-material';
-import { Close as CloseIcon } from '@mui/icons-material';
+import { Send as SendIcon, WatchLater as WatchLaterIcon, Autorenew, ArrowDownward as ArrowDownwardIcon, Close as CloseIcon } from '@mui/icons-material';
 
 import { useAppContext } from '../../context/app-context';
 import { ImageI } from '../../api/generate-image-utils';
 import { VirtualTryOnFormI, virtualTryOnFields } from '../../api/virtual-try-on-utils';
-import { generateVtoImage } from '../../api/virtual-try-on/action'; // 我们将在下一步创建
+import { generateVtoImage } from '../../api/virtual-try-on/action';
 
 import ImageDropzone from './ImageDropzone';
 import FormInputChipGroup from '../ux-components/InputChipGroup';
@@ -32,11 +31,9 @@ export default function VirtualTryOnForm({
   isLoading, errorMsg, generationFields, onRequestSent, onNewErrorMsg, onImageGeneration
 }: VirtualTryOnFormProps) {
   const { appContext } = useAppContext();
-  const { handleSubmit, control, setValue, reset, watch } = useForm<VirtualTryOnFormI>({
+  const { handleSubmit, control, setValue, reset } = useForm<VirtualTryOnFormI>({
     defaultValues: generationFields.defaultValues,
   });
-
-  const garmentImages = watch('garmentImages'); // 监视服装图片数组
 
   const onReset = () => {
     reset(generationFields.defaultValues);
@@ -59,7 +56,6 @@ export default function VirtualTryOnForm({
       if ('error' in result) {
         throw new Error(result.error);
       }
-      // 假设 action 返回 ImageI 格式
       onImageGeneration(result as ImageI);
     } catch (error: any) {
       onNewErrorMsg(error.message || 'An unknown error occurred.');
@@ -80,7 +76,6 @@ export default function VirtualTryOnForm({
             <ImageDropzone name="humanImage" label="Human Model Image" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
           </Box>
           <Box sx={{ flex: 1 }}>
-            {/* 目前只支持一张服装图，所以直接索引 [0] */}
             <ImageDropzone name={`garmentImages.0`} label="Garment Image" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
           </Box>
         </Stack>
