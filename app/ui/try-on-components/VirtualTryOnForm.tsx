@@ -7,7 +7,7 @@ import { Box, Stack, Button, Alert, IconButton, Accordion, AccordionSummary, Acc
 import { Send as SendIcon, WatchLater as WatchLaterIcon, Autorenew, ArrowDownward as ArrowDownwardIcon, Close as CloseIcon } from '@mui/icons-material';
 
 import { useAppContext } from '../../context/app-context';
-import { ImageI, chipGroupFieldsI, selectFieldsI } from '../../api/generate-image-utils'; // [新增] 导入类型
+import { ImageI } from '../../api/generate-image-utils';
 import { VirtualTryOnFormI, virtualTryOnFields } from '../../api/virtual-try-on-utils';
 import { generateVtoImage } from '../../api/virtual-try-on/action';
 
@@ -92,11 +92,34 @@ export default function VirtualTryOnForm({
           </AccordionSummary>
           <AccordionDetails>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {/* [修改] 明确地进行类型断言，告诉 TS 我们知道这个字段的类型是正确的 */}
-              <FormInputChipGroup name="sampleCount" control={control} setValue={setValue} field={generationFields.fields.sampleCount as chipGroupFieldsI} />
-              <FormInputDropdown name="personGeneration" control={control} field={generationFields.fields.personGeneration as selectFieldsI} />
-              <FormInputDropdown name="outputFormat" control={control} field={generationFields.fields.outputFormat as selectFieldsI} />
-              <FormInputNumberSmall name="seedNumber" control={control} label={generationFields.fields.seedNumber.label} />
+              {/* [修改] 使用展开语法 (...) 来传递 props，并补上缺失的属性 */}
+              <FormInputChipGroup
+                name="sampleCount"
+                control={control}
+                setValue={setValue}
+                {...generationFields.fields.sampleCount}
+                width="100%"
+                required={false}
+              />
+              <FormInputDropdown
+                name="personGeneration"
+                control={control}
+                {...generationFields.fields.personGeneration}
+                width="100%"
+                required={false}
+              />
+              <FormInputDropdown
+                name="outputFormat"
+                control={control}
+                {...generationFields.fields.outputFormat}
+                width="100%"
+                required={false}
+              />
+              <FormInputNumberSmall
+                name="seedNumber"
+                control={control}
+                label={generationFields.fields.seedNumber.label}
+              />
             </Stack>
           </AccordionDetails>
         </Accordion>
