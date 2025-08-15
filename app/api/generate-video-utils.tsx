@@ -416,7 +416,7 @@ export const tempVeo3specificSettings = {
     label: 'Quantity of outputs',
     type: 'chip-group',
     default: '1',
-    options: ['1', '2'],
+    options: ['1'],
     isDataResetable: false,
     isFullPromptAdditionalField: false,
   },
@@ -439,7 +439,7 @@ export const tempVeo3specificSettings = {
   resolution: {
     label: 'Resolution',
     type: 'chip-group',
-    default: '720p',
+    default: '1080p',
     options: ['720p', '1080p'],
     isDataResetable: false,
     isFullPromptAdditionalField: false,
