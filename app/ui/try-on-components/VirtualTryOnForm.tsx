@@ -86,7 +86,8 @@ export default function VirtualTryOnForm({
           </Box>
         </Stack>
 
-        <Accordion defaultExpanded sx={CustomizedAccordion}>
+        {/* [修改] 移除了 defaultExpanded 属性，使其默认折叠 */}
+        <Accordion sx={CustomizedAccordion}>
           <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} sx={CustomizedAccordionSummary}>
             <Typography variant="body1" sx={{ fontWeight: 500 }}>Advanced Settings</Typography>
           </AccordionSummary>
@@ -123,7 +124,6 @@ export default function VirtualTryOnForm({
                 <Typography variant="caption" sx={{ color: palette.text.primary, fontSize: '0.75rem', fontWeight: 500, lineHeight: '1.3em', pb: 0.5 }}>
                   {generationFields.fields.seedNumber.label}
                 </Typography>
-                {/* [最终修正] 根据错误日志，为组件提供其必需的 min 和 max 属性 */}
                 <FormInputNumberSmall
                   name="seedNumber"
                   control={control}
