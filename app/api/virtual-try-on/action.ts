@@ -1,16 +1,15 @@
+// app/api/virtual-try-on/action.ts
 
 'use server';
 
 import { GoogleAuth } from 'google-auth-library';
 import { GaxiosOptions } from 'gaxios';
 
-
-import { AppContextI } from '../../context/app-context';
+import { appContextDataI } from '../../context/app-context';
 import { downloadMediaFromGcs } from '../cloud-storage/action';
 import { VirtualTryOnFormI } from '../virtual-try-on-utils';
 import { ImageI } from '../generate-image-utils';
 
-// [最终修正] 复用您在 imagen/action.ts 中已有的函数
 function generateUniqueFolderId() {
   let number = Math.floor(Math.random() * 9) + 1;
   for (let i = 0; i < 12; i++) number = number * 10 + Math.floor(Math.random() * 10);
@@ -29,13 +28,12 @@ interface PredictionResponse {
 
 export const generateVtoImage = async (
   formData: VirtualTryOnFormI,
-  appContext: AppContextI
+  appContext: appContextDataI
 ): Promise<ImageI | { error: string }> => {
-  if (!appContext.user.gcsBucket) {
+  if (!appContext?.user?.gcsBucket) {
     return { error: 'User GCS bucket is not configured in the application context.' };
   }
 
-  // [最终修正] 完全遵循 imagen/action.ts 的认证模式
   let client;
   try {
     const auth = new GoogleAuth({
