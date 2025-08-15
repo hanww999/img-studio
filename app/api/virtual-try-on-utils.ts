@@ -1,138 +1,84 @@
-'use server';
+import { chipGroupFieldsI, selectFieldsI } from './generate-image-utils';
 
-import { GoogleAuth } from 'google-auth-library';
-import { GaxiosOptions } from 'gaxios';
-
-// [最终修正] 使用您项目中正确的、已存在的类型名称 appContextDataI
-import { appContextDataI } from '../../context/app-context';
-import { downloadMediaFromGcs } from '../cloud-storage/action';
-import { VirtualTryOnFormI } from '../virtual-try-on-utils';
-import { ImageI } from '../generate-image-utils';
-
-function generateUniqueFolderId() {
-  let number = Math.floor(Math.random() * 9) + 1;
-  for (let i = 0; i < 12; i++) number = number * 10 + Math.floor(Math.random() * 10);
-  return number.toString();
+export interface VtoImageObjectI {
+  base64Image: string;
+  format: string;
+  width: number;
+  height: number;
+  key: string;
 }
 
-interface Prediction {
-  bytesBase64Encoded?: string;
-  mimeType?: string;
-  error?: { message?: string };
+export interface VirtualTryOnFormI {
+  humanImage: VtoImageObjectI;
+  garmentImages: VtoImageObjectI[];
+  sampleCount: string;
+  personGeneration: string;
+  seedNumber: string;
+  outputFormat: string;
+  modelVersion: string;
 }
 
-interface PredictionResponse {
-  predictions: Prediction[];
-}
-
-export const generateVtoImage = async (
-  formData: VirtualTryOnFormI,
-  // [最终修正] 使用正确的类型 appContextDataI
-  appContext: appContextDataI
-): Promise<ImageI | { error: string }> => {
-  // [最终修正] 检查 appContext.user.gcsBucket 是否存在
-  if (!appContext?.user?.gcsBucket) {
-    return { error: 'User GCS bucket is not configured in the application context.' };
-  }
-
-  let client;
-  try {
-    const auth = new GoogleAuth({
-      scopes: 'https://www.googleapis.com/auth/cloud-platform',
-    });
-    client = await auth.getClient();
-  } catch (error) {
-    console.error('Authentication Error:', error);
-    return { error: 'Unable to authenticate your account.' };
-  }
-
-  const location = appContext.location;
-  const projectId = appContext.project_id;
-  const modelVersion = formData.modelVersion;
-  const apiUrl = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelVersion}:predict`;
-
-  const uniqueId = generateUniqueFolderId();
-  const outputFileName = `${uniqueId}.png`;
-  const storageUri = `gs://${appContext.user.gcsBucket}/vto-generations/${outputFileName}`;
-
-  const reqData = {
-    instances: [
-      {
-        personImage: { image: { bytesBase64Encoded: formData.humanImage.base64Image } },
-        productImages: formData.garmentImages.map(img => ({
-          image: { bytesBase64Encoded: img.base64Image },
-        })),
-      },
+const virtualTryOnFormFields: {
+  sampleCount: chipGroupFieldsI;
+  personGeneration: selectFieldsI;
+  outputFormat: selectFieldsI;
+  seedNumber: { label?: string; type: string; default: string; isDataResetable: boolean; };
+  modelVersion: { type: string; default: string; isDataResetable: boolean; };
+} = {
+  sampleCount: {
+    label: 'Quantity of outputs',
+    default: '1',
+    options: ['1', '2', '3', '4'],
+  },
+  personGeneration: {
+    label: 'People generation',
+    default: 'allow_adult',
+    options: [
+      { value: 'allow_adult', label: 'Adults only' },
+      { value: 'allow_all', label: 'Adults & Children' },
+      { value: 'dont_allow', label: 'No people' },
     ],
-    parameters: {
-      sampleCount: parseInt(formData.sampleCount, 10),
-      personGeneration: formData.personGeneration,
-      outputOptions: { mimeType: formData.outputFormat },
-      storageUri: storageUri,
-      ...(formData.seedNumber && { seed: parseInt(formData.seedNumber, 10) }),
-    },
-  };
+  },
+  outputFormat: {
+    label: 'Output format',
+    default: 'image/png',
+    options: [
+      { value: 'image/png', label: 'PNG' },
+      { value: 'image/jpeg', label: 'JPEG' },
+    ],
+  },
+  seedNumber: {
+    label: 'Seed number (optional)',
+    type: 'numberInput',
+    default: '',
+    isDataResetable: true,
+  },
+  modelVersion: {
+    type: 'hidden',
+    default: 'virtual-try-on-preview-08-04',
+    isDataResetable: false,
+  },
+};
 
-  const opts: GaxiosOptions = {
-    url: apiUrl,
-    method: 'POST',
-    data: reqData,
-  };
+export const VtoImageDefaults: VtoImageObjectI = {
+  base64Image: '',
+  format: '',
+  width: 0,
+  height: 0,
+  key: '',
+};
 
-  try {
-    const res = await client.request(opts);
+const formDataDefaults: VirtualTryOnFormI = {
+  humanImage: { ...VtoImageDefaults, key: 'human' },
+  garmentImages: [{ ...VtoImageDefaults, key: Math.random().toString(36).substring(2, 15) }],
+  sampleCount: String(virtualTryOnFormFields.sampleCount.default ?? '1'),
+  personGeneration: virtualTryOnFormFields.personGeneration.default ?? 'allow_adult',
+  seedNumber: virtualTryOnFormFields.seedNumber.default ?? '',
+  outputFormat: virtualTryOnFormFields.outputFormat.default ?? 'image/png',
+  modelVersion: virtualTryOnFormFields.modelVersion.default ?? 'virtual-try-on-preview-08-04',
+};
 
-    if (typeof res.data !== 'object' || res.data === null || !('predictions' in res.data)) {
-      throw new Error('Unexpected API response structure.');
-    }
-    
-    const responseData = res.data as PredictionResponse;
-
-    if (!responseData.predictions || responseData.predictions.length === 0) {
-      throw new Error('API returned no predictions.');
-    }
-
-    const predictionResult = responseData.predictions[0];
-
-    if (predictionResult.error) {
-      throw new Error(`API returned an error: ${predictionResult.error.message || 'Unknown error'}`);
-    }
-
-    let generatedImageBase64: string;
-    const mimeType = predictionResult.mimeType || formData.outputFormat;
-
-    if (predictionResult.bytesBase64Encoded) {
-      generatedImageBase64 = predictionResult.bytesBase64Encoded;
-    } else {
-      console.log(`Bytes not found in API response, attempting to download from GCS path: ${storageUri}`);
-      const downloadResult = await downloadMediaFromGcs(storageUri);
-      if (downloadResult.error) {
-        throw new Error(`Failed to download generated image from GCS: ${downloadResult.error}`);
-      }
-      generatedImageBase64 = downloadResult.data;
-    }
-
-    const resultImage: ImageI = {
-      src: `data:${mimeType};base64,${generatedImageBase64}`,
-      gcsUri: storageUri,
-      ratio: '',
-      width: 0,
-      height: 0,
-      altText: 'Generated try-on image',
-      key: uniqueId,
-      format: mimeType,
-      prompt: `Try-on with model version: ${formData.modelVersion}`,
-      date: new Date().toISOString(),
-      author: appContext.user.email,
-      modelVersion: formData.modelVersion,
-      mode: 'try-on',
-    };
-
-    return resultImage;
-
-  } catch (error: any) {
-    console.error('Error calling Virtual Try-On API:', error);
-    const errorMessage = error.response?.data?.error?.message || error.message || 'An unknown error occurred.';
-    return { error: errorMessage };
-  }
+export const virtualTryOnFields = {
+  fields: virtualTryOnFormFields,
+  defaultValues: formDataDefaults,
 };
