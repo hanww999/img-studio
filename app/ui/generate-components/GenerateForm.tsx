@@ -108,7 +108,7 @@ export default function GenerateForm({
     }
   };
 
-  const [isGeminiRewrite, setIsGeminiRewrite] = useState(true);
+  const [isGeminiRewrite, setIsGeminiRewrite] = useState(false);
   const handleGeminiRewrite = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsGeminiRewrite(event.target.checked);
   };
