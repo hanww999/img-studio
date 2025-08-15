@@ -92,7 +92,6 @@ export default function VirtualTryOnForm({
           </AccordionSummary>
           <AccordionDetails>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {/* [最终修正] 遵循组件定义，同时提供 label 和 field 属性 */}
               <FormInputChipGroup
                 name="sampleCount"
                 control={control}
@@ -120,11 +119,16 @@ export default function VirtualTryOnForm({
                 width="100%"
                 required={false}
               />
-              <FormInputNumberSmall
-                name="seedNumber"
-                control={control}
-                label={generationFields.fields.seedNumber.label}
-              />
+              {/* [最终修正] FormInputNumberSmall 不接受 label prop，我们在外部手动添加一个 label */}
+              <Box>
+                <Typography variant="caption" sx={{ color: palette.text.primary, fontSize: '0.75rem', fontWeight: 500, lineHeight: '1.3em', pb: 0.5 }}>
+                  {generationFields.fields.seedNumber.label}
+                </Typography>
+                <FormInputNumberSmall
+                  name="seedNumber"
+                  control={control}
+                />
+              </Box>
             </Stack>
           </AccordionDetails>
         </Accordion>
