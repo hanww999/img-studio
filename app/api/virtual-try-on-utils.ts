@@ -31,7 +31,7 @@ const virtualTryOnFormFields: {
   sampleCount: {
     label: 'Quantity of outputs',
     default: '1',
-    options: ['1', '2', '3', '4'],
+    options: ['1'],
   },
   personGeneration: {
     label: 'People generation',
@@ -60,7 +60,7 @@ const virtualTryOnFormFields: {
     label: 'Model', // 虽然不在 UI 上显示，但最好有
     default: 'virtual-try-on-preview-08-04',
     options: [
-      { value: 'virtual-try-on-preview-08-04', label: 'Try-On v1' }
+      { value: 'virtual-try-on-preview-08-04', label: 'Try-On' }
     ]
   },
 };
