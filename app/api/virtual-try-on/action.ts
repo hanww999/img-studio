@@ -3,6 +3,8 @@
 'use server';
 
 import { GoogleAuth } from 'google-auth-library';
+// [新增] 导入 GaxiosOptions 类型以解决类型错误
+import { GaxiosOptions } from 'gaxios';
 
 import { appContextDataI } from '../../context/app-context';
 import { VirtualTryOnFormI } from '../virtual-try-on-utils';
@@ -18,7 +20,6 @@ export const generateVtoImage = async (
   formData: VirtualTryOnFormI,
   appContext: appContextDataI
 ): Promise<ImageI | { error: string }> => {
-  // [修改] 将 gcsBucket 修正为 gcsURI，与您现有代码保持一致
   if (!appContext.gcsURI) {
     return { error: 'User GCS URI is not configured in the application context.' };
   }
@@ -41,7 +42,6 @@ export const generateVtoImage = async (
 
   const uniqueId = generateUniqueFolderId();
   const outputFileName = `${uniqueId}.png`;
-  // [修改] 从 gcsURI 中提取 bucket 名称
   const bucketName = appContext.gcsURI.replace('gs://', '');
   const storageUri = `gs://${bucketName}/vto-generations/${outputFileName}`;
 
@@ -63,7 +63,8 @@ export const generateVtoImage = async (
     },
   };
 
-  const opts = {
+  // [修改] 为 opts 对象明确指定类型
+  const opts: GaxiosOptions = {
     url: apiUrl,
     method: 'POST',
     data: reqData,
