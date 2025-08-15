@@ -55,7 +55,7 @@ export default function ImageDropzone({ name, label, control, setValue, onNewErr
       const img = document.createElement('img');
       img.onload = () => {
         setValue(name, {
-          base64Image: base64Image.split(',')[1], // Remove the data URL prefix
+          base64Image: base64Image.split(',')[1],
           format: file.type,
           width: img.width,
           height: img.height,
