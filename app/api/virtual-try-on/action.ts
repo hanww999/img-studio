@@ -1,15 +1,12 @@
-// app/api/virtual-try-on/action.ts
-
 'use server';
 
 import { GoogleAuth } from 'google-auth-library';
-import { v1 } from '@google-cloud/aiplatform';
 
 import { AppContextI } from '../../context/app-context';
 import { VirtualTryOnFormI } from '../virtual-try-on-utils';
 import { ImageI } from '../generate-image-utils';
 
-// [新增] 从您的 imagen/action.ts 中复制过来的函数，以保持一致性
+// [复用] 从您的 imagen/action.ts 中复制过来的函数
 function generateUniqueFolderId() {
   let number = Math.floor(Math.random() * 9) + 1;
   for (let i = 0; i < 12; i++) number = number * 10 + Math.floor(Math.random() * 10);
@@ -20,58 +17,67 @@ export const generateVtoImage = async (
   formData: VirtualTryOnFormI,
   appContext: AppContextI
 ): Promise<ImageI | { error: string }> => {
+  // 1. 认证 (与您的 imagen/action.ts 完全一致)
+  let client;
+  try {
+    const auth = new GoogleAuth({
+      scopes: 'https://www.googleapis.com/auth/cloud-platform',
+    });
+    client = await auth.getClient();
+  } catch (error) {
+    console.error(error);
+    return { error: 'Unable to authenticate your account.' };
+  }
+
   if (!appContext.user.gcsBucket) {
     return { error: 'User GCS bucket is not configured in the application context.' };
   }
 
-  const auth = new GoogleAuth({
-    scopes: 'https://www.googleapis.com/auth/cloud-platform',
-  });
-  const clientOptions = {
-    auth: auth,
-    apiEndpoint: `${appContext.location}-aiplatform.googleapis.com`,
-  };
-  const predictionServiceClient = new v1.PredictionServiceClient(clientOptions);
+  // 2. 构建请求 URL (与您的 imagen/action.ts 完全一致)
+  const location = process.env.NEXT_PUBLIC_VERTEX_API_LOCATION || 'us-central1';
+  const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+  const modelVersion = formData.modelVersion;
+  const apiUrl = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelVersion}:predict`;
 
-  const instances = [
-    {
-      personImage: { image: { bytesBase64Encoded: formData.humanImage.base64Image } },
-      productImages: formData.garmentImages.map(img => ({
-        image: { bytesBase64Encoded: img.base64Image },
-      })),
-    },
-  ];
-
-  // [修改] 使用您现有的函数来生成唯一 ID
+  // 3. 构建请求体 (根据 VTO API 文档)
   const uniqueId = generateUniqueFolderId();
   const outputFileName = `${uniqueId}.png`;
   const storageUri = `gs://${appContext.user.gcsBucket}/vto-generations/${outputFileName}`;
 
-  const parameters: { [key: string]: any } = {
-    sampleCount: parseInt(formData.sampleCount, 10),
-    personGeneration: formData.personGeneration,
-    outputOptions: { mimeType: formData.outputFormat },
-    storageUri: storageUri,
+  const reqData = {
+    instances: [
+      {
+        personImage: { image: { bytesBase64Encoded: formData.humanImage.base64Image } },
+        productImages: formData.garmentImages.map(img => ({
+          image: { bytesBase64Encoded: img.base64Image },
+        })),
+      },
+    ],
+    parameters: {
+      sampleCount: parseInt(formData.sampleCount, 10),
+      personGeneration: formData.personGeneration,
+      outputOptions: { mimeType: formData.outputFormat },
+      storageUri: storageUri,
+      ...(formData.seedNumber && { seed: parseInt(formData.seedNumber, 10) }), // 仅当有 seed 时才添加
+    },
   };
 
-  if (formData.seedNumber) {
-    parameters.seed = parseInt(formData.seedNumber, 10);
-  }
-
-  const request = {
-    endpoint: `projects/${appContext.project_id}/locations/${appContext.location}/publishers/google/models/${formData.modelVersion}`,
-    instances: instances.map(instance => v1.helpers.toValue(instance)),
-    parameters: v1.helpers.toValue(parameters),
+  // 4. 构建请求选项 (与您的 imagen/action.ts 完全一致)
+  const opts = {
+    url: apiUrl,
+    method: 'POST',
+    data: reqData,
   };
 
+  // 5. 发送请求 (与您的 imagen/action.ts 完全一致)
   try {
-    const [response] = await predictionServiceClient.predict(request);
+    const res = await client.request(opts);
 
-    if (!response.predictions || response.predictions.length === 0) {
+    if (!res.data.predictions || res.data.predictions.length === 0) {
       throw new Error('API returned no predictions.');
     }
 
-    const predictionResult = v1.helpers.fromValue(response.predictions[0] as any);
+    const predictionResult = res.data.predictions[0];
 
     if (!predictionResult || typeof predictionResult !== 'object' || !('bytesBase64Encoded' in predictionResult)) {
       throw new Error('Invalid prediction format received from API.');
@@ -100,8 +106,7 @@ export const generateVtoImage = async (
 
   } catch (error: any) {
     console.error('Error calling Virtual Try-On API:', error);
-    return {
-      error: error.details || error.message || 'An unknown error occurred while generating the image.',
-    };
+    const errorMessage = error.response?.data?.error?.message || error.message || 'An unknown error occurred.';
+    return { error: errorMessage };
   }
 };
