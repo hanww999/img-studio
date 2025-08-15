@@ -1,3 +1,5 @@
+// app/ui/try-on-components/TryOnResultDisplay.tsx
+
 'use client';
 
 import * as React from 'react';
@@ -8,7 +10,7 @@ import { Box, Skeleton, Modal, ImageListItem, ImageListItemBar, Stack, Typograph
 import { Edit, CreateNewFolderRounded, Download, VideocamRounded } from '@mui/icons-material';
 
 import { ImageI } from '../../api/generate-image-utils';
-import ExportStepper, { downloadBase64Media } from '../transverse-components/ExportDialog';
+import ExportStepper from '../transverse-components/ExportDialog';
 import DownloadDialog from '../transverse-components/DownloadDialog';
 import { appContextDataDefault, useAppContext } from '../../context/app-context';
 import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action';
@@ -62,6 +64,7 @@ export default function TryOnResultDisplay({ isLoading, errorMsg, generatedImage
     router.push('/generate?mode=video');
   };
 
+  // 注意：这个函数现在由 DownloadDialog 内部调用，但我们保留它以备将来直接下载的需求
   const handleDLimage = async (image: ImageI) => {
     try {
       const res = await downloadMediaFromGcs(image.gcsUri);
@@ -137,7 +140,8 @@ export default function TryOnResultDisplay({ isLoading, errorMsg, generatedImage
                     </IconButton>
                   </CustomWhiteTooltip>
                   <CustomWhiteTooltip title="Download locally" size="small">
-                    <IconButton onClick={(e) => { e.stopPropagation(); handleDLimage(generatedImage); }} sx={{ pr: 1, pl: 0.2, zIndex: 10 }} disableRipple>
+                    {/* [修改] 这里的 onClick 行为现在与“导出”按钮一致，都是打开一个对话框 */}
+                    <IconButton onClick={(e) => { e.stopPropagation(); setImageToDL(generatedImage); }} sx={{ pr: 1, pl: 0.2, zIndex: 10 }} disableRipple>
                       <Avatar sx={CustomizedAvatarButton}><Download sx={CustomizedIconButton} /></Avatar>
                     </IconButton>
                   </CustomWhiteTooltip>
