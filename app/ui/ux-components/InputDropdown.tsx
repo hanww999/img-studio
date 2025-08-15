@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { FormDropdownInputI } from './InputInterface'
 
-// [MODIFIED] Import Stack and Typography for the new layout
 import { TextField, MenuItem, FormControl, Stack, Typography } from '@mui/material'
 
 import theme from '../../theme'
@@ -22,23 +21,26 @@ const CustomizedInput = (styleSize: string) => {
  return style
 }
 
-// [MODIFIED] This function no longer needs to handle the component's overall width
-const CustomizedTextField = (styleSize: string) => {
+const CustomizedTextField = (styleSize: string, width: string) => {
  var customizedFont
+ var customizedWidth = {}
  if (styleSize === 'big') {
   customizedFont = '37px'
  }
  if (styleSize === 'small') {
   customizedFont = '24px'
+   // For the small variant, the width is now handled by the Stack's parent
+  customizedWidth = { minWidth: 120 }
  }
 
  return {
-  '& .MuiSvgIcon-root': {
-   color: palette.text.secondary,
-   fontSize: customizedFont,
+  ...{
+   '& .MuiSvgIcon-root': {
+    color: palette.text.secondary,
+    fontSize: customizedFont,
+    },
   },
-   // The TextField itself now has a defined minimum width
-   minWidth: 120,
+  ...customizedWidth,
  }
 }
 
@@ -94,55 +96,69 @@ export default function FormInputDropdown({
   setItemIndication(indication !== undefined ? indication : '')
  }
 
+ // [MODIFIED] The core logic is now conditional based on styleSize
+ const renderInput = (onChange: (...event: any[]) => void, value: any) => {
+    // If the style is 'small', use the new layout with a separate label
+  if (styleSize === 'small') {
+   return (
+    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
+     <Typography sx={{ color: palette.text.primary, fontWeight: 500, fontSize: '0.875rem', mr: 2, whiteSpace: 'nowrap' }}>
+      {label}
+     </Typography>
+     <TextField
+      onChange={onChange}
+      value={value == null ? field.default : value}
+      select
+      variant="standard"
+      size="small"
+      defaultValue={field.default}
+      InputProps={{ sx: CustomizedInput(styleSize) }}
+      SelectProps={{ MenuProps: CustomizedMenu, displayEmpty: true }}
+      sx={CustomizedTextField(styleSize, width)}
+      required={required}
+     >
+      {field.options.map((option: { value: string; label: string; indication?: string }) => (
+       <MenuItem onClick={() => handleClick(option.value, option.indication)} key={option.value} value={option.value} selected={selectedItem === option.value} sx={CustomizedMenuItem}>
+        {option.label}
+       </MenuItem>
+      ))}
+     </TextField>
+    </Stack>
+   )
+  }
+
+    // Otherwise (for 'big' style), use the original, more compact layout
+  return (
+   <TextField
+    onChange={onChange}
+    value={value == null ? field.default : value}
+    select
+    variant="standard"
+    size="small"
+    defaultValue={field.default}
+    label={label == null ? '' : label}
+    InputLabelProps={{
+     sx: { color: palette.text.primary, fontWeight: 500, fontSize: '1rem' },
+    }}
+    InputProps={{ sx: CustomizedInput(styleSize) }}
+    SelectProps={{ MenuProps: CustomizedMenu, displayEmpty: true }}
+    sx={CustomizedTextField(styleSize, width)}
+    required={required}
+   >
+    {field.options.map((option: { value: string; label: string; indication?: string }) => (
+     <MenuItem onClick={() => handleClick(option.value, option.indication)} key={option.value} value={option.value} selected={selectedItem === option.value} sx={CustomizedMenuItem}>
+      {option.label}
+     </MenuItem>
+    ))}
+   </TextField>
+  )
+ }
+
  return (
   <CustomTooltip title={itemIndication == null ? '' : itemIndication} size="big">
-     {/* [MODIFIED] The FormControl now just provides context */}
    <FormControl size={'small'} sx={{ width: width }}>
     <Controller
-     render={({ field: { onChange, value } }) => (
-         // [MODIFIED] The core layout is now a horizontal Stack
-         <Stack direction="row" alignItems="center" justifyContent="space-between">
-           {/* The Label is now a separate Typography component */}
-           <Typography sx={{
-             color: palette.text.primary,
-             fontWeight: 500,
-             fontSize: '0.875rem', // Slightly smaller to fit better
-             mr: 2, // Margin to separate it from the dropdown
-             whiteSpace: 'nowrap', // Ensure the label itself doesn't wrap
-           }}>
-             {label}
-           </Typography>
-
-           {/* The TextField is now only for the value and dropdown arrow */}
-          <TextField
-          onChange={onChange}
-          value={value == null ? field.default : value}
-          select
-          variant="standard"
-          size="small"
-          defaultValue={field.default}
-             // [MODIFIED] The label is removed from the TextField itself
-          InputProps={{ sx: CustomizedInput(styleSize) }}
-          SelectProps={{ MenuProps: CustomizedMenu, displayEmpty: true }}
-          sx={CustomizedTextField(styleSize)}
-          required={required}
-          >
-          {field.options.map((field: { value: string; label: string; indication?: string }) => {
-            return (
-              <MenuItem
-                onClick={() => handleClick(field.value, field.indication)}
-                key={field.value}
-                value={field.value}
-                selected={selectedItem === field.value}
-                sx={CustomizedMenuItem}
-              >
-                {field.label}
-              </MenuItem>
-            )
-          })}
-          </TextField>
-         </Stack>
-     )}
+     render={({ field: { onChange, value } }) => renderInput(onChange, value)}
      control={control}
      name={name}
      rules={{ required: required }}
