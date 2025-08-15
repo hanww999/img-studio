@@ -10,7 +10,6 @@ import { Box, Skeleton, Modal, ImageListItem, ImageListItemBar, Stack, Typograph
 import { Edit, CreateNewFolderRounded, Download, VideocamRounded } from '@mui/icons-material';
 
 import { ImageI } from '../../api/generate-image-utils';
-// [修改] 添加缺失的 import 语句
 import ExportStepper, { downloadBase64Media } from '../transverse-components/ExportDialog';
 import DownloadDialog from '../transverse-components/DownloadDialog';
 import { appContextDataDefault, useAppContext } from '../../context/app-context';
@@ -34,9 +33,11 @@ const containerStyles = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  backgroundColor: palette.grey[900],
+  // [修改] 将背景颜色从深灰色改为白色
+  backgroundColor: palette.background.paper, 
   position: 'relative',
   overflow: 'hidden',
+  border: `1px solid ${palette.grey[300]}`, // [新增] 为白色背景添加一个浅灰色边框，以增加可见性
 };
 
 export default function TryOnResultDisplay({ isLoading, errorMsg, generatedImage }: TryOnResultDisplayProps) {
@@ -93,8 +94,8 @@ export default function TryOnResultDisplay({ isLoading, errorMsg, generatedImage
           <ImageListItem
             key={generatedImage.key}
             sx={{
-              boxShadow: '0px 5px 10px -1px rgb(0 0 0 / 70%)',
-              transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+              // [修改] 移除深色背景下的阴影，因为在白色背景下不再需要
+              // boxShadow: '0px 5px 10px -1px rgb(0 0 0 / 70%)', 
               width: '100%', height: '100%', display: 'flex',
               justifyContent: 'center', alignItems: 'center',
             }}
@@ -140,7 +141,7 @@ export default function TryOnResultDisplay({ isLoading, errorMsg, generatedImage
                     </IconButton>
                   </CustomWhiteTooltip>
                   <CustomWhiteTooltip title="Download locally" size="small">
-                    <IconButton onClick={(e) => { e.stopPropagation(); setImageToDL(generatedImage); }} sx={{ pr: 1, pl: 0.2, zIndex: 10 }} disableRipple>
+                    <IconButton onClick={(e) => { e.stopPropagation(); handleDLimage(generatedImage); }} sx={{ pr: 1, pl: 0.2, zIndex: 10 }} disableRipple>
                       <Avatar sx={CustomizedAvatarButton}><Download sx={CustomizedIconButton} /></Avatar>
                     </IconButton>
                   </CustomWhiteTooltip>
