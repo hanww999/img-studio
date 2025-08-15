@@ -92,19 +92,20 @@ export default function VirtualTryOnForm({
           </AccordionSummary>
           <AccordionDetails>
             <Stack spacing={2} sx={{ pt: 1 }}>
+              {/* [最终修正] 遵循组件定义，同时提供 label 和 field 属性 */}
               <FormInputChipGroup
                 name="sampleCount"
                 control={control}
                 setValue={setValue}
-                {...generationFields.fields.sampleCount}
+                label={generationFields.fields.sampleCount.label}
+                field={generationFields.fields.sampleCount}
                 width="100%"
                 required={false}
               />
-              {/* [修改] 同时提供 label 和 field 属性 */}
               <FormInputDropdown
                 name="personGeneration"
                 control={control}
-                label={generationFields.fields.personGeneration.label}
+                label={generationFields.fields.personGeneration.label ?? ''}
                 field={generationFields.fields.personGeneration}
                 styleSize="small"
                 width="100%"
@@ -113,7 +114,7 @@ export default function VirtualTryOnForm({
               <FormInputDropdown
                 name="outputFormat"
                 control={control}
-                label={generationFields.fields.outputFormat.label}
+                label={generationFields.fields.outputFormat.label ?? ''}
                 field={generationFields.fields.outputFormat}
                 styleSize="small"
                 width="100%"
