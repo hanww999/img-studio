@@ -1,4 +1,3 @@
-// app/api/virtual-try-on/action.ts
 
 'use server';
 
@@ -46,8 +45,14 @@ export const generateVtoImage = async (
     return { error: 'Unable to authenticate your account.' };
   }
 
-  const location = appContext.location;
-  const projectId = appContext.project_id;
+  // [最终修正] 从环境变量中获取 location 和 project_id，这才是您项目中的正确模式
+  const location = process.env.NEXT_PUBLIC_VERTEX_API_LOCATION || 'us-central1';
+  const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+  
+  if (!projectId) {
+    return { error: 'Project ID is not configured in environment variables.' };
+  }
+
   const modelVersion = formData.modelVersion;
   const apiUrl = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelVersion}:predict`;
 
