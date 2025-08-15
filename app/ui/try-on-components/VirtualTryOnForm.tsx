@@ -119,14 +119,16 @@ export default function VirtualTryOnForm({
                 width="100%"
                 required={false}
               />
-              {/* [最终修正] FormInputNumberSmall 不接受 label prop，我们在外部手动添加一个 label */}
               <Box>
                 <Typography variant="caption" sx={{ color: palette.text.primary, fontSize: '0.75rem', fontWeight: 500, lineHeight: '1.3em', pb: 0.5 }}>
                   {generationFields.fields.seedNumber.label}
                 </Typography>
+                {/* [最终修正] 根据错误日志，为组件提供其必需的 min 和 max 属性 */}
                 <FormInputNumberSmall
                   name="seedNumber"
                   control={control}
+                  min={0}
+                  max={4294967295}
                 />
               </Box>
             </Stack>
