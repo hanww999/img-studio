@@ -1,17 +1,3 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 'use server'
 
 const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg')
@@ -59,49 +45,52 @@ export async function getSignedURL(gcsURI: string) {
     return url
   } catch (error) {
     console.error(error)
+    // 保持这个函数的错误返回对象，因为它被多处使用
     return {
       error: 'Error while getting secured access to content.',
     }
   }
 }
 
-export async function copyImageToTeamBucket(sourceGcsUri: string, id: string) {
+// <-- 核心修复：修改此函数以在失败时抛出错误 -->
+export async function copyImageToTeamBucket(sourceGcsUri: string, id: string): Promise<string> {
   const storage = new Storage({ projectId })
 
   try {
     if (!sourceGcsUri || !sourceGcsUri.startsWith('gs://')) {
       console.error('Invalid source GCS URI provided:', sourceGcsUri)
-      return {
-        error: 'Invalid source GCS URI format. It must start with gs://',
-      }
+      // 抛出错误而不是返回对象
+      throw new Error('Invalid source GCS URI format. It must start with gs://')
     }
     if (!id) {
       console.error('Invalid id provided:', id)
-      return {
-        error: 'Invalid id. It cannot be empty.',
-      }
+      // 抛出错误而不是返回对象
+      throw new Error('Invalid id. It cannot be empty.')
     }
 
     const { bucketName, fileName } = await decomposeUri(sourceGcsUri)
 
     const destinationBucketName = process.env.NEXT_PUBLIC_TEAM_BUCKET
 
-    if (!bucketName || !fileName || !destinationBucketName) throw new Error('Invalid source or destination URI.')
+    if (!bucketName || !fileName || !destinationBucketName) {
+      throw new Error('Invalid source or destination URI.')
+    }
 
     const sourceObject = storage.bucket(bucketName).file(fileName)
     const destinationBucket = storage.bucket(destinationBucketName)
     const destinationFile = destinationBucket.file(id)
 
-    // Check if file already exists in destination bucket, if not copy it
     const [exists] = await destinationFile.exists()
-    if (!exists) await sourceObject.copy(destinationFile)
+    if (!exists) {
+      await sourceObject.copy(destinationFile)
+    }
 
+    // 成功时返回 string
     return `gs://${destinationBucketName}/${id}`
   } catch (error) {
-    console.error(error)
-    return {
-      error: 'Error while moving media to team Library',
-    }
+    console.error('Error in copyImageToTeamBucket:', error)
+    // 重新抛出错误，以便调用方可以捕获它
+    throw new Error(`Error while moving media to team Library: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 
@@ -141,6 +130,7 @@ export async function downloadMediaFromGcs(gcsUri: string): Promise<{ data?: str
   }
 }
 
+// ... 文件中剩余的其他函数保持不变 ...
 export async function downloadTempVideo(gcsUri: string): Promise<string> {
   const storage = new Storage()
 
@@ -225,14 +215,12 @@ export async function getVideoThumbnailBase64(
   let localVideoPath: string | null = null
 
   try {
-    // 1. Ensure video is locally accessible
     localVideoPath = await downloadTempVideo(videoSourceGcsUri)
 
     if (!localVideoPath) throw Error('Failed to download video')
 
-    // 2. Use FFmpeg to extract the thumbnail
     await new Promise<void>((resolve, reject) => {
-      let command = ffmpeg(localVideoPath!).seekInput('00:00:01').frames(1) // Extract a single frame
+      let command = ffmpeg(localVideoPath!).seekInput('00:00:01').frames(1)
 
       const size = ratio === '16:9' ? '320x180' : '180x320'
       command = command.size(size)
@@ -250,10 +238,7 @@ export async function getVideoThumbnailBase64(
         .run()
     })
 
-    // 3. Read the generated thumbnail file into a buffer
     const thumbnailBuffer = await fs.readFile(tempThumbnailPath)
-
-    // 4. Convert buffer to base64 string
     const thumbnailBase64Data = thumbnailBuffer.toString('base64')
 
     return {
@@ -264,13 +249,11 @@ export async function getVideoThumbnailBase64(
     console.error('Error in getVideoThumbnailBase64:', error)
     return { error: error.message || 'An unexpected error occurred while generating thumbnail.' }
   } finally {
-    // 5. Cleanup temporary files
     if (localVideoPath)
       await fs
         .unlink(localVideoPath)
         .catch((err: any) => console.error(`Failed to delete temp video file: ${localVideoPath}`, err))
 
-    // Attempt to delete the temp thumbnail even if an error occurred earlier
     await fs.unlink(tempThumbnailPath).catch((err: { code: string }) => {
       if (err.code !== 'ENOENT') console.error(`Failed to delete temp thumbnail file: ${tempThumbnailPath}`, err)
     })
