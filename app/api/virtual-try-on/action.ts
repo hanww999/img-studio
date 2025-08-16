@@ -19,7 +19,7 @@ function generateUniqueFolderId() {
 interface Prediction {
   bytesBase64Encoded?: string;
   mimeType?: string;
-  gcsUri?: string; // [新增] 明确定义 gcsUri 字段
+  gcsUri?: string;
   error?: { message?: string };
 }
 
@@ -57,7 +57,6 @@ export const generateVtoImage = async (
   const apiUrl = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelVersion}:predict`;
 
   const uniqueId = generateUniqueFolderId();
-  // [修改] 我们现在将 storageUri 理解为一个文件夹前缀
   const storageUriPrefix = `gs://${appContext.gcsURI.replace('gs://', '')}/vto-generations/${uniqueId}`;
 
   const reqData = {
@@ -73,7 +72,7 @@ export const generateVtoImage = async (
       sampleCount: parseInt(formData.sampleCount, 10),
       personGeneration: formData.personGeneration,
       outputOptions: { mimeType: formData.outputFormat },
-      storageUri: storageUriPrefix, // [修改] 告知 API 使用这个前缀
+      storageUri: storageUriPrefix,
       ...(formData.seedNumber && { seed: parseInt(formData.seedNumber, 10) }),
     },
   };
@@ -105,11 +104,10 @@ export const generateVtoImage = async (
 
     let generatedImageBase64: string;
     const mimeType = predictionResult.mimeType || formData.outputFormat;
-    // [最终修正] 优先使用 API 返回的真实 GCS 路径
     const finalGcsUri = predictionResult.gcsUri;
 
     if (!finalGcsUri) {
-        throw new Error('API did not return a GCS URI for the generated image.');
+      throw new Error('API did not return a GCS URI for the generated image.');
     }
 
     if (predictionResult.bytesBase64Encoded) {
@@ -129,15 +127,20 @@ export const generateVtoImage = async (
       generatedImageBase64 = downloadResult.data;
     }
 
+    // [关键修改开始]
+    // 将 'image/png' 或 'image/jpeg' 清理为 'PNG' 或 'JPEG'，与应用内其他功能保持一致
+    const cleanFormat = (mimeType.split('/')[1] || 'png').toUpperCase();
+    // [关键修改结束]
+
     const resultImage: ImageI = {
       src: `data:${mimeType};base64,${generatedImageBase64}`,
-      gcsUri: finalGcsUri, // [最终修正] 使用从 API 获取的真实路径
+      gcsUri: finalGcsUri,
       ratio: '',
       width: 0,
       height: 0,
       altText: 'Generated try-on image',
       key: uniqueId,
-      format: mimeType,
+      format: cleanFormat, // [修改] 使用清理后的格式
       prompt: `Try-on with model version: ${formData.modelVersion}`,
       date: new Date().toISOString(),
       author: appContext.userID || 'Unknown User',
