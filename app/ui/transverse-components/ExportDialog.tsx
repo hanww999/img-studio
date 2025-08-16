@@ -159,19 +159,17 @@ export default function ExportStepper({
 
       try {
         // 1. Upscale if needed
-        let res
-        const upscaleFactor = formData.upscaleFactor
-        if (upscaleFactor === 'x2' || upscaleFactor === 'x4') {
+        if (formData.upscaleFactor === 'x2' || formData.upscaleFactor === 'x4') {
           try {
             setExportStatus('Upscaling...')
 
-            res = await upscaleImage({ uri: media.gcsUri }, upscaleFactor, appContext)
+            const res = await upscaleImage({ uri: media.gcsUri }, formData.upscaleFactor, appContext)
             if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
 
             media.gcsUri = res.newGcsUri
 
-            media.width = media.width * parseInt(upscaleFactor.replace(/[^0-9]/g, ''))
-            media.height = media.height * parseInt(upscaleFactor.replace(/[^0-9]/g, ''))
+            media.width = media.width * parseInt(formData.upscaleFactor.replace(/[^0-9]/g, ''))
+            media.height = media.height * parseInt(formData.upscaleFactor.replace(/[^0-9]/g, ''))
           } catch (error: any) {
             throw Error(error)
           }
@@ -184,11 +182,14 @@ export default function ExportStepper({
           setExportStatus('Exporting...')
           const res = await copyImageToTeamBucket(currentGcsUri, id)
 
-          // <-- 已修复的错误检查 1 -->
-          if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
+          // <-- 核心修复：添加类型守卫，如果 res 是错误对象则抛出异常 -->
+          if (typeof res === 'object' && res.error) {
+            throw new Error(res.error.replaceAll('Error: ', ''))
+          }
+          
+          // 如果代码能执行到这里，TypeScript 就能确定 res 是 string 类型
+          media.gcsUri = res
 
-          const movedGcsUri = res
-          media.gcsUri = movedGcsUri
         } catch (error: any) {
           throw Error(error)
         }
@@ -226,15 +227,12 @@ export default function ExportStepper({
         try {
           setExportStatus('Saving data...')
 
-          let res
           if (exportMediaFormFields) {
-            res = await saveMediaToLibrary(id, formData, exportMediaFormFields)
+            const res = await saveMediaToLibrary(id, formData, exportMediaFormFields)
+            if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
           } else {
             throw Error("Can't find exportMediaFormFields")
           }
-
-          // <-- 已修复的错误检查 2 -->
-          if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
         } catch (error: any) {
           throw Error(error)
         }
@@ -244,10 +242,11 @@ export default function ExportStepper({
           try {
             setExportStatus('Preparing download...')
             const res = await downloadMediaFromGcs(media.gcsUri)
+            if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
+            
             const name = `${media.key}.${media.format.toLowerCase()}`
             downloadBase64Media(res.data, name, media.format)
 
-            if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
           } catch (error: any) {
             throw Error(error)
           }
