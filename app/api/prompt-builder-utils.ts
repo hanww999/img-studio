@@ -1,32 +1,19 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+import { AdUnits, Brush, Camera, Gamepad, Lightbulb, Mic, Movie, Palette, Place, Public, VideogameAsset, Villa } from '@mui/icons-material';
 
-import { SportsEsports, TheaterComedy, Videocam } from '@mui/icons-material';
-
-// Defines the data structure for all fields in the Prompt Builder
+// 1. [核心修改] 定义新的、分层的数据结构
 export interface PromptData {
+  // 核心创意
   subject: string;
   context: string;
   action: string;
-  visualStyle: string;
-  cameraMovement: string;
-  composition: string;
-  lighting: string;
+  // 专业控制
+  cinematography: string;
+  lightingVfx: string;
+  negativePrompt: string;
   audio: string;
 }
 
-// Defines the structure for a single Professional Template
+// 2. [核心修改] 定义新的模板接口
 export interface Template {
   title: string;
   description: string;
@@ -34,86 +21,85 @@ export interface Template {
   data: PromptData;
 }
 
-// Default values for the fields when no template is selected
+// 3. [核心修改] 更新默认数据以匹配新结构
 export const initialPromptData: PromptData = {
   subject: 'A 25-year old travel vlogger with authentic energy, wearing casual outdoor gear',
   context: 'standing on a scenic mountain overlook during golden hour, backpack and hiking equipment visible',
   action: 'speaks directly to camera while gesturing toward breathtaking landscape, natural and conversational',
-  visualStyle: '',
-  cameraMovement: '',
-  composition: 'medium close-up with scenic background, natural framing',
-  lighting: 'golden hour lighting with warm, natural glow',
-  audio: "enthusiastic narration: 'After 6 hours of hiking, this view makes every step worth it!' with gentle wind and nature sounds",
+  cinematography: 'Medium close-up, smooth gimbal movement, natural framing',
+  lightingVfx: 'Golden hour lighting with warm, natural glow, professional color correction',
+  negativePrompt: 'blurry, low quality, watermark, text, ugly, deformed',
+  audio: "Enthusiastic narration: 'After 6 hours of hiking, this view makes every step worth it!' with gentle wind and nature sounds",
 };
 
-// Options for the dropdown menus in the Prompt Builder
-export const promptBuilderOptions = {
-  visualStyle: [
-    'cinematic corporate style with warm color grading',
-    'documentary-style natural lighting and authentic feel',
-    'high-end commercial production values with perfect lighting',
-    'film noir with dramatic chiaroscuro lighting',
-    'bright social-media optimized aesthetic',
-    'National Geographic documentary style',
-    'professional broadcast quality',
-    'artistic with creative visual effects',
-    'horror cinematography with dramatic lighting',
-    'macro cinematography with extreme close-ups',
-    'handheld POV style with personal intimacy',
-    'street documentary with natural urban lighting',
-  ],
-  cameraMovement: [
-    'smooth dolly-in from wide to medium shot',
-    'tracking shot following subject movement',
-    'slow push-in for emotional emphasis',
-    'crane shot descending to eye level',
-    'handheld documentary style with subtle shake',
-    'smooth gimbal movement maintaining stability',
-    'rack focus from foreground to subject',
-    'slow zoom-in during key moment',
-    'panning left to right revealing scene',
-    'static shot with perfect framing',
-    'overhead shot for unique perspective',
-    'low angle shot for dramatic effect',
-  ],
+// 4. [核心修改] 定义新的、面向行业的建议标签
+export const industryKeywords = {
+  common: {
+    cinematography: ['Close-up', 'Medium Shot', 'Wide Shot', 'Tracking Shot', 'Handheld', 'Shallow Depth of Field', 'Cinematic', 'Documentary Style'],
+    lightingVfx: ['Natural Light', 'Studio Lighting', 'Dramatic Shadows', 'Lens Flare', 'Film Grain', 'HDR Color Grading', 'Volumetric Light'],
+  },
+  gaming: {
+    cinematography: ['Game CG Trailer', 'In-Engine Look', 'Concept Art Style', 'Cel-Shading', 'Pixel Art', 'Immersive POV', 'Over-the-Shoulder', 'Bullet-Time/Slow-Mo', 'Orbital Camera', 'Epic Wide-Angle'],
+    lightingVfx: ['Sharp Details', 'Motion Blur', 'Magic/Skill VFX', 'UI/HUD Elements', 'Volumetric Fog', 'God Rays', 'Neon-drenched', 'Dark Fantasy Mood', 'Magical Glow'],
+  },
+  ecommerce: {
+    cinematography: ['Clean Studio Product', 'Lifestyle Context', 'Unboxing Video', '360° Spin', 'Top-Down Flat Lay', 'Macro/Detail Shot', 'Product-focused', 'Static Tripod Shot'],
+    lightingVfx: ['Clear Texture', 'White Background', 'True-to-Life Color', 'Glossy Finish', 'Softbox Light', 'Bright and Airy', 'Natural Window Light'],
+  },
+  advertising: {
+    cinematography: ['UGC Phone-shot Style', 'Cinematic Storytelling', 'High-end Commercial', 'Abstract Concept', 'Emotional Close-up', 'Dramatic Reveal', 'Sweeping Drone Shot'],
+    lightingVfx: ['Warm Color Grade', 'Brand Color Pop', 'Golden Hour', 'High-Contrast/Film Noir', 'Cozy & Inviting', 'Clean & Minimalist'],
+  },
 };
 
-// Data for the Professional Templates sidebar
+// 5. [核心修改] 定义新的、功能更强大的模板
 export const professionalTemplates: Template[] = [
   {
-    title: 'Horror/Thriller Scene',
-    description: 'Professional template',
-    icon: TheaterComedy,
-    data: {
-      subject: 'A lone detective, haunted by his past, holding a flickering flashlight.',
-      context: 'Inside a derelict, abandoned asylum during a thunderstorm. Dust motes dance in the flashlight beam.',
-      action: 'He cautiously pushes open a heavy, creaking door, revealing a long, dark corridor. His breath is visible in the cold air.',
-      visualStyle: 'film noir with dramatic chiaroscuro lighting',
-      cameraMovement: 'slow push-in for emotional emphasis',
-      composition: 'Extreme close-up on the detective\'s wide, fearful eyes, with the dark hallway reflected in them.',
-      lighting: 'Harsh, directional light from the flashlight, creating long, distorted shadows. Occasional flashes of lightning illuminate the scene.',
-      audio: 'The sound of dripping water, distant thunder, and the detective\'s own ragged breathing. A sudden, sharp, unidentifiable noise echoes from the end of the hall.',
-    },
-  },
-  {
-    title: 'Video Game Trailer',
-    description: 'Professional template',
-    icon: SportsEsports,
-    data: {
-      subject: 'A futuristic cyborg warrior, clad in glowing neon armor, wielding a plasma sword.',
-      context: 'On the rain-slicked rooftops of a sprawling, Blade Runner-esque cyberpunk city at night.',
-      action: 'The warrior dashes and leaps between skyscrapers, deflecting laser fire from flying drones with their sword in a fluid, acrobatic sequence.',
-      visualStyle: 'high-end commercial production values with perfect lighting',
-      cameraMovement: 'tracking shot following subject movement',
-      composition: 'Dynamic wide shots showing the scale of the city, intercut with tight action shots of the swordplay.',
-      lighting: 'Vibrant neon glow from holographic advertisements reflecting off wet surfaces, creating a high-contrast, colorful scene.',
-      audio: 'An epic, high-energy electronic music track with heavy bass, mixed with the sounds of plasma sword clashes, explosions, and futuristic vehicle whooshes.',
-    },
-  },
-  {
     title: 'Cinematic Vlog',
-    description: 'Professional template',
-    icon: Videocam,
-    data: initialPromptData, // Uses the default data as a base
+    description: 'For travel and lifestyle content',
+    icon: Public,
+    data: initialPromptData,
+  },
+  {
+    title: 'Game Trailer Shot',
+    description: 'Epic cinematic for game promotion',
+    icon: Gamepad,
+    data: {
+      subject: 'A battle-hardened elven ranger, clad in forest camouflage leather, holding a glowing runic longbow.',
+      context: 'On the pinnacle of an ancient, moss-covered stone ruin, with a stormy dusk sky in the background.',
+      action: 'She leaps towards another stone pillar, drawing an arrow mid-air that gathers wind elemental energy.',
+      cinematography: 'Dynamic low-angle tracking shot, capturing her leap from below, combined with a bullet-time slow-motion effect. The background has intense motion blur.',
+      lightingVfx: 'Dusk god rays pierce through the clouds, creating rim lighting on her silhouette. Distant lightning flashes illuminate the scene. The arrow has visible cyan wind magic particles. The overall color grade is cool and cinematic.',
+      negativePrompt: 'cartoonish, plastic-like, static, overexposed',
+      audio: 'Epic orchestral score, the creak of the bowstring, the howl of the wind, and distant thunder.',
+    },
+  },
+  {
+    title: 'E-commerce Product',
+    description: 'Clean studio shot for product display',
+    icon: Villa,
+    data: {
+      subject: 'A latest model of Sennheiser noise-canceling headphones, matte black with a brushed metal finish.',
+      context: 'On a flawless, pure white seamless background.',
+      action: 'Statically placed at an angle that best showcases its design.',
+      cinematography: 'Professional product photography, commercial-grade, with a macro lens capturing the texture of the leather earcups and metal.',
+      lightingVfx: 'Bright, clean commercial studio lighting with soft shadows to emphasize three-dimensionality. No stray light. Hyper-realistic with colors true to the actual product.',
+      negativePrompt: 'cluttered background, color distortion, artistic filters, harsh reflections',
+      audio: 'No audio needed.',
+    },
+  },
+  {
+    title: 'Performance Ad (UGC)',
+    description: 'For social media click-through rates',
+    icon: AdUnits,
+    data: {
+      subject: 'A relatable, ordinary woman in her 30s, with minimal or no makeup.',
+      context: 'In a standard home bathroom, with bright but not professionally lit lighting.',
+      action: 'She is speaking directly to her phone\'s front camera (first-person view), excitedly showing an acne serum and pointing to a before-and-after spot on her face.',
+      cinematography: 'Shot on a phone front camera style, with slight shakes, looking like it\'s handheld. A text overlay at the top mimics a TikTok UI: "This thing actually works!"',
+      lightingVfx: 'Standard bathroom overhead lighting, authentic, slightly overexposed. No special effects, no color grading, looks straight out of the phone.',
+      negativePrompt: 'professional lighting, gimbal shot, cinematic color grading, staged, too perfect',
+      audio: 'Her own slightly excited, fast-paced voiceover: "Girls, I have to show you this! I used it for one night, and this pimple is gone!"',
+    },
   },
 ];
