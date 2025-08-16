@@ -40,7 +40,7 @@ import { generateImage } from '../../api/imagen/action';
 import {
   chipGroupFieldsI, GenerateImageFormFields, GenerateImageFormI, ImageGenerationFieldsI,
   ImageI, maxReferences, ReferenceObjectDefaults, ReferenceObjectInit, selectFieldsI,
-  imagenUltraSpecificSettings, // [修改] 导入新的配置对象
+  imagenUltraSpecificSettings,
 } from '../../api/generate-image-utils';
 import { EditImageFormFields } from '../../api/edit-utils';
 import {
@@ -93,14 +93,20 @@ export default function GenerateForm({
   };
 
   const [promptBuilderOpen, setPromptBuilderOpen] = useState(false);
-  const handlePromptBuilderClose = (newPrompt?: string) => {
-    setPromptBuilderOpen(false);
-    if (newPrompt && typeof newPrompt === 'string') {
-      setValue('prompt', newPrompt);
-    }
+  const [imagenPromptBuilderOpen, setImagenPromptBuilderOpen] = useState(false);
+
+  // [核心修复] 1. 创建新的、功能正确的 onApply 回调函数
+  const handleApplyFromBuilder = (prompt: string, negativePrompt: string) => {
+    setValue('prompt', prompt, { shouldValidate: true });
+    setValue('negativePrompt', negativePrompt);
+    setPromptBuilderOpen(false); // 关闭弹窗
   };
 
-  const [imagenPromptBuilderOpen, setImagenPromptBuilderOpen] = useState(false);
+  // [核心修复] 2. 创建新的、专门用于关闭的 onClose 回调函数
+  const handleCloseBuilder = () => {
+    setPromptBuilderOpen(false);
+  };
+  
   const handleImagenPromptBuilderClose = (newPrompt?: string) => {
     setImagenPromptBuilderOpen(false);
     if (newPrompt && typeof newPrompt === 'string') {
@@ -180,7 +186,6 @@ export default function GenerateForm({
   const isOnlyITVavailable = currentModel.includes('veo-3.0') && !currentModel.includes('fast') && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true';
   const isAdvancedFeaturesAvailable = currentModel.includes('veo-2.0') && process.env.NEXT_PUBLIC_VEO_ADVANCED_ENABLED === 'true';
 
-  // [修改] 当模型切换到 Imagen Ultra 时，自动将输出数量设置为 1
   useEffect(() => {
     if (currentModel === 'imagen-4.0-ultra-generate-001') {
       setValue('sampleCount', '1');
@@ -188,18 +193,17 @@ export default function GenerateForm({
   }, [currentModel, setValue]);
 
   useEffect(() => {
-  if (!isAdvancedFeaturesAvailable) {
-   setValue('cameraPreset', '');
-   setValue('interpolImageLast', { ...InterpolImageDefaults, purpose: 'last' });
-   if (!isOnlyITVavailable) setValue('interpolImageFirst', { ...InterpolImageDefaults, purpose: 'first' });
-  }
-   // [MODIFIED] Set resolution based on the selected model
-  if (currentModel.includes('veo-2.0')) {
-    setValue('resolution', '720p');
-  } else if (currentModel.includes('veo-3.0')) {
-    setValue('resolution', '1080p');
-  }
- }, [currentModel, isAdvancedFeaturesAvailable, isOnlyITVavailable, setValue]);
+    if (!isAdvancedFeaturesAvailable) {
+      setValue('cameraPreset', '');
+      setValue('interpolImageLast', { ...InterpolImageDefaults, purpose: 'last' });
+      if (!isOnlyITVavailable) setValue('interpolImageFirst', { ...InterpolImageDefaults, purpose: 'first' });
+    }
+    if (currentModel.includes('veo-2.0')) {
+      setValue('resolution', '720p');
+    } else if (currentModel.includes('veo-3.0')) {
+      setValue('resolution', '1080p');
+    }
+  }, [currentModel, isAdvancedFeaturesAvailable, isOnlyITVavailable, setValue]);
 
   interface ModelOption { value: string; label: string; indication?: string; type?: string }
   function manageModelNotFoundError(errorMessage: string, modelOptions: ModelOption[]): string {
@@ -297,7 +301,6 @@ export default function GenerateForm({
             <CustomTooltip title="Image to prompt generator" size="small"><IconButton onClick={() => setImageToPromptOpen(true)} aria-label="Prompt Generator" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Mms sx={CustomizedIconButton} /></Avatar></IconButton></CustomTooltip>
             <CustomTooltip title="Get prompt ideas" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())} aria-label="Random prompt" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Lightbulb sx={CustomizedIconButton} /></Avatar></IconButton></CustomTooltip>
             <CustomTooltip title="Reset all fields" size="small"><IconButton disabled={isLoading} onClick={() => onReset()} aria-label="Reset form" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Autorenew sx={CustomizedIconButton} /></Avatar></IconButton></CustomTooltip>
-            {/* [修改] 动态修改 GenerateSettings 的 props */}
             <GenerateSettings
               control={control}
               setValue={setValue}
@@ -305,8 +308,8 @@ export default function GenerateForm({
                 currentModel === 'imagen-4.0-ultra-generate-001'
                   ? { ...generationFields.settings, ...imagenUltraSpecificSettings }
                   : currentModel.includes('veo-3.0')
-                  ? tempVeo3specificSettings
-                  : generationFields.settings
+                    ? tempVeo3specificSettings
+                    : generationFields.settings
               }
               advancedSettingsFields={generationFields.advancedSettings}
               warningMessage={currentModel.includes('veo-3.0') ? 'NB: for now, Veo 3 has fewer setting options than Veo 2!' : ''}
@@ -339,43 +342,6 @@ export default function GenerateForm({
           )}
 
           {generationType === 'Video' && (
-            <Accordion disableGutters expanded={expanded === 'interpolation'} onChange={handleChange('interpolation')} sx={CustomizedAccordion}>
-              <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
-                <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>
-                  Image to video
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails sx={{ pt: 1, pb: 1, height: 'auto' }}>
-                {isAdvancedFeaturesAvailable && (
-                  <>
-                    <Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}>
-                      <VideoInterpolBox label="Base image" sublabel={'(or first frame)'} objectKey="interpolImageFirst" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageFirst} orientation={orientation} />
-                      <ArrowRight color={interpolImageLast.base64Image === '' ? 'secondary' : 'primary'} />
-                      <VideoInterpolBox label="Last frame" sublabel="(optional)" objectKey="interpolImageLast" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageLast} orientation={orientation} />
-                    </Stack>
-                    <Box sx={{ py: 2 }}>
-                      <FormInputChipGroup name="cameraPreset" label={videoGenerationUtils.cameraPreset.label ?? ''} control={control} setValue={setValue} width="450px" field={videoGenerationUtils.cameraPreset as chipGroupFieldsI} required={false} />
-                    </Box>
-                  </>
-                )}
-                {isOnlyITVavailable && (
-                  <Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}>
-                    <VideoInterpolBox label="Base image" sublabel={'(input)'} objectKey="interpolImageFirst" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageFirst} orientation={orientation} />
-                    <Typography color={palette.warning.main} sx={{ fontSize: '0.85rem', fontWeight: 400, pt: 2, width: '70%' }}>
-                      {'For now, Veo 3 does not support Image Interpolation and Camera Presets, switch to Veo 2 to use them!'}
-                    </Typography>
-                  </Stack>
-                )}
-                {!isAdvancedFeaturesAvailable && !isOnlyITVavailable && (
-                  <Typography sx={{ p: 2, color: 'text.secondary' }}>
-                    Image to video features are not available for the currently selected model. Please select Veo 2 or Veo 3 to see available options.
-                  </Typography>
-                )}
-              </AccordionDetails>
-            </Accordion>
-          )}
-
-          {generationType === 'Video' && (
             <Box sx={{ mt: 2 }}>
               <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setPromptBuilderOpen(true)} sx={{ py: 1.5, justifyContent: 'flex-start', textTransform: 'none', fontSize: '1rem', fontWeight: 500 }}>
                 Open Video Prompt Builder
@@ -386,16 +352,20 @@ export default function GenerateForm({
         </Box>
       </form>
 
+      {/* [核心修复] 3. 将 PromptBuilder 的调用移到这里，并正确传递 props */}
       <ThemeProvider theme={lightTheme}>
-        <Dialog open={promptBuilderOpen} onClose={() => handlePromptBuilderClose()} fullWidth={true} maxWidth="xl">
+        <Dialog open={promptBuilderOpen} onClose={handleCloseBuilder} fullWidth={true} maxWidth="xl">
           <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
             Video / Prompt Builder
-            <IconButton aria-label="close" onClick={() => handlePromptBuilderClose()} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
+            <IconButton aria-label="close" onClick={handleCloseBuilder} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
               <CloseIcon />
             </IconButton>
           </DialogTitle>
           <DialogContent dividers>
-            <PromptBuilder onApply={handlePromptBuilderClose} />
+            <PromptBuilder 
+              onApply={handleApplyFromBuilder} 
+              onClose={handleCloseBuilder} 
+            />
           </DialogContent>
         </Dialog>
       </ThemeProvider>
