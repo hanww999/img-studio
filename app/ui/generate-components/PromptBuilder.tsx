@@ -4,11 +4,11 @@ import React, { useState, useMemo } from 'react';
 import {
   Box, Button, Grid, Typography, Stack, Paper, Card, CardActionArea, CardContent,
   Accordion, AccordionSummary, AccordionDetails, Chip, TextField, Select, MenuItem, FormControl, InputLabel,
-  Dialog, DialogTitle, DialogContent, DialogActions // 导入 DialogActions
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import {
   ExpandMore, AccountCircle, Place, DirectionsRun, Palette, Mic, Movie,
-  RestartAlt, AutoFixHigh, CheckCircle, Block, ContentCopy // [新增] 导入复制图标
+  RestartAlt, AutoFixHigh, CheckCircle, Block, ContentCopy, WbSunny, Theaters
 } from '@mui/icons-material';
 import { initialPromptData, professionalTemplates, industryKeywords, PromptData, Template } from '../../api/prompt-builder-utils';
 
@@ -53,6 +53,20 @@ const ChipInput = ({ label, value, onChange, keywords }: { label: string, value:
   );
 };
 
+// [新增] 用于 Preview 弹窗的卡片组件
+const PreviewCard = ({ icon, title, content }: { icon: React.ReactNode, title: string, content: string }) => {
+  if (!content) return null; // 如果内容为空则不渲染
+  return (
+    <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+      <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+        {icon}
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>{title}</Typography>
+      </Stack>
+      <Typography variant="body2">{content}</Typography>
+    </Paper>
+  );
+};
+
 
 export default function PromptBuilder({ onApply, onClose }: PromptBuilderProps) {
   const [promptData, setPromptData] = useState<PromptData>(initialPromptData);
@@ -60,10 +74,7 @@ export default function PromptBuilder({ onApply, onClose }: PromptBuilderProps) 
   const [industry, setIndustry] = useState<'common' | 'gaming' | 'ecommerce' | 'advertising'>('common');
   
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewPrompt, setPreviewPrompt] = useState('');
-  
-  // [新增] 用于复制按钮的状态反馈
-  const [copyStatus, setCopyStatus] = useState('Copy');
+  const [copyStatus, setCopyStatus] = useState('Copy All');
 
   const keywords = useMemo(() => {
     const industryCinematography = industryKeywords[industry]?.cinematography || [];
@@ -96,17 +107,15 @@ export default function PromptBuilder({ onApply, onClose }: PromptBuilderProps) 
   };
 
   const handlePreview = () => {
-    const finalPrompt = generateFinalPrompt();
-    setPreviewPrompt(finalPrompt);
     setPreviewOpen(true);
   };
 
-  // [新增] 处理复制的函数
   const handleCopyFromPreview = () => {
-    const fullTextToCopy = `Prompt: ${previewPrompt}\n\nNegative Prompt: ${promptData.negativePrompt}`;
+    const finalPrompt = generateFinalPrompt();
+    const fullTextToCopy = `Prompt: ${finalPrompt}\n\nNegative Prompt: ${promptData.negativePrompt}`;
     navigator.clipboard.writeText(fullTextToCopy).then(() => {
       setCopyStatus('Copied!');
-      setTimeout(() => setCopyStatus('Copy'), 2000); // 2秒后恢复按钮文字
+      setTimeout(() => setCopyStatus('Copy All'), 2000);
     });
   };
 
@@ -204,23 +213,38 @@ export default function PromptBuilder({ onApply, onClose }: PromptBuilderProps) 
         <Button variant="contained" onClick={handleApplyAndClose} startIcon={<CheckCircle />} size="large">Apply to Form</Button>
       </Stack>
 
-      {/* Preview 弹窗 */}
+      {/* [核心修复] 全新的、结构化的 Preview 弹窗 */}
       <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>Generated Prompt Preview</DialogTitle>
         <DialogContent>
-          <Paper variant="outlined" sx={{ p: 2, whiteSpace: 'pre-wrap', wordBreak: 'break-word', bgcolor: 'grey.100' }}>
-            <Typography variant="body1" component="pre" sx={{ fontFamily: 'monospace' }}>
-              {previewPrompt}
-            </Typography>
-          </Paper>
-          <Paper variant="outlined" sx={{ p: 2, mt: 2, whiteSpace: 'pre-wrap', wordBreak: 'break-word', bgcolor: 'grey.100' }}>
-            <Typography variant="caption" color="text.secondary">Negative Prompt:</Typography>
-            <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', mt: 1 }}>
-              {promptData.negativePrompt}
-            </Typography>
-          </Paper>
+          <Stack spacing={1}>
+            <PreviewCard 
+              icon={<Theaters fontSize="small" />} 
+              title="Core Description" 
+              content={`${promptData.subject}, ${promptData.action}, ${promptData.context}.`} 
+            />
+            <PreviewCard 
+              icon={<Movie fontSize="small" />} 
+              title="Cinematography & Visuals" 
+              content={promptData.cinematography} 
+            />
+            <PreviewCard 
+              icon={<WbSunny fontSize="small" />} 
+              title="Lighting & VFX" 
+              content={promptData.lightingVfx} 
+            />
+            <PreviewCard 
+              icon={<Block fontSize="small" color="error" />} 
+              title="Negative Prompt" 
+              content={promptData.negativePrompt} 
+            />
+            <PreviewCard 
+              icon={<Mic fontSize="small" />} 
+              title="Audio" 
+              content={promptData.audio} 
+            />
+          </Stack>
         </DialogContent>
-        {/* [核心修复] 加回 DialogActions 和 Copy 按钮 */}
         <DialogActions>
           <Button onClick={handleCopyFromPreview} startIcon={<ContentCopy />}>
             {copyStatus}
