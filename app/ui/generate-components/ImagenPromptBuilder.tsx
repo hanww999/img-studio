@@ -1,193 +1,187 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//  https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 'use client';
 
 import React, { useState } from 'react';
 import {
- Box,
- Button,
- Grid,
- TextField,
- Typography,
- Select,
- MenuItem,
- FormControl,
- InputLabel,
- Stack,
- Paper,
-  Divider,
+  Box, Button, Grid, Typography, Stack, Paper, TextField, Select, MenuItem, FormControl, InputLabel,
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import {
- RestartAlt,
- CheckCircle,
-  AutoFixHigh,
-  ContentCopy, // FIX: Import the Copy icon
+  RestartAlt, AutoFixHigh, CheckCircle, ContentCopy, Block, Style, CameraAlt, PhotoFilter
 } from '@mui/icons-material';
 import { initialImagenPromptData, imagenPromptBuilderOptions, ImagenPromptData } from '../../api/imagen-prompt-builder-utils';
-import theme from '../../theme';
-const { palette } = theme;
 
+// 定义组件的 Props 接口
 interface ImagenPromptBuilderProps {
-    onApply: (prompt: string) => void;
+  onApply: (prompt: string, negativePrompt: string) => void;
+  onClose: () => void;
 }
 
-const SectionTitle = ({ title }: { title: string }) => (
-    <Box sx={{ my: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{title}</Typography>
-        <Divider />
-    </Box>
-);
+// 预览弹窗的卡片组件
+const PreviewCard = ({ icon, title, content }: { icon: React.ReactNode, title: string, content: string | undefined }) => {
+  if (!content) return null;
+  return (
+    <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+      <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+        {icon}
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>{title}</Typography>
+      </Stack>
+      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{content}</Typography>
+    </Paper>
+  );
+};
 
-export default function ImagenPromptBuilder({ onApply }: ImagenPromptBuilderProps) {
- const [promptData, setPromptData] = useState<ImagenPromptData>(initialImagenPromptData);
- const [generatedPrompt, setGeneratedPrompt] = useState('');
+export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBuilderProps) {
+  const [promptData, setPromptData] = useState<ImagenPromptData>(initialImagenPromptData);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [copyStatus, setCopyStatus] = useState('Copy All');
 
- const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-  const { name, value } = e.target;
-  setPromptData((prev) => ({ ...prev, [name]: value }));
- };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setPromptData((prev) => ({ ...prev, [name]: value }));
+  };
 
- const handleSelectChange = (e: any) => {
-  const { name, value } = e.target;
-  setPromptData((prev) => ({ ...prev, [name]: value }));
- };
+  const handleSelectChange = (e: any) => {
+    const { name, value } = e.target;
+    setPromptData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  // FIX: Reformat the prompt string for readability with labels and newlines
- const generateFinalPromptString = () => {
-    const sections = [
-        { label: 'Style / Medium', value: promptData.styleMedium },
-        { label: 'Subject', value: promptData.subject },
-        { label: 'Detailed Description', value: promptData.detailedDescription },
-        { label: 'Environment / Background', value: promptData.environment },
-        { label: 'Composition / View', value: promptData.composition },
-        { label: 'Lighting', value: promptData.lighting },
-        { label: 'Color Scheme', value: promptData.colorScheme },
-        { label: 'Lens Type', value: promptData.lensType },
-        { label: 'Camera Settings', value: promptData.cameraSettings },
-        { label: 'Film Type', value: promptData.filmType },
-        { label: 'Quality', value: promptData.quality },
+  const generateFinalPrompt = () => {
+    const parts = [
+      promptData.styleMedium,
+      `of ${promptData.subject}`,
+      promptData.detailedDescription,
+      promptData.environment,
+      promptData.composition,
+      promptData.lighting,
+      promptData.colorScheme,
+      promptData.lensType,
+      promptData.cameraSettings,
+      promptData.filmType,
+      promptData.quality,
     ];
-
-    let prompt = sections
-        .filter(section => section.value) // Only include sections that have a value
-        .map(section => `${section.label}: ${section.value}`) // Format as "Label: Value"
-        .join('\n'); // Join each section with a newline
-
-    if (promptData.negativePrompt) {
-        prompt += `\n\nNegative Prompt: ${promptData.negativePrompt}`;
-    }
-    
-    return prompt;
-  }
-
-  const handleGeneratePrompt = () => {
-    const finalPrompt = generateFinalPromptString();
-    setGeneratedPrompt(finalPrompt);
+    return parts.filter(part => part).join(', ');
   };
 
-  // FIX: Add a handleCopy function for the new button
+  const handlePreview = () => {
+    setPreviewOpen(true);
+  };
+
   const handleCopy = () => {
-    if (generatedPrompt) {
-      navigator.clipboard.writeText(generatedPrompt);
-    }
+    const finalPrompt = generateFinalPrompt();
+    const fullTextToCopy = `Prompt: ${finalPrompt}\n\nNegative Prompt: ${promptData.negativePrompt}`;
+    navigator.clipboard.writeText(fullTextToCopy).then(() => {
+      setCopyStatus('Copied!');
+      setTimeout(() => setCopyStatus('Copy All'), 2000);
+    });
   };
 
- const handleApplyPrompt = () => {
-    const finalPrompt = generatedPrompt || generateFinalPromptString();
-    onApply(finalPrompt);
-  }
+  const handleApply = () => {
+    const finalPrompt = generateFinalPrompt();
+    onApply(finalPrompt, promptData.negativePrompt);
+    onClose();
+  };
 
- const handleReset = () => {
-  setPromptData(initialImagenPromptData);
-  setGeneratedPrompt('');
- };
+  const handleReset = () => {
+    setPromptData(initialImagenPromptData);
+  };
 
- return (
-  <Box sx={{ width: '100%', p: 1 }}>
-    <Grid container spacing={3}>
-        {/* Column 1: Core Components */}
+  return (
+    <Box sx={{ p: 2, bgcolor: 'grey.50' }}>
+      <Grid container spacing={3}>
+        {/* Core Components */}
         <Grid item xs={12} md={4}>
-            <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
-                <SectionTitle title="Core Components" />
-                <Stack spacing={3}>
-                    <FormControl fullWidth><InputLabel>Style / Medium</InputLabel><Select name="styleMedium" value={promptData.styleMedium} label="Style / Medium" onChange={handleSelectChange}>{imagenPromptBuilderOptions.styleMedium.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}</Select></FormControl>
-                    <TextField name="subject" label="Subject" value={promptData.subject} onChange={handleInputChange} fullWidth multiline rows={2} placeholder="The core focus of the image..." />
-                    <TextField name="detailedDescription" label="Detailed Description" value={promptData.detailedDescription} onChange={handleInputChange} fullWidth multiline rows={4} placeholder="Material, texture, emotion, clothing..." />
-                    <TextField name="environment" label="Environment / Background" value={promptData.environment} onChange={handleInputChange} fullWidth multiline rows={3} placeholder="Where the subject is located..." />
-                </Stack>
-            </Paper>
-        </Grid>
-
-        {/* Column 2: Photographic Style */}
-        <Grid item xs={12} md={4}>
-            <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
-                <SectionTitle title="Photographic Style" />
-                <Stack spacing={3}>
-                    <FormControl fullWidth><InputLabel>Composition / View</InputLabel><Select name="composition" value={promptData.composition} label="Composition / View" onChange={handleSelectChange}>{imagenPromptBuilderOptions.composition.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}</Select></FormControl>
-                    <FormControl fullWidth><InputLabel>Lighting</InputLabel><Select name="lighting" value={promptData.lighting} label="Lighting" onChange={handleSelectChange}>{imagenPromptBuilderOptions.lighting.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}</Select></FormControl>
-                    <FormControl fullWidth><InputLabel>Color Scheme</InputLabel><Select name="colorScheme" value={promptData.colorScheme} label="Color Scheme" onChange={handleSelectChange}>{imagenPromptBuilderOptions.colorScheme.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}</Select></FormControl>
-                    <FormControl fullWidth><InputLabel>Lens Type</InputLabel><Select name="lensType" value={promptData.lensType} label="Lens Type" onChange={handleSelectChange}>{imagenPromptBuilderOptions.lensType.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}</Select></FormControl>
-                    <FormControl fullWidth><InputLabel>Camera Settings</InputLabel><Select name="cameraSettings" value={promptData.cameraSettings} label="Camera Settings" onChange={handleSelectChange}>{imagenPromptBuilderOptions.cameraSettings.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}</Select></FormControl>
-                    <FormControl fullWidth><InputLabel>Film Type</InputLabel><Select name="filmType" value={promptData.filmType} label="Film Type" onChange={handleSelectChange}>{imagenPromptBuilderOptions.filmType.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}</Select></FormControl>
-                    <FormControl fullWidth><InputLabel>Quality</InputLabel><Select name="quality" value={promptData.quality} label="Quality" onChange={handleSelectChange}>{imagenPromptBuilderOptions.quality.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}</Select></FormControl>
-                </Stack>
-            </Paper>
-        </Grid>
-
-        {/* Column 3: Exclusions */}
-        <Grid item xs={12} md={4}>
-            <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <SectionTitle title="Exclusions (Negative Prompt)" />
-                <TextField name="negativePrompt" label="Negative Prompt" value={promptData.negativePrompt} onChange={handleInputChange} fullWidth multiline rows={10} placeholder="Things to exclude: blurry, text, watermark, bad anatomy..." sx={{ flexGrow: 1 }} />
-            </Paper>
-        </Grid>
-    </Grid>
-
-    <Stack direction="row" spacing={2} justifyContent="center" sx={{ my: 4 }}>
-        <Button variant="outlined" startIcon={<AutoFixHigh />} onClick={handleGeneratePrompt} size="large">
-            Preview Generated Prompt
-        </Button>
-        <Button variant="text" startIcon={<RestartAlt />} onClick={handleReset}>
-            Reset All
-        </Button>
-    </Stack>
-
-    {generatedPrompt && (
-        <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.100', border: '1px solid', borderColor: 'grey.300' }}>
-            {/* FIX: Add a Stack to hold the title and the new Copy button */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Your Generated Prompt</Typography>
-                <Button variant="text" startIcon={<ContentCopy />} onClick={handleCopy}>Copy</Button>
+          <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>Core Components</Typography>
+            <Stack spacing={2}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Style / Medium</InputLabel>
+                <Select name="styleMedium" value={promptData.styleMedium} label="Style / Medium" onChange={handleSelectChange}>
+                  {imagenPromptBuilderOptions.styleMedium.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}
+                </Select>
+              </FormControl>
+              <TextField name="subject" label="Subject" value={promptData.subject} onChange={handleInputChange} size="small" />
+              <TextField name="detailedDescription" label="Detailed Description" value={promptData.detailedDescription} onChange={handleInputChange} multiline rows={4} />
+              <TextField name="environment" label="Environment / Background" value={promptData.environment} onChange={handleInputChange} multiline rows={3} />
             </Stack>
-            <Box component="pre" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', m: 0, p: 2, backgroundColor: '#fff', borderRadius: 1, fontFamily: 'monospace', border: '1px solid', borderColor: 'grey.300' }}>
-                {generatedPrompt}
-            </Box>
-        </Paper>
-    )}
+          </Paper>
+        </Grid>
 
-    <Stack sx={{ mt: 4 }} alignItems="flex-end">
-        <Button 
-            variant="contained" 
-            startIcon={<CheckCircle />} 
-            onClick={handleApplyPrompt} 
-            size="large"
-            sx={{ py: 1.5, px: 4 }}
-        >
-            Apply to Form
-        </Button>
-    </Stack>
-  </Box>
- );
+        {/* Photographic Style */}
+        <Grid item xs={12} md={4}>
+          <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>Photographic Style</Typography>
+            <Stack spacing={2}>
+              <FormControl fullWidth size="small"><InputLabel>Composition / View</InputLabel><Select name="composition" value={promptData.composition} label="Composition / View" onChange={handleSelectChange}>{imagenPromptBuilderOptions.composition.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
+              <FormControl fullWidth size="small"><InputLabel>Lighting</InputLabel><Select name="lighting" value={promptData.lighting} label="Lighting" onChange={handleSelectChange}>{imagenPromptBuilderOptions.lighting.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
+              <FormControl fullWidth size="small"><InputLabel>Color Scheme</InputLabel><Select name="colorScheme" value={promptData.colorScheme} label="Color Scheme" onChange={handleSelectChange}>{imagenPromptBuilderOptions.colorScheme.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
+              <FormControl fullWidth size="small"><InputLabel>Lens Type</InputLabel><Select name="lensType" value={promptData.lensType} label="Lens Type" onChange={handleSelectChange}>{imagenPromptBuilderOptions.lensType.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
+              <FormControl fullWidth size="small"><InputLabel>Camera Settings</InputLabel><Select name="cameraSettings" value={promptData.cameraSettings} label="Camera Settings" onChange={handleSelectChange}>{imagenPromptBuilderOptions.cameraSettings.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
+              <FormControl fullWidth size="small"><InputLabel>Film Type</InputLabel><Select name="filmType" value={promptData.filmType} label="Film Type" onChange={handleSelectChange}>{imagenPromptBuilderOptions.filmType.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
+              <FormControl fullWidth size="small"><InputLabel>Quality</InputLabel><Select name="quality" value={promptData.quality} label="Quality" onChange={handleSelectChange}>{imagenPromptBuilderOptions.quality.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
+            </Stack>
+          </Paper>
+        </Grid>
+
+        {/* Exclusions */}
+        <Grid item xs={12} md={4}>
+          <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>Exclusions (Negative Prompt)</Typography>
+            <TextField name="negativePrompt" label="Negative Prompt" value={promptData.negativePrompt} onChange={handleInputChange} fullWidth multiline rows={10} />
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* 底部操作按钮 */}
+      <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 3 }}>
+        <Button variant="outlined" onClick={handlePreview} startIcon={<AutoFixHigh />}>Preview Generated Prompt</Button>
+        <Button variant="text" onClick={handleReset} startIcon={<RestartAlt />}>Reset All</Button>
+      </Stack>
+
+      {/* 主应用按钮 */}
+      <Stack sx={{ mt: 4 }} alignItems="flex-end">
+        <Button variant="contained" startIcon={<CheckCircle />} onClick={handleApply} size="large">Apply to Form</Button>
+      </Stack>
+
+      {/* 预览弹窗 */}
+      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="md">
+        <DialogTitle>Generated Prompt Preview</DialogTitle>
+        <DialogContent>
+          <Stack spacing={1}>
+            <PreviewCard 
+              icon={<Style fontSize="small" />} 
+              title="Core Components" 
+              content={
+                `Style / Medium: ${promptData.styleMedium}\n` +
+                `Subject: ${promptData.subject}\n` +
+                `Detailed Description: ${promptData.detailedDescription}\n` +
+                `Environment / Background: ${promptData.environment}`
+              } 
+            />
+            <PreviewCard 
+              icon={<CameraAlt fontSize="small" />} 
+              title="Photographic Style" 
+              content={
+                `Composition / View: ${promptData.composition}\n` +
+                `Lighting: ${promptData.lighting}\n` +
+                `Color Scheme: ${promptData.colorScheme}\n` +
+                `Lens Type: ${promptData.lensType}\n` +
+                `Camera Settings: ${promptData.cameraSettings}\n` +
+                `Film Type: ${promptData.filmType}\n` +
+                `Quality: ${promptData.quality}`
+              } 
+            />
+            <PreviewCard 
+              icon={<Block fontSize="small" color="error" />} 
+              title="Exclusions (Negative Prompt)" 
+              content={promptData.negativePrompt} 
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCopy} startIcon={<ContentCopy />}>{copyStatus}</Button>
+          <Button onClick={() => setPreviewOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
 }
