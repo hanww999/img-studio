@@ -1,22 +1,9 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 'use server'
 
 import { Timestamp } from '@google-cloud/firestore'
 import { ExportMediaFormI, MediaMetadataI, ExportMediaFormFieldsI } from '../export-utils'
 import { deleteMedia } from '../cloud-storage/action'
+import { getUserEmail } from '../auth-utils'; // <-- 核心修改：导入用户身份辅助函数
 
 const { Firestore, FieldValue } = require('@google-cloud/firestore')
 const firestore = new Firestore()
@@ -25,7 +12,8 @@ firestore.settings({ ignoreUndefinedProperties: true })
 export async function addNewFirestoreEntry(
   entryID: string,
   data: ExportMediaFormI,
-  ExportImageFormFields: ExportMediaFormFieldsI
+  ExportImageFormFields: ExportMediaFormFieldsI,
+  userEmail: string, // <-- 核心修改：接收 userEmail 参数
 ) {
   const document = firestore.collection('metadata').doc(entryID)
 
@@ -50,6 +38,7 @@ export async function addNewFirestoreEntry(
 
   const dataToSet = {
     ...cleanData,
+    userEmail: userEmail, // <-- 核心修改：将 userEmail 添加到要保存的数据中
     timestamp: FieldValue.serverTimestamp(),
     combinedFilters: combinedFilters,
   }
@@ -66,12 +55,14 @@ export async function addNewFirestoreEntry(
 }
 
 export async function fetchDocumentsInBatches(lastVisibleDocument?: any, filters?: any) {
+  const userEmail = getUserEmail(); // <-- 核心修改：在函数开始时获取当前用户 email
   const batchSize = 24
 
   const collection = firestore.collection('metadata')
   let thisBatchDocuments: MediaMetadataI[] = []
 
-  let query = collection
+  // <-- 核心修改：所有查询都必须首先基于 userEmail 进行过滤 -->
+  let query = collection.where('userEmail', '==', userEmail);
 
   if (filters) {
     const filterEntries = Object.entries(filters).filter(([, values]) => Array.isArray(values) && values.length > 0)
@@ -98,7 +89,6 @@ export async function fetchDocumentsInBatches(lastVisibleDocument?: any, filters
 
     const snapshot = await query.get()
 
-    // No more documents
     if (snapshot.empty) {
       return { thisBatchDocuments: null, lastVisibleDocument: null, isMorePageToLoad: false }
     }
@@ -117,8 +107,8 @@ export async function fetchDocumentsInBatches(lastVisibleDocument?: any, filters
         snapshot.docs[snapshot.docs.length - 1].data().timestamp._nanoseconds / 1000000,
     }
 
-    // Check if there's a next page
-    let nextPageQuery = collection
+    // <-- 核心修改：检查下一页的查询也必须包含 userEmail 过滤 -->
+    let nextPageQuery = collection.where('userEmail', '==', userEmail);
     if (filters) {
       const filterEntries = Object.entries(filters).filter(([, values]) => Array.isArray(values) && values.length > 0)
       if (filterEntries.length > 0) {
@@ -159,7 +149,7 @@ export async function firestoreDeleteBatch(
   idsToDelete: string[],
   currentMedias: MediaMetadataI[]
 ): Promise<boolean | { error: string }> {
-  // Ensure firestore is initialized and collection name is correct
+  const userEmail = getUserEmail(); // <-- 核心修改：获取当前用户 email 以进行权限验证
   const collection = firestore.collection('metadata')
   const batch = firestore.batch()
 
@@ -173,6 +163,15 @@ export async function firestoreDeleteBatch(
   for (const id of idsToDelete) {
     const mediaItem = currentMedias.find((media) => media.id === id)
 
+    // <-- 核心安全修改：开始 -->
+    // 在删除前，验证该媒体的所有者是否为当前登录用户
+    if (mediaItem && mediaItem.userEmail !== userEmail) {
+      console.warn(`Security Alert: User '${userEmail}' attempted to delete media '${id}' owned by '${mediaItem.userEmail}'. Operation blocked.`);
+      // 跳过此项，不将其加入删除批处理
+      continue;
+    }
+    // <-- 核心安全修改：结束 -->
+
     if (mediaItem && mediaItem.gcsURI)
       gcsDeletionPromises.push(
         deleteMedia(mediaItem.gcsURI)
@@ -184,21 +183,17 @@ export async function firestoreDeleteBatch(
           })
       )
 
-    // Add the Firestore document deletion to the batch
     const docRef = collection.doc(id)
     batch.delete(docRef)
   }
 
-  // Attempt to delete all GCS files concurrently and wait for all attempts to settle.
   if (gcsDeletionPromises.length > 0) await Promise.all(gcsDeletionPromises)
 
-  // Commit the batch of Firestore deletions
   try {
     await batch.commit()
     return true
   } catch (error) {
     console.error('Firestore batch commit failed:', error)
-
     return { error: `Firestore batch deletion failed. ` }
   }
 }
