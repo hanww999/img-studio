@@ -95,14 +95,12 @@ export default function GenerateForm({
   const [promptBuilderOpen, setPromptBuilderOpen] = useState(false);
   const [imagenPromptBuilderOpen, setImagenPromptBuilderOpen] = useState(false);
 
-  // [核心修复] 1. 创建新的、功能正确的 onApply 回调函数
   const handleApplyFromBuilder = (prompt: string, negativePrompt: string) => {
     setValue('prompt', prompt, { shouldValidate: true });
     setValue('negativePrompt', negativePrompt);
-    setPromptBuilderOpen(false); // 关闭弹窗
+    setPromptBuilderOpen(false);
   };
 
-  // [核心修复] 2. 创建新的、专门用于关闭的 onClose 回调函数
   const handleCloseBuilder = () => {
     setPromptBuilderOpen(false);
   };
@@ -319,6 +317,54 @@ export default function GenerateForm({
             <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>{'Generate'}</Button>
           </Stack>
 
+          {/* [核心修复] 加回 Image to video / Interpolation 的 Accordion */}
+          {generationType === 'Video' && (
+            <Accordion disableGutters expanded={expanded === 'interpolation'} onChange={handleChange('interpolation')} sx={CustomizedAccordion}>
+              <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
+                <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>
+                  Image to video
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 1, pb: 1, height: 'auto' }}>
+                {isAdvancedFeaturesAvailable && (
+                  <>
+                    <Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}>
+                      <VideoInterpolBox label="Base image" sublabel={'(or first frame)'} objectKey="interpolImageFirst" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageFirst} orientation={orientation} />
+                      <ArrowRight color={interpolImageLast.base64Image === '' ? 'secondary' : 'primary'} />
+                      <VideoInterpolBox label="Last frame" sublabel="(optional)" objectKey="interpolImageLast" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageLast} orientation={orientation} />
+                    </Stack>
+                    <Box sx={{ py: 2 }}>
+                      <FormInputChipGroup name="cameraPreset" label={videoGenerationUtils.cameraPreset.label ?? ''} control={control} setValue={setValue} width="450px" field={videoGenerationUtils.cameraPreset as chipGroupFieldsI} required={false} />
+                    </Box>
+                  </>
+                )}
+                {isOnlyITVavailable && (
+                  <Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}>
+                    <VideoInterpolBox label="Base image" sublabel={'(input)'} objectKey="interpolImageFirst" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageFirst} orientation={orientation} />
+                    <Typography color={palette.warning.main} sx={{ fontSize: '0.85rem', fontWeight: 400, pt: 2, width: '70%' }}>
+                      {'For now, Veo 3 does not support Image Interpolation and Camera Presets, switch to Veo 2 to use them!'}
+                    </Typography>
+                  </Stack>
+                )}
+                {!isAdvancedFeaturesAvailable && !isOnlyITVavailable && (
+                  <Typography sx={{ p: 2, color: 'text.secondary' }}>
+                    Image to video features are not available for the currently selected model. Please select Veo 2 or Veo 3 to see available options.
+                  </Typography>
+                )}
+              </AccordionDetails>
+            </Accordion>
+          )}
+
+          {/* [核心修复] 加回 Prompt Builder 的按钮 */}
+          {generationType === 'Video' && (
+            <Box sx={{ mt: 2 }}>
+              <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setPromptBuilderOpen(true)} sx={{ py: 1.5, justifyContent: 'flex-start', textTransform: 'none', fontSize: '1rem', fontWeight: 500 }}>
+                Open Video Prompt Builder
+              </Button>
+            </Box>
+          )}
+
+          {/* 保留 Imagen 的相关功能 */}
           {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
             <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')} sx={CustomizedAccordion}>
               <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
@@ -332,7 +378,6 @@ export default function GenerateForm({
               </AccordionDetails>
             </Accordion>
           )}
-
           {generationType === 'Image' && (
             <Box sx={{ mt: 2 }}>
               <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setImagenPromptBuilderOpen(true)} sx={{ py: 1.5, justifyContent: 'flex-start', textTransform: 'none', fontSize: '1rem', fontWeight: 500 }}>
@@ -341,18 +386,9 @@ export default function GenerateForm({
             </Box>
           )}
 
-          {generationType === 'Video' && (
-            <Box sx={{ mt: 2 }}>
-              <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setPromptBuilderOpen(true)} sx={{ py: 1.5, justifyContent: 'flex-start', textTransform: 'none', fontSize: '1rem', fontWeight: 500 }}>
-                Open Video Prompt Builder
-              </Button>
-            </Box>
-          )}
-
         </Box>
       </form>
 
-      {/* [核心修复] 3. 将 PromptBuilder 的调用移到这里，并正确传递 props */}
       <ThemeProvider theme={lightTheme}>
         <Dialog open={promptBuilderOpen} onClose={handleCloseBuilder} fullWidth={true} maxWidth="xl">
           <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
