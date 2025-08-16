@@ -95,21 +95,24 @@ export default function GenerateForm({
   const [promptBuilderOpen, setPromptBuilderOpen] = useState(false);
   const [imagenPromptBuilderOpen, setImagenPromptBuilderOpen] = useState(false);
 
-  const handleApplyFromBuilder = (prompt: string, negativePrompt: string) => {
+  // Veo Builder Callbacks
+  const handleApplyFromVeoBuilder = (prompt: string, negativePrompt: string) => {
     setValue('prompt', prompt, { shouldValidate: true });
     setValue('negativePrompt', negativePrompt);
     setPromptBuilderOpen(false);
   };
-
-  const handleCloseBuilder = () => {
+  const handleCloseVeoBuilder = () => {
     setPromptBuilderOpen(false);
   };
   
-  const handleImagenPromptBuilderClose = (newPrompt?: string) => {
+  // [核心修复] 为 Imagen Builder 创建同样的回调函数
+  const handleApplyFromImagenBuilder = (prompt: string, negativePrompt: string) => {
+    setValue('prompt', prompt, { shouldValidate: true });
+    setValue('negativePrompt', negativePrompt);
     setImagenPromptBuilderOpen(false);
-    if (newPrompt && typeof newPrompt === 'string') {
-      setValue('prompt', newPrompt);
-    }
+  };
+  const handleCloseImagenBuilder = () => {
+    setImagenPromptBuilderOpen(false);
   };
 
   const [isGeminiRewrite, setIsGeminiRewrite] = useState(false);
@@ -317,7 +320,28 @@ export default function GenerateForm({
             <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>{'Generate'}</Button>
           </Stack>
 
-          {/* [核心修复] 加回 Image to video / Interpolation 的 Accordion */}
+          {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
+            <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')} sx={CustomizedAccordion}>
+              <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
+                <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>{'Subject & Style reference(s)'}</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0, pb: 1, height: 'auto' }}>
+                <Stack direction="column" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={1} sx={{ pt: 0, pb: 1 }}>
+                  {referenceObjects.map((refObj, index) => (<ReferenceBox key={refObj.objectKey + index + '_box'} objectKey={refObj.objectKey} currentReferenceObject={refObj} onNewErrorMsg={onNewErrorMsg} control={control} setValue={setValue} removeReferenceObject={removeReferenceObject} addAdditionalRefObject={() => { }} refPosition={index} refCount={referenceObjects.length} />))}
+                </Stack>
+                {referenceObjects.length < maxReferences && (<Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start' }}><Button variant="contained" onClick={() => addNewRefObject()} disabled={referenceObjects.length >= maxReferences} sx={{ ...CustomizedSendButton, ...{ fontSize: '0.8rem', px: 0 } }}>{'Add'}</Button></Box>)}
+              </AccordionDetails>
+            </Accordion>
+          )}
+
+          {generationType === 'Image' && (
+            <Box sx={{ mt: 2 }}>
+              <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setImagenPromptBuilderOpen(true)} sx={{ py: 1.5, justifyContent: 'flex-start', textTransform: 'none', fontSize: '1rem', fontWeight: 500 }}>
+                Open Imagen Prompt Builder
+              </Button>
+            </Box>
+          )}
+
           {generationType === 'Video' && (
             <Accordion disableGutters expanded={expanded === 'interpolation'} onChange={handleChange('interpolation')} sx={CustomizedAccordion}>
               <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
@@ -355,7 +379,6 @@ export default function GenerateForm({
             </Accordion>
           )}
 
-          {/* [核心修复] 加回 Prompt Builder 的按钮 */}
           {generationType === 'Video' && (
             <Box sx={{ mt: 2 }}>
               <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setPromptBuilderOpen(true)} sx={{ py: 1.5, justifyContent: 'flex-start', textTransform: 'none', fontSize: '1rem', fontWeight: 500 }}>
@@ -364,58 +387,40 @@ export default function GenerateForm({
             </Box>
           )}
 
-          {/* 保留 Imagen 的相关功能 */}
-          {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
-            <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')} sx={CustomizedAccordion}>
-              <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
-                <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>{'Subject & Style reference(s)'}</Typography>
-              </AccordionSummary>
-              <AccordionDetails sx={{ pt: 0, pb: 1, height: 'auto' }}>
-                <Stack direction="column" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={1} sx={{ pt: 0, pb: 1 }}>
-                  {referenceObjects.map((refObj, index) => (<ReferenceBox key={refObj.objectKey + index + '_box'} objectKey={refObj.objectKey} currentReferenceObject={refObj} onNewErrorMsg={onNewErrorMsg} control={control} setValue={setValue} removeReferenceObject={removeReferenceObject} addAdditionalRefObject={() => { }} refPosition={index} refCount={referenceObjects.length} />))}
-                </Stack>
-                {referenceObjects.length < maxReferences && (<Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start' }}><Button variant="contained" onClick={() => addNewRefObject()} disabled={referenceObjects.length >= maxReferences} sx={{ ...CustomizedSendButton, ...{ fontSize: '0.8rem', px: 0 } }}>{'Add'}</Button></Box>)}
-              </AccordionDetails>
-            </Accordion>
-          )}
-          {generationType === 'Image' && (
-            <Box sx={{ mt: 2 }}>
-              <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setImagenPromptBuilderOpen(true)} sx={{ py: 1.5, justifyContent: 'flex-start', textTransform: 'none', fontSize: '1rem', fontWeight: 500 }}>
-                Open Imagen Prompt Builder
-              </Button>
-            </Box>
-          )}
-
         </Box>
       </form>
 
       <ThemeProvider theme={lightTheme}>
-        <Dialog open={promptBuilderOpen} onClose={handleCloseBuilder} fullWidth={true} maxWidth="xl">
+        <Dialog open={promptBuilderOpen} onClose={handleCloseVeoBuilder} fullWidth={true} maxWidth="xl">
           <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
             Video / Prompt Builder
-            <IconButton aria-label="close" onClick={handleCloseBuilder} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
+            <IconButton aria-label="close" onClick={handleCloseVeoBuilder} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
               <CloseIcon />
             </IconButton>
           </DialogTitle>
           <DialogContent dividers>
             <PromptBuilder 
-              onApply={handleApplyFromBuilder} 
-              onClose={handleCloseBuilder} 
+              onApply={handleApplyFromVeoBuilder} 
+              onClose={handleCloseVeoBuilder} 
             />
           </DialogContent>
         </Dialog>
       </ThemeProvider>
 
+      {/* [核心修复] 正确地为 ImagenPromptBuilder 传递 props */}
       <ThemeProvider theme={lightTheme}>
-        <Dialog open={imagenPromptBuilderOpen} onClose={() => handleImagenPromptBuilderClose()} fullWidth={true} maxWidth="xl">
+        <Dialog open={imagenPromptBuilderOpen} onClose={handleCloseImagenBuilder} fullWidth={true} maxWidth="xl">
           <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
             Imagen / Prompt Builder
-            <IconButton aria-label="close" onClick={() => handleImagenPromptBuilderClose()} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
+            <IconButton aria-label="close" onClick={handleCloseImagenBuilder} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
               <CloseIcon />
             </IconButton>
           </DialogTitle>
           <DialogContent dividers>
-            <ImagenPromptBuilder onApply={handleImagenPromptBuilderClose} />
+            <ImagenPromptBuilder 
+              onApply={handleApplyFromImagenBuilder} 
+              onClose={handleCloseImagenBuilder} 
+            />
           </DialogContent>
         </Dialog>
       </ThemeProvider>
