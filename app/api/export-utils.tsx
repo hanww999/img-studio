@@ -1,17 +1,3 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import { ImageI } from './generate-image-utils'
 import { VideoI } from './generate-video-utils'
 
@@ -196,6 +182,10 @@ export interface MediaMetadataI {
   upscaleFactor?: string
   width: number
   height: number
+  
+  // <-- 核心修改：为数据添加 userEmail 字段，'?'使其可选以兼容旧数据 -->
+  userEmail?: string;
+
   [key: string]: any
 }
 
