@@ -160,96 +160,62 @@ export default function ExportStepper({
       try {
         // 1. Upscale if needed
         if (formData.upscaleFactor === 'x2' || formData.upscaleFactor === 'x4') {
-          try {
-            setExportStatus('Upscaling...')
-
-            const res = await upscaleImage({ uri: media.gcsUri }, formData.upscaleFactor, appContext)
-            if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
-
-            media.gcsUri = res.newGcsUri
-
-            media.width = media.width * parseInt(formData.upscaleFactor.replace(/[^0-9]/g, ''))
-            media.height = media.height * parseInt(formData.upscaleFactor.replace(/[^0-9]/g, ''))
-          } catch (error: any) {
-            throw Error(error)
-          }
+          setExportStatus('Upscaling...')
+          const res = await upscaleImage({ uri: media.gcsUri }, formData.upscaleFactor, appContext)
+          if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
+          media.gcsUri = res.newGcsUri
+          media.width = media.width * parseInt(formData.upscaleFactor.replace(/[^0-9]/g, ''))
+          media.height = media.height * parseInt(formData.upscaleFactor.replace(/[^0-9]/g, ''))
         }
 
         // 2. Copy media to team library
+        setExportStatus('Exporting...')
         const currentGcsUri = media.gcsUri
         const id = media.key
-        try {
-          setExportStatus('Exporting...')
-          const res = await copyImageToTeamBucket(currentGcsUri, id)
-
-          // <-- 核心修复：添加类型守卫，如果 res 是错误对象则抛出异常 -->
-          if (typeof res === 'object' && res.error) {
-            throw new Error(res.error.replaceAll('Error: ', ''))
-          }
-          
-          // 如果代码能执行到这里，TypeScript 就能确定 res 是 string 类型
-          media.gcsUri = res
-
-        } catch (error: any) {
-          throw Error(error)
-        }
+        // <-- 核心修复：现在可以直接赋值，因为失败会抛出错误并被外层 catch 捕获 -->
+        const newGcsUri = await copyImageToTeamBucket(currentGcsUri, id)
+        media.gcsUri = newGcsUri
 
         // 2.5. If media is a video, upload its thumbnail
         if (media.format === 'MP4') {
           setExportStatus('Generating thumbnail...')
-
           const result = await getVideoThumbnailBase64(media.gcsUri, media.ratio)
           if (!result.thumbnailBase64Data) console.error('Failed to generate thumbnail:', result.error)
           const thumbnailBase64Data = result.thumbnailBase64Data
-
           if (thumbnailBase64Data && process.env.NEXT_PUBLIC_TEAM_BUCKET) {
-            try {
-              const uploadResult = await uploadBase64Image(
-                thumbnailBase64Data,
-                process.env.NEXT_PUBLIC_TEAM_BUCKET,
-                `${id}_thumbnail.png`,
-                'image/png'
-              )
-
-              if (uploadResult.success && uploadResult.fileUrl) formData.videoThumbnailGcsUri = uploadResult.fileUrl
-              else {
-                formData.videoThumbnailGcsUri = ''
-                console.warn('Video thumbnail upload failed:', uploadResult.error)
-              }
-            } catch (thumbError: any) {
-              console.error('Video thumbnail upload exception:', thumbError)
+            const uploadResult = await uploadBase64Image(
+              thumbnailBase64Data,
+              process.env.NEXT_PUBLIC_TEAM_BUCKET,
+              `${id}_thumbnail.png`,
+              'image/png'
+            )
+            if (uploadResult.success && uploadResult.fileUrl) {
+              formData.videoThumbnailGcsUri = uploadResult.fileUrl
+            } else {
+              formData.videoThumbnailGcsUri = ''
+              console.warn('Video thumbnail upload failed:', uploadResult.error)
             }
-          } else
+          } else {
             console.warn(`Video ${id} is a video format but has no thumbnailBase64Data. Skipping thumbnail upload.`)
+          }
         }
 
         // 3. Upload metadata to firestore
-        try {
-          setExportStatus('Saving data...')
-
-          if (exportMediaFormFields) {
-            const res = await saveMediaToLibrary(id, formData, exportMediaFormFields)
-            if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
-          } else {
-            throw Error("Can't find exportMediaFormFields")
-          }
-        } catch (error: any) {
-          throw Error(error)
+        setExportStatus('Saving data...')
+        if (exportMediaFormFields) {
+          const res = await saveMediaToLibrary(id, formData, exportMediaFormFields)
+          if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
+        } else {
+          throw Error("Can't find exportMediaFormFields")
         }
 
         // 4. DL locally if asked to
         if (isDownload) {
-          try {
-            setExportStatus('Preparing download...')
-            const res = await downloadMediaFromGcs(media.gcsUri)
-            if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
-            
-            const name = `${media.key}.${media.format.toLowerCase()}`
-            downloadBase64Media(res.data, name, media.format)
-
-          } catch (error: any) {
-            throw Error(error)
-          }
+          setExportStatus('Preparing download...')
+          const res = await downloadMediaFromGcs(media.gcsUri)
+          if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
+          const name = `${media.key}.${media.format.toLowerCase()}`
+          downloadBase64Media(res.data, name, media.format)
         }
 
         setExportStatus('')
@@ -257,7 +223,9 @@ export default function ExportStepper({
         onClose()
       } catch (error: any) {
         console.log(error)
-        setErrorMsg('Error while exporting your image')
+        // 统一的错误处理
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred during export.';
+        setErrorMsg(errorMessage)
       }
     },
     [isDownload, appContext, exportMediaFormFields]
