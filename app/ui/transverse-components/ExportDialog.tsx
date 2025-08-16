@@ -47,7 +47,6 @@ import {
   uploadBase64Image,
 } from '../../api/cloud-storage/action'
 import { upscaleImage } from '../../api/imagen/action'
-// <-- 核心修改 1：导入我们新的、安全的 Server Action -->
 import { saveMediaToLibrary } from '../../api/export/action'
 import { useAppContext, appContextDataDefault } from '../../context/app-context'
 import { VideoI } from '@/app/api/generate-video-utils'
@@ -167,7 +166,7 @@ export default function ExportStepper({
             setExportStatus('Upscaling...')
 
             res = await upscaleImage({ uri: media.gcsUri }, upscaleFactor, appContext)
-            if (typeof res === 'object' && 'error' in res && res.error) throw Error(res.error.replaceAll('Error: ', ''))
+            if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
 
             media.gcsUri = res.newGcsUri
 
@@ -185,7 +184,8 @@ export default function ExportStepper({
           setExportStatus('Exporting...')
           const res = await copyImageToTeamBucket(currentGcsUri, id)
 
-          if (typeof res === 'object' && 'error' in res) throw Error(res.error.replaceAll('Error: ', ''))
+          // <-- 已修复的错误检查 1 -->
+          if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
 
           const movedGcsUri = res
           media.gcsUri = movedGcsUri
@@ -228,13 +228,13 @@ export default function ExportStepper({
 
           let res
           if (exportMediaFormFields) {
-            // <-- 核心修改 2：调用新的、安全的 saveMediaToLibrary Action -->
             res = await saveMediaToLibrary(id, formData, exportMediaFormFields)
           } else {
             throw Error("Can't find exportMediaFormFields")
           }
 
-          if (typeof res === 'object' && 'error' in res) throw Error(res.error.replaceAll('Error: ', ''))
+          // <-- 已修复的错误检查 2 -->
+          if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''))
         } catch (error: any) {
           throw Error(error)
         }
@@ -261,7 +261,7 @@ export default function ExportStepper({
         setErrorMsg('Error while exporting your image')
       }
     },
-    [isDownload, appContext, exportMediaFormFields] // <-- 核心修改 3：添加依赖项
+    [isDownload, appContext, exportMediaFormFields]
   )
 
   const onCloseTry: DialogProps['onClose'] = (
