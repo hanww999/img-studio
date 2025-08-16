@@ -23,13 +23,13 @@ export interface Template {
 
 // 3. [核心修改] 更新默认数据以匹配新结构
 export const initialPromptData: PromptData = {
-  subject: 'A 25-year old travel vlogger with authentic energy, wearing casual outdoor gear',
-  context: 'standing on a scenic mountain overlook during golden hour, backpack and hiking equipment visible',
-  action: 'speaks directly to camera while gesturing toward breathtaking landscape, natural and conversational',
-  cinematography: 'Medium close-up, smooth gimbal movement, natural framing',
-  lightingVfx: 'Golden hour lighting with warm, natural glow, professional color correction',
-  negativePrompt: 'blurry, low quality, watermark, text, ugly, deformed',
-  audio: "Enthusiastic narration: 'After 6 hours of hiking, this view makes every step worth it!' with gentle wind and nature sounds",
+  subject: 'A lone astronaut in a sleek, white and orange advanced spacesuit, helmet visor reflecting the alien landscape.',
+  context: 'Inside a vast, bioluminescent alien cave. Giant, glowing crystalline structures and otherworldly flora cover the walls, casting an ethereal blue and purple light.',
+  action: 'The astronaut cautiously reaches out a gloved hand to touch a mysterious, pulsating orb of light that is floating silently in the center of the cave.',
+  cinematography: 'Slow, smooth tracking shot from behind the astronaut, creating a sense of discovery. Shallow depth of field focuses on the hand and the orb, blurring the background. The shot has a slight, almost imperceptible, handheld feel to add tension.',
+  lightingVfx: 'The primary light source is the bioluminescent environment itself, creating soft, volumetric, and colorful lighting. Dust motes dance in the air, caught in the light beams. The orb emits a gentle, pulsating glow.',
+  negativePrompt: 'bright daylight, cartoony, hard shadows, human figures without suits, fast-paced action',
+  audio: 'A low, ambient, and mysterious synthesizer pad creates a sense of wonder and tension. The only other sounds are the astronaut\'s soft, controlled breathing inside the helmet and a faint, high-frequency hum from the floating orb.',
 };
 
 // 4. [核心修改] 定义新的、面向行业的建议标签
