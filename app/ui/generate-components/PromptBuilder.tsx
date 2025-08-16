@@ -3,21 +3,21 @@
 import React, { useState, useMemo } from 'react';
 import {
   Box, Button, Grid, Typography, Stack, Paper, Card, CardActionArea, CardContent,
-  Accordion, AccordionSummary, AccordionDetails, Chip, TextField, Select, MenuItem, FormControl, InputLabel
+  Accordion, AccordionSummary, AccordionDetails, Chip, TextField, Select, MenuItem, FormControl, InputLabel,
+  Dialog, DialogTitle, DialogContent, DialogActions // 导入 DialogActions
 } from '@mui/material';
 import {
   ExpandMore, AccountCircle, Place, DirectionsRun, Palette, Mic, Movie,
-  RestartAlt, AutoFixHigh, CheckCircle, Block
+  RestartAlt, AutoFixHigh, CheckCircle, Block, ContentCopy // [新增] 导入复制图标
 } from '@mui/icons-material';
 import { initialPromptData, professionalTemplates, industryKeywords, PromptData, Template } from '../../api/prompt-builder-utils';
 
-// 定义组件的 Props 接口
+// ... (其他组件定义保持不变) ...
 interface PromptBuilderProps {
   onApply: (prompt: string, negativePrompt: string) => void;
   onClose: () => void;
 }
 
-// 可复用的区域标题组件
 const SectionHeader = ({ icon, title }: { icon: React.ReactNode, title: string }) => (
   <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
     {icon}
@@ -25,7 +25,6 @@ const SectionHeader = ({ icon, title }: { icon: React.ReactNode, title: string }
   </Stack>
 );
 
-// 可复用的标签输入框组件
 const ChipInput = ({ label, value, onChange, keywords }: { label: string, value: string, onChange: (newValue: string) => void, keywords: string[] }) => {
   const handleAddChip = (chip: string) => {
     const currentValue = value || '';
@@ -54,16 +53,25 @@ const ChipInput = ({ label, value, onChange, keywords }: { label: string, value:
   );
 };
 
+
 export default function PromptBuilder({ onApply, onClose }: PromptBuilderProps) {
   const [promptData, setPromptData] = useState<PromptData>(initialPromptData);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>('Cinematic Vlog');
   const [industry, setIndustry] = useState<'common' | 'gaming' | 'ecommerce' | 'advertising'>('common');
+  
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewPrompt, setPreviewPrompt] = useState('');
+  
+  // [新增] 用于复制按钮的状态反馈
+  const [copyStatus, setCopyStatus] = useState('Copy');
 
-  // 使用 useMemo 优化关键字列表的计算
   const keywords = useMemo(() => {
+    const industryCinematography = industryKeywords[industry]?.cinematography || [];
+    const industryLightingVfx = industryKeywords[industry]?.lightingVfx || [];
+    
     return {
-      cinematography: [...industryKeywords.common.cinematography, ...(industryKeywords[industry]?.cinematography || [])],
-      lightingVfx: [...industryKeywords.common.lightingVfx, ...(industryKeywords[industry]?.lightingVfx || [])],
+      cinematography: [...new Set([...industryKeywords.common.cinematography, ...industryCinematography])],
+      lightingVfx: [...new Set([...industryKeywords.common.lightingVfx, ...industryLightingVfx])],
     };
   }, [industry]);
 
@@ -85,6 +93,21 @@ export default function PromptBuilder({ onApply, onClose }: PromptBuilderProps) 
       audio ? `Audio: ${audio}.` : '',
     ];
     return parts.filter(part => part).join(' ').replace(/\s+/g, ' ').trim();
+  };
+
+  const handlePreview = () => {
+    const finalPrompt = generateFinalPrompt();
+    setPreviewPrompt(finalPrompt);
+    setPreviewOpen(true);
+  };
+
+  // [新增] 处理复制的函数
+  const handleCopyFromPreview = () => {
+    const fullTextToCopy = `Prompt: ${previewPrompt}\n\nNegative Prompt: ${promptData.negativePrompt}`;
+    navigator.clipboard.writeText(fullTextToCopy).then(() => {
+      setCopyStatus('Copied!');
+      setTimeout(() => setCopyStatus('Copy'), 2000); // 2秒后恢复按钮文字
+    });
   };
 
   const handleApplyAndClose = () => {
@@ -176,9 +199,35 @@ export default function PromptBuilder({ onApply, onClose }: PromptBuilderProps) 
 
       {/* 底部操作按钮 */}
       <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3, p: 1 }}>
+        <Button variant="outlined" onClick={handlePreview} startIcon={<AutoFixHigh />}>Preview Generated Prompt</Button>
         <Button variant="text" onClick={handleReset} startIcon={<RestartAlt />}>Reset</Button>
         <Button variant="contained" onClick={handleApplyAndClose} startIcon={<CheckCircle />} size="large">Apply to Form</Button>
       </Stack>
+
+      {/* Preview 弹窗 */}
+      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="md">
+        <DialogTitle>Generated Prompt Preview</DialogTitle>
+        <DialogContent>
+          <Paper variant="outlined" sx={{ p: 2, whiteSpace: 'pre-wrap', wordBreak: 'break-word', bgcolor: 'grey.100' }}>
+            <Typography variant="body1" component="pre" sx={{ fontFamily: 'monospace' }}>
+              {previewPrompt}
+            </Typography>
+          </Paper>
+          <Paper variant="outlined" sx={{ p: 2, mt: 2, whiteSpace: 'pre-wrap', wordBreak: 'break-word', bgcolor: 'grey.100' }}>
+            <Typography variant="caption" color="text.secondary">Negative Prompt:</Typography>
+            <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', mt: 1 }}>
+              {promptData.negativePrompt}
+            </Typography>
+          </Paper>
+        </DialogContent>
+        {/* [核心修复] 加回 DialogActions 和 Copy 按钮 */}
+        <DialogActions>
+          <Button onClick={handleCopyFromPreview} startIcon={<ContentCopy />}>
+            {copyStatus}
+          </Button>
+          <Button onClick={() => setPreviewOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
