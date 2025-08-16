@@ -1,17 +1,3 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
@@ -61,7 +47,8 @@ import {
   uploadBase64Image,
 } from '../../api/cloud-storage/action'
 import { upscaleImage } from '../../api/imagen/action'
-import { addNewFirestoreEntry } from '../../api/firestore/action'
+// <-- 核心修改 1：导入我们新的、安全的 Server Action -->
+import { saveMediaToLibrary } from '../../api/export/action'
 import { useAppContext, appContextDataDefault } from '../../context/app-context'
 import { VideoI } from '@/app/api/generate-video-utils'
 
@@ -240,8 +227,12 @@ export default function ExportStepper({
           setExportStatus('Saving data...')
 
           let res
-          if (exportMediaFormFields) res = await addNewFirestoreEntry(id, formData, exportMediaFormFields)
-          else throw Error("Can't find exportMediaFormFields")
+          if (exportMediaFormFields) {
+            // <-- 核心修改 2：调用新的、安全的 saveMediaToLibrary Action -->
+            res = await saveMediaToLibrary(id, formData, exportMediaFormFields)
+          } else {
+            throw Error("Can't find exportMediaFormFields")
+          }
 
           if (typeof res === 'object' && 'error' in res) throw Error(res.error.replaceAll('Error: ', ''))
         } catch (error: any) {
@@ -270,7 +261,7 @@ export default function ExportStepper({
         setErrorMsg('Error while exporting your image')
       }
     },
-    [isDownload]
+    [isDownload, appContext, exportMediaFormFields] // <-- 核心修改 3：添加依赖项
   )
 
   const onCloseTry: DialogProps['onClose'] = (
