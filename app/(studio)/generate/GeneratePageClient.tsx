@@ -4,31 +4,32 @@
 
 import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
-import Grid from '@mui/material/Grid2';
-import Box from '@mui/material/Box';
-import GenerateForm from '../../ui/generate-components/GenerateForm';
 import { useEffect, useRef, useState } from 'react';
-import { imageGenerationUtils, ImageI, ImageRandomPrompts } from '../../api/generate-image-utils';
-import OutputImagesDisplay from '../../ui/transverse-components/ImagenOutputImagesDisplay';
-import { appContextDataDefault, useAppContext } from '../../context/app-context';
-import { Typography } from '@mui/material';
 
-import theme from '../../theme';
-const { palette } = theme;
+// [修改] 从 @mui/material 引入 Grid，而不是 @mui/material/Grid2
+import { Grid, Box, Typography } from '@mui/material'; 
+
+import GenerateForm from '../../ui/generate-components/GenerateForm';
+import { imageGenerationUtils, ImageI, ImageRandomPrompts } from '../../api/generate-image-utils';
+import { appContextDataDefault, useAppContext } from '../../context/app-context';
 import {
-  InterpolImageI,
-  OperationMetadataI,
-  VideoGenerationStatusResult,
-  videoGenerationUtils,
-  VideoI,
-  VideoRandomPrompts,
+ InterpolImageI,
+ OperationMetadataI,
+ VideoGenerationStatusResult,
+ videoGenerationUtils,
+ VideoI,
+ VideoRandomPrompts,
 } from '../../api/generate-video-utils';
 import { getVideoGenerationStatus } from '../../api/veo/action';
-import OutputVideosDisplay from '../../ui/transverse-components/VeoOutputVideosDisplay';
 import { downloadMediaFromGcs } from '../../api/cloud-storage/action';
 import { getAspectRatio } from '../../ui/edit-components/EditImageDropzone';
 
-// Video Polling Constants
+// [新增] 引入我们全新的预览面板
+import PreviewAndGalleryPanel from '../../ui/transverse-components/PreviewAndGalleryPanel';
+// [说明] OutputImagesDisplay 仍然需要，用于图片生成模式
+import OutputImagesDisplay from '../../ui/transverse-components/ImagenOutputImagesDisplay';
+
+// ... Polling Constants (保持不变)
 const INITIAL_POLLING_INTERVAL_MS = 6000;
 const MAX_POLLING_INTERVAL_MS = 60000;
 const BACKOFF_FACTOR = 1.2;
@@ -36,6 +37,7 @@ const MAX_POLLING_ATTEMPTS = 30;
 const JITTER_FACTOR = 0.2;
 
 export default function GeneratePageClient() {
+  // --- [说明] 以下所有 State, useEffect, Handlers 逻辑都保持原样，无需改动 ---
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode');
 
@@ -86,7 +88,7 @@ export default function GeneratePageClient() {
         else return { ...appContextDataDefault, promptToGenerateVideo: '' };
       });
     }
-  }, [appContext?.promptToGenerateImage, appContext?.promptToGenerateVideo]);
+  }, [appContext?.promptToGenerateImage, appContext?.promptToGenerateVideo, setAppContext]);
 
   const [initialITVimage, setInitialITVimage] = useState<InterpolImageI | null>(null);
   useEffect(() => {
@@ -197,38 +199,81 @@ export default function GeneratePageClient() {
   if (appContext?.isLoading === true) {
     return (
       <Box p={5}>
-        <Typography variant="h3" sx={{ fontWeight: 400, color: appContextError === null ? palette.primary.main : palette.error.main }}>
+        <Typography variant="h3" sx={{ fontWeight: 400, color: appContextError === null ? 'primary.main' : 'error.main' }}>
           {appContextError === null ? 'Loading your profile content...' : 'Error while loading your profile content!'}
         </Typography>
       </Box>
     );
   }
 
+  // --- [核心改造] 返回全新的 JSX 布局 ---
   return (
-    <Box p={5} sx={{ maxHeight: '100vh' }}>
-      <Grid wrap="nowrap" container spacing={6} direction="row" columns={2}>
-        <Grid size={1.1} flex={0} sx={{ maxWidth: 700, minWidth: 610 }}>
-          
-          {/* [删除] 移除此处的页面主标题，因为它在白色背景下不可见且多余 */}
-          {/* 
-          <Typography variant="h4" component="h1" sx={{ mb: 4, fontWeight: 500, color: 'white' }}>
-            {generationMode}
-          </Typography> 
-          */}
-
+    <Box p={3} sx={{ height: '100vh', overflow: 'hidden' }}>
+      <Grid container spacing={3} sx={{ height: '100%', flexWrap: 'nowrap' }}>
+        
+        {/* 第一栏：左侧设置区 (红色框) */}
+        <Grid item xs={12} md={5} lg={4} xl={3.5} sx={{ 
+          height: 'calc(100vh - 48px)', 
+          overflowY: 'auto',
+          pr: 1, // Add some padding to the right of the scrollbar
+          '::-webkit-scrollbar': { width: '8px' },
+          '::-webkit-scrollbar-thumb': { backgroundColor: '#ccc', borderRadius: '4px' }
+        }}>
+          {/* 您的 GenerateForm 组件放在这里，它的内部逻辑和 props 都不需要改变 */}
           {generationMode === 'Generate an Image' && (
-            <GenerateForm key="image-form" generationType="Image" isLoading={isLoading} onRequestSent={handleRequestSent} onImageGeneration={handleImageGeneration} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={ImageRandomPrompts} generationFields={imageGenerationUtils} initialPrompt={initialPrompt ?? ''} promptIndication={'Describe your image...'} />
+            <GenerateForm 
+              key="image-form" 
+              generationType="Image" 
+              isLoading={isLoading} 
+              onRequestSent={handleRequestSent} 
+              onImageGeneration={handleImageGeneration} 
+              onNewErrorMsg={handleNewErrorMsg} 
+              errorMsg={generationErrorMsg} 
+              randomPrompts={ImageRandomPrompts} 
+              generationFields={imageGenerationUtils} 
+              initialPrompt={initialPrompt ?? ''} 
+              promptIndication={'Describe your image...'} 
+            />
           )}
           {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && generationMode === 'Generate a Video' && (
-            <GenerateForm key="video-form" generationType="Video" isLoading={isLoading} onRequestSent={handleRequestSent} onVideoPollingStart={handleVideoPollingStart} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={VideoRandomPrompts} generationFields={videoGenerationUtils} initialPrompt={initialPrompt ?? ''} initialITVimage={initialITVimage ?? undefined} promptIndication={'Describe your video...'} />
+            <GenerateForm
+              key="video-form"
+              generationType="Video"
+              isLoading={isLoading}
+              onRequestSent={handleRequestSent}
+              onVideoPollingStart={handleVideoPollingStart}
+              onNewErrorMsg={handleNewErrorMsg}
+              errorMsg={generationErrorMsg}
+              randomPrompts={VideoRandomPrompts}
+              generationFields={videoGenerationUtils}
+              initialPrompt={initialPrompt ?? ''}
+              initialITVimage={initialITVimage ?? undefined}
+              promptIndication={'Describe your video...'}
+            />
           )}
         </Grid>
-        {/* [修改] 调整右侧内容区域的顶部内边距，使其与左侧表单对齐 */}
-        <Grid size={0.9} flex={1} sx={{ pt: 5.5, maxWidth: 850, minWidth: 400 }}>
+
+        {/* 第二栏：右侧结果与灵感区 (蓝色框) */}
+        <Grid item xs={12} md={7} lg={8} xl={8.5} sx={{ height: '100%' }}>
+          {/* 
+            [说明] 这里我们根据模式，条件渲染不同的预览面板。
+          */}
           {generationMode === 'Generate an Image' ? (
-            <OutputImagesDisplay isLoading={isLoading} generatedImagesInGCS={generatedImages} generatedCount={generatedCount} isPromptReplayAvailable={true} />
+            // TODO: 为图片生成也创建一个类似的 PreviewAndGalleryPanel
+            // 目前暂时还使用旧的 Display 组件
+            <OutputImagesDisplay 
+              isLoading={isLoading} 
+              generatedImagesInGCS={generatedImages} 
+              generatedCount={generatedCount} 
+              isPromptReplayAvailable={true} 
+            />
           ) : (
-            <OutputVideosDisplay isLoading={isLoading} generatedVideosInGCS={generatedVideos} generatedCount={generatedCount} />
+            // [使用新组件] 视频模式下，使用我们全新的预览面板
+            <PreviewAndGalleryPanel
+              isLoading={isLoading}
+              generatedVideos={generatedVideos}
+              generatedCount={generatedCount}
+            />
           )}
         </Grid>
       </Grid>
