@@ -1,3 +1,8 @@
+// app/page.tsx (Final Version with Scheme 3 Copy)
+
+// Copyright 2025 Google LLC
+// ... (license header)
+
 'use client';
 
 import * as React from 'react';
@@ -6,13 +11,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { pages } from './routes'; // 导入您的路由配置
 
-// 专为新主页设计的导航栏组件 (已按要求更新)
+// 专为新主页设计的导航栏组件
 const HomePageHeader = () => {
-  // 1. 调整导航链接的顺序
+  // 调整后的导航链接顺序
   const navLinks = [
     pages.GenerateImage,
     pages.GenerateVideo,
-    pages.VirtualTryOn, // "Generate a Try-On" 已移到此处
+    pages.VirtualTryOn,
     pages.Edit,
     pages.Library,
   ];
@@ -32,13 +37,13 @@ const HomePageHeader = () => {
         zIndex: 10,
       }}
     >
-      {/* 2. 更换 Logo */}
+      {/* CloudPuppy Logo */}
       <Link href="/" passHref>
         <Image 
           src="/cloudpuppy-logo.png" 
           alt="CloudPuppy Logo" 
-          width={220} // 调整了宽度以适应新 Logo
-          height={60}  // 调整了高度以适应新 Logo
+          width={220}
+          height={60}
         />
       </Link>
 
@@ -51,7 +56,6 @@ const HomePageHeader = () => {
             </Link>
           ) : null
         )}
-        {/* 3. "Free Trial" 按钮已被移除 */}
       </Box>
     </Box>
   );
@@ -93,7 +97,7 @@ export default function Page() {
       {/* 导航栏 */}
       <HomePageHeader />
 
-      {/* 内容覆盖层 */}
+      {/* 内容覆盖层 (已更新为方案三文案) */}
       <Box
         sx={{
           position: 'relative',
@@ -109,16 +113,16 @@ export default function Page() {
         }}
       >
         <Box component="h1" sx={{ typography: 'h1', fontWeight: 'bold', fontSize: { xs: '3rem', md: '4.5rem' }, mb: 2 }}>
-          AI Video Generator
+          创意，从此有了最佳拍档
         </Box>
-        <Box component="h2" sx={{ typography: 'h3', fontWeight: 'bold', fontSize: { xs: '2rem', md: '3rem' }, mb: 3 }}>
-          Create Amazing Videos with AI
+        <Box component="h2" sx={{ typography: 'h3', fontWeight: 'bold', fontSize: { xs: '1.8rem', md: '2.8rem' }, mb: 3, letterSpacing: '1px' }}>
+          用简单的指令，获取非凡的视觉内容
         </Box>
-        <Box component="p" sx={{ typography: 'h6', maxWidth: '650px', mb: 5, px: 2 }}>
-          Turn your text, images, or video prompts into high-quality videos in simple prompts. No technical skills required.
+        <Box component="p" sx={{ typography: 'h6', maxWidth: '650px', mb: 5, px: 2, lineHeight: 1.7 }}>
+          无论是生成全新概念、编辑现有图像还是制作营销视频，CloudPuppy 都是您忠实的创意助手，助您更智能、更高效地完成工作。
         </Box>
 
-        {/* 主要行动号召按钮 */}
+        {/* 主要行动号召按钮 (已更新文本) */}
         <Link href={pages.GenerateImage.href} passHref>
           <Box
             component="button"
@@ -139,7 +143,7 @@ export default function Page() {
               },
             }}
           >
-            Try ImgStudio AI
+            开启创作之旅
           </Box>
         </Link>
       </Box>
