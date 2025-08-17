@@ -1,4 +1,4 @@
-// 文件路径: app/(studio)/generate/GeneratePageClient.tsx
+// File Path: app/(studio)/generate/GeneratePageClient.tsx
 
 'use client';
 
@@ -23,8 +23,9 @@ import { getVideoGenerationStatus } from '../../api/veo/action';
 import { downloadMediaFromGcs } from '../../api/cloud-storage/action';
 import { getAspectRatio } from '../../ui/edit-components/EditImageDropzone';
 
+// [修改] 引入两个版本的预览面板
 import PreviewAndGalleryPanel from '../../ui/transverse-components/PreviewAndGalleryPanel';
-import OutputImagesDisplay from '../../ui/transverse-components/ImagenOutputImagesDisplay';
+import ImagePreviewAndGalleryPanel from '../../ui/transverse-components/ImagePreviewAndGalleryPanel';
 
 const INITIAL_POLLING_INTERVAL_MS = 6000;
 const MAX_POLLING_INTERVAL_MS = 60000;
@@ -206,7 +207,6 @@ export default function GeneratePageClient() {
     <Box p={3} sx={{ height: '100vh', overflow: 'hidden' }}>
       <Grid container spacing={3} sx={{ height: '100%', flexWrap: 'nowrap' }}>
         
-        {/* [修改] 调整了Grid比例，让左侧更宽敞 */}
         <Grid item xs={12} md={5} lg={4.5} xl={4} sx={{ 
           height: 'calc(100vh - 48px)', 
           overflowY: 'auto',
@@ -247,14 +247,13 @@ export default function GeneratePageClient() {
           )}
         </Grid>
 
-        {/* [修改] 调整了Grid比例 */}
         <Grid item xs={12} md={7} lg={7.5} xl={8} sx={{ height: '100%' }}>
+          {/* [核心修改] 根据模式，条件渲染不同的预览面板 */}
           {generationMode === 'Generate an Image' ? (
-            <OutputImagesDisplay 
-              isLoading={isLoading} 
-              generatedImagesInGCS={generatedImages} 
-              generatedCount={generatedCount} 
-              isPromptReplayAvailable={true} 
+            <ImagePreviewAndGalleryPanel
+              isLoading={isLoading}
+              generatedImages={generatedImages}
+              generatedCount={generatedCount}
             />
           ) : (
             <PreviewAndGalleryPanel
