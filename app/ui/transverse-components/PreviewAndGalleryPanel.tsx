@@ -50,12 +50,11 @@ const VideoCard = ({ sample, onClick, isActive }: { sample: typeof sampleMedias[
     <Card 
       onClick={onClick}
       sx={{ 
-        minWidth: 260, 
+        width: 260, 
         flexShrink: 0, 
         transition: 'all 0.2s ease-in-out',
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
         cursor: 'pointer',
         border: isActive ? '3px solid #1976d2' : '3px solid transparent',
         '&:hover': { 
@@ -126,13 +125,14 @@ export default function PreviewAndGalleryPanel({
 
   return (
     <Paper variant="outlined" sx={{ height: 'calc(100vh - 48px)', padding: 2.5, display: 'flex', flexDirection: 'column', backgroundColor: '#f5f5f5', borderRadius: 2 }}>
-      {/* [CORE FIX] Main preview area now has a constrained height and a title */}
+      
+      {/* [CORE FIX] Main preview area with a calculated, robust height */}
       <Box sx={{ 
-        height: '65%', // Constrain the height
-        minHeight: 0, // A flexbox trick to enforce the height constraint
+        height: 'calc(100% - 260px)', // Total height minus the fixed height of the gallery below
+        width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        marginBottom: 2,
+        mb: 2,
       }}>
         <Typography variant="h6" sx={{ mb: 1, fontWeight: 500, color: 'text.secondary' }}>
           {hasUserGeneratedContent ? 'Your Results' : 'Sample Video'}
@@ -159,13 +159,13 @@ export default function PreviewAndGalleryPanel({
         </Box>
       </Box>
 
-      {/* Inspiration Gallery Section */}
-      <Box sx={{ flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+      {/* [CORE FIX] Inspiration Gallery with a fixed, predictable height */}
+      <Box sx={{ height: '260px', display: 'flex', flexDirection: 'column' }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 500, color: 'text.primary' }}>
           Inspiration Gallery
         </Typography>
         <Box 
-          sx={{ position: 'relative', flexGrow: 1 }}
+          sx={{ position: 'relative', flexGrow: 1, display: 'flex', alignItems: 'center' }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
@@ -197,6 +197,7 @@ export default function PreviewAndGalleryPanel({
               overflowX: 'auto', 
               gap: 2, 
               py: 1,
+              height: '100%',
               scrollSnapType: 'x mandatory',
               '& > *': { scrollSnapAlign: 'start' },
               scrollbarWidth: 'none',
