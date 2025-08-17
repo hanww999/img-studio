@@ -15,23 +15,21 @@ const sampleMedias = [
   { id: 3, thumbnail: '/samples/3.mp4', prompt: ' subject: a bottle of "fountain of life" potion in a delicate crystal bottle, with a bright emerald green liquid and slowly rotating golden light spots inside. scenario: on a seamless black background. action: the entire bottle body is slowly and uniformly rotating around the vertical axis. photography style: game asset display style, orthogonal projection, 45 degree top-down view, all details are clearly visible. lighting atmosphere: soft and uniform studio lighting clearly outlines the edges of the crystal bottle and the transparency of the liquid. special effects and post production: the potion itself emits a soft internal light, without any other environmental effects, requiring ultra-high resolution and sharp details. photography style: the highly dynamic low angle tracking lens captures her jumping from bottom to top, combined with bullet time like slow motion effects, with a strong dynamic blur in the background. lighting atmosphere: the jesus light at dusk penetrates through the clouds, illuminating her contours to form edge lights, and lightning in the distance instantly illuminates the entire scene. special effects and post production: there are clear and visible blue wind magic particles on the arrows, and raindrops are captured by the camera in slow motion. The overall color scheme is movie grade with cool tones. audio: a majestic symphony, the creaking sound of bowstring tension, ahe wind, and distant thunder.' },
 ];
 
-// [NEW] Featured Sample Player Component
 const FeaturedSamplePlayer = ({ videoSrc }: { videoSrc: string }) => (
   <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     <video
-      key={videoSrc} // Using src as key ensures the component re-renders when the video changes
+      key={videoSrc}
       src={videoSrc}
       controls
       autoPlay
       muted
       loop
       playsInline
-      style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '8px' }}
+      style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '8px', objectFit: 'contain' }}
     />
   </Box>
 );
 
-// [MODIFIED] VideoCard component, added onClick and isActive props
 const VideoCard = ({ sample, onClick, isActive }: { sample: typeof sampleMedias[0], onClick: () => void, isActive: boolean }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -59,7 +57,7 @@ const VideoCard = ({ sample, onClick, isActive }: { sample: typeof sampleMedias[
         flexDirection: 'column',
         height: '100%',
         cursor: 'pointer',
-        border: isActive ? '3px solid #1976d2' : '3px solid transparent', // Highlight the active card
+        border: isActive ? '3px solid #1976d2' : '3px solid transparent',
         '&:hover': { 
           transform: 'scale(1.05)',
           boxShadow: 6,
@@ -69,7 +67,7 @@ const VideoCard = ({ sample, onClick, isActive }: { sample: typeof sampleMedias[
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <Box sx={{ width: '100%', paddingTop: '56.25%', position: 'relative' }}> {/* 16:9 aspect ratio container */}
+      <Box sx={{ width: '100%', paddingTop: '56.25%', position: 'relative' }}>
         <video
           ref={videoRef}
           src={sample.thumbnail}
@@ -87,7 +85,7 @@ const VideoCard = ({ sample, onClick, isActive }: { sample: typeof sampleMedias[
             color: 'text.secondary',
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
-            WebkitLineClamp: 3, // Show max 3 lines
+            WebkitLineClamp: 3,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
           }}
@@ -112,7 +110,6 @@ export default function PreviewAndGalleryPanel({
 }: PreviewAndGalleryPanelProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
-  // [NEW] Internal state to track the featured sample
   const [featuredSample, setFeaturedSample] = useState(sampleMedias[0]);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -125,44 +122,53 @@ export default function PreviewAndGalleryPanel({
     }
   };
 
+  const hasUserGeneratedContent = generatedVideos.length > 0;
+
   return (
     <Paper variant="outlined" sx={{ height: 'calc(100vh - 48px)', padding: 2.5, display: 'flex', flexDirection: 'column', backgroundColor: '#f5f5f5', borderRadius: 2 }}>
-      {/* [CORE CHANGE] Main preview area is now dynamic */}
+      {/* [CORE FIX] Main preview area now has a constrained height and a title */}
       <Box sx={{ 
-        flexGrow: 1, 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        backgroundColor: '#e0e0e0', 
-        borderRadius: 2, 
-        marginBottom: 2, 
-        overflow: 'hidden',
-        position: 'relative',
+        height: '65%', // Constrain the height
+        minHeight: 0, // A flexbox trick to enforce the height constraint
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: 2,
       }}>
-        {generatedVideos.length > 0 ? (
-          // State 2: If the user has generated results, display them
-          <OutputVideosDisplay
-            isLoading={isLoading}
-            generatedVideosInGCS={generatedVideos}
-            generatedCount={generatedCount}
-          />
-        ) : (
-          // State 1: If the user has no results, display the featured sample
-          <FeaturedSamplePlayer videoSrc={featuredSample.thumbnail} />
-        )}
+        <Typography variant="h6" sx={{ mb: 1, fontWeight: 500, color: 'text.secondary' }}>
+          {hasUserGeneratedContent ? 'Your Results' : 'Sample Video'}
+        </Typography>
+        <Box sx={{
+          flexGrow: 1,
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          backgroundColor: '#e0e0e0', 
+          borderRadius: 2, 
+          overflow: 'hidden',
+          position: 'relative',
+        }}>
+          {hasUserGeneratedContent ? (
+            <OutputVideosDisplay
+              isLoading={isLoading}
+              generatedVideosInGCS={generatedVideos}
+              generatedCount={generatedCount}
+            />
+          ) : (
+            <FeaturedSamplePlayer videoSrc={featuredSample.thumbnail} />
+          )}
+        </Box>
       </Box>
 
-      <Box sx={{ flexShrink: 0 }}>
+      {/* Inspiration Gallery Section */}
+      <Box sx={{ flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 500, color: 'text.primary' }}>
-          Sample Video
+          Inspiration Gallery
         </Typography>
-        {/* [NEW] Parent container with relative positioning for navigation buttons */}
         <Box 
-          sx={{ position: 'relative' }}
+          sx={{ position: 'relative', flexGrow: 1 }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* [NEW] Left/right navigation buttons */}
           <IconButton
             onClick={() => scroll('left')}
             sx={{
@@ -184,7 +190,6 @@ export default function PreviewAndGalleryPanel({
             <ArrowForwardIos />
           </IconButton>
 
-          {/* [MODIFIED] Gallery container, hiding the native scrollbar */}
           <Box 
             ref={scrollContainerRef}
             sx={{ 
@@ -194,18 +199,16 @@ export default function PreviewAndGalleryPanel({
               py: 1,
               scrollSnapType: 'x mandatory',
               '& > *': { scrollSnapAlign: 'start' },
-              scrollbarWidth: 'none', // for Firefox
-              '&::-webkit-scrollbar': { display: 'none' }, // for Chrome, Safari, and Opera
+              scrollbarWidth: 'none',
+              '&::-webkit-scrollbar': { display: 'none' },
             }}
           >
             {sampleMedias.map(sample => (
               <VideoCard 
                 key={sample.id} 
                 sample={sample}
-                // [NEW] Update featured video on click
                 onClick={() => setFeaturedSample(sample)}
-                // [NEW] Check if the current card is the active/featured one
-                isActive={sample.id === featuredSample.id && generatedVideos.length === 0}
+                isActive={sample.id === featuredSample.id && !hasUserGeneratedContent}
               />
             ))}
           </Box>
