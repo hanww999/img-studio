@@ -1,5 +1,7 @@
 
 
+// File Path: app/ui/transverse-components/ImagePreviewAndGalleryPanel.tsx
+
 'use client';
 
 import * as React from 'react';
@@ -9,6 +11,7 @@ import { ArrowBackIosNew, ArrowForwardIos } from '@mui/icons-material';
 import { ImageI } from '../../api/generate-image-utils';
 import OutputImagesDisplay from './ImagenOutputImagesDisplay';
 
+// [CORE FIX] Changed 'thumbnail' property to 'src' to match the ImageI type and ensure consistency.
 const imageSampleMedias = [
   { id: 1, src: '/samples/789.jpeg', prompt: 'A photo of a deer running in the forest, fast shutter speed, movement tracking' },
   { id: 2, src: '/samples/456.png', prompt: "A photo of a photorealistic 3d render for an e-commerce website, showcasing a white, fluffy teddy bear toy sleeping peacefully on the floor of a beautifully decorated baby's bedroom. The room is filled with soft, pastel-colored toy boxes and other toys scattered playfully around. The composition is a gentle, slightly high-angle shot. The scene is illuminated by soft, diffused light from a large window, creating a warm and inviting atmosphere.Rendered in 8k with hyperdetailed fur textures to emphasize the toy's softness and quality." },
@@ -25,7 +28,6 @@ const FeaturedImagePlayer = ({ imageSrc }: { imageSrc: string }) => (
   </Box>
 );
 
-// [修改] 增加 onSampleSelect prop
 const ImageCard = ({ sample, onClick, isActive }: { sample: typeof imageSampleMedias[0], onClick: () => void, isActive: boolean }) => (
   <Card 
     onClick={onClick}
@@ -42,7 +44,8 @@ const ImageCard = ({ sample, onClick, isActive }: { sample: typeof imageSampleMe
   >
     <CardMedia
       component="img"
-      image={sample.thumbnail}
+      // [CORE FIX] Using 'sample.src' instead of the non-existent 'sample.thumbnail'.
+      image={sample.src}
       alt={sample.prompt}
       sx={{ width: '100%', height: 145, objectFit: 'cover' }}
     />
@@ -64,19 +67,18 @@ const ImageCard = ({ sample, onClick, isActive }: { sample: typeof imageSampleMe
   </Card>
 );
 
-// [修改] 增加 onSampleSelect prop
 interface ImagePreviewPanelProps {
   isLoading: boolean;
   generatedImages: ImageI[];
   generatedCount: number;
-  onSampleSelect: (prompt: string) => void; // [ADD] This prop is now required
+  onSampleSelect: (prompt: string) => void;
 }
 
 export default function ImagePreviewAndGalleryPanel({
   isLoading,
   generatedImages,
   generatedCount,
-  onSampleSelect, // [ADD] Receive the function prop
+  onSampleSelect,
 }: ImagePreviewPanelProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -94,7 +96,7 @@ export default function ImagePreviewAndGalleryPanel({
 
   const handleCardClick = (sample: typeof imageSampleMedias[0]) => {
     setFeaturedSample(sample);
-    onSampleSelect(sample.prompt); // [ADD] Call the passed-in function with the sample's prompt
+    onSampleSelect(sample.prompt);
   };
 
   const hasUserGeneratedContent = generatedImages.length > 0;
@@ -129,7 +131,8 @@ export default function ImagePreviewAndGalleryPanel({
               isPromptReplayAvailable={true}
             />
           ) : (
-            <FeaturedImagePlayer imageSrc={featuredSample.thumbnail} />
+            // [CORE FIX] Using 'featuredSample.src'
+            <FeaturedImagePlayer imageSrc={featuredSample.src} />
           )}
         </Box>
       </Box>
@@ -182,7 +185,7 @@ export default function ImagePreviewAndGalleryPanel({
               <ImageCard 
                 key={sample.id} 
                 sample={sample}
-                onClick={() => handleCardClick(sample)} // [MODIFY] Use the new handler
+                onClick={() => handleCardClick(sample)}
                 isActive={sample.id === featuredSample.id && !hasUserGeneratedContent}
               />
             ))}
