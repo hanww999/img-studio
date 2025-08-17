@@ -1,3 +1,8 @@
+// app/page.tsx (Corrected Version)
+
+// Copyright 2025 Google LLC
+// ... (license header)
+
 'use client';
 
 import * as React from 'react';
@@ -6,8 +11,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { pages } from './routes'; // 导入您的路由配置
 
-// 专为新主页设计的导航栏组件
+// 专为新主页设计的导航栏组件 (已修正)
 const HomePageHeader = () => {
+  // 创建一个要显示的页面列表
+  const navLinks = [
+    pages.GenerateImage,
+    pages.GenerateVideo,
+    pages.Edit,
+    pages.Library,
+    pages.VirtualTryOn,
+  ];
+
   return (
     <Box
       component="header"
@@ -28,20 +42,17 @@ const HomePageHeader = () => {
         <Image src="/ImgStudioLogoReversedMini.svg" alt="ImgStudio Logo" width={180} height={40} />
       </Link>
 
-      {/* 右侧导航链接 */}
+      {/* 右侧导航链接 (动态生成) */}
       <Box component="nav" sx={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
-        <Link href={pages.GenerateImage.href} style={{ color: 'white', textDecoration: 'none', fontSize: '1rem' }}>
-          Image to Video
-        </Link>
-        <Link href={pages.GenerateVideo.href} style={{ color: 'white', textDecoration: 'none', fontSize: '1rem' }}>
-          Text to Video
-        </Link>
-        <Link href={pages.Edit.href} style={{ color: 'white', textDecoration: 'none', fontSize: '1rem' }}>
-          AI Effect
-        </Link>
-        <Link href={pages.Library.href} style={{ color: 'white', textDecoration: 'none', fontSize: '1rem' }}>
-          My Creations
-        </Link>
+        {navLinks.map((page) =>
+          // 检查 status 字段，只有当 status 为 'true' 或未定义时才显示
+          page.status === 'true' || page.status === undefined ? (
+            <Link key={page.name} href={page.href} style={{ color: 'white', textDecoration: 'none', fontSize: '1rem' }}>
+              {/* 使用 routes.tsx 中定义的 name */}
+              {page.name}
+            </Link>
+          ) : null
+        )}
         <Link href="#" passHref>
            <Box component="button" sx={{
               color: 'white',
@@ -80,7 +91,7 @@ export default function Page() {
         autoPlay
         loop
         muted
-        playsInline // Important for mobile devices
+        playsInline
         style={{
           position: 'absolute',
           top: '50%',
@@ -92,7 +103,6 @@ export default function Page() {
           zIndex: 1,
         }}
       >
-        {/* 确保您的视频文件名为 background-video.mp4 并放在 public 文件夹下 */}
         <source src="/background-video.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
@@ -112,7 +122,6 @@ export default function Page() {
           alignItems: 'center',
           textAlign: 'center',
           color: 'white',
-          // 添加半透明遮罩，使文本更易读
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         }}
       >
@@ -126,7 +135,7 @@ export default function Page() {
           Turn your text, images, or video prompts into high-quality videos in simple prompts. No technical skills required.
         </Box>
 
-        {/* 主要行动号召按钮，链接到您的 Generate 页面 */}
+        {/* 主要行动号召按钮 */}
         <Link href={pages.GenerateImage.href} passHref>
           <Box
             component="button"
@@ -147,7 +156,8 @@ export default function Page() {
               },
             }}
           >
-            Try DeeVid AI
+            {/* 您可以修改按钮文本 */}
+            Try ImgStudio AI
           </Box>
         </Link>
       </Box>
