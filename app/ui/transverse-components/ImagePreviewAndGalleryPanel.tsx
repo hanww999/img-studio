@@ -1,7 +1,3 @@
-
-
-// File Path: app/ui/transverse-components/ImagePreviewAndGalleryPanel.tsx
-
 'use client';
 
 import * as React from 'react';
@@ -9,6 +5,7 @@ import { useState } from 'react';
 import { Box, Typography, Paper, Card, CardMedia, IconButton } from '@mui/material';
 import { ArrowBackIosNew, ArrowForwardIos } from '@mui/icons-material';
 import { ImageI } from '../../api/generate-image-utils';
+// [REMOVED] We no longer need the full OutputImagesDisplay component inside this panel.
 import OutputImagesDisplay from './ImagenOutputImagesDisplay';
 
 const imageSampleMedias = [
@@ -27,7 +24,6 @@ const FeaturedImagePlayer = ({ imageSrc }: { imageSrc: string }) => (
   </Box>
 );
 
-// [SYNC] Applying the new dark theme styles to the ImageCard
 const ImageCard = ({ sample, onClick, isActive }: { sample: typeof imageSampleMedias[0], onClick: () => void, isActive: boolean }) => (
   <Card 
     onClick={onClick}
@@ -38,13 +34,8 @@ const ImageCard = ({ sample, onClick, isActive }: { sample: typeof imageSampleMe
       display: 'flex',
       flexDirection: 'column',
       cursor: 'pointer',
-      border: isActive ? '3px solid #00BFFF' : '3px solid transparent', // Deep sky blue for highlight
-      backgroundColor: '#333', // Darker card background
-      '&:hover': { 
-        transform: 'scale(1.05)',
-        boxShadow: '0px 8px 20px rgba(0, 255, 255, 0.2)', // Cyan glow effect
-        zIndex: 10 
-      } 
+      border: isActive ? '3px solid #1976d2' : '3px solid transparent',
+      '&:hover': { transform: 'scale(1.05)', boxShadow: 6, zIndex: 10 } 
     }}
   >
     <CardMedia
@@ -57,7 +48,7 @@ const ImageCard = ({ sample, onClick, isActive }: { sample: typeof imageSampleMe
       <Typography 
         variant="caption" 
         sx={{ 
-          color: 'rgba(255, 255, 255, 0.7)', // Lighter text for dark background
+          color: 'text.secondary',
           display: '-webkit-box',
           WebkitBoxOrient: 'vertical',
           WebkitLineClamp: 3,
@@ -71,19 +62,12 @@ const ImageCard = ({ sample, onClick, isActive }: { sample: typeof imageSampleMe
   </Card>
 );
 
+// [REMOVED] onSampleSelect is no longer needed in the props.
 interface ImagePreviewPanelProps {
-  isLoading: boolean;
-  generatedImages: ImageI[];
-  generatedCount: number;
-  onSampleSelect: (prompt: string) => void;
+  // No props are needed anymore as this is a self-contained initial state display.
 }
 
-export default function ImagePreviewAndGalleryPanel({
-  isLoading,
-  generatedImages,
-  generatedCount,
-  onSampleSelect,
-}: ImagePreviewPanelProps) {
+export default function ImagePreviewAndGalleryPanel({}: ImagePreviewPanelProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [featuredSample, setFeaturedSample] = useState(imageSampleMedias[0]);
@@ -98,25 +82,13 @@ export default function ImagePreviewAndGalleryPanel({
     }
   };
 
+  // [MODIFIED] This handler now ONLY updates the local state.
   const handleCardClick = (sample: typeof imageSampleMedias[0]) => {
     setFeaturedSample(sample);
-    onSampleSelect(sample.prompt);
   };
 
-  const hasUserGeneratedContent = generatedImages.length > 0;
-
   return (
-    // [SYNC] Applying the new dark theme styles to the main Paper container
-    <Paper variant="outlined" sx={{ 
-      height: 'calc(100vh - 48px)', 
-      padding: 2.5, 
-      display: 'flex', 
-      flexDirection: 'column', 
-      backgroundColor: '#1E1E1E', // Main dark background
-      borderColor: '#424242', // Subtle border color
-      borderRadius: 2 
-    }}>
-      
+    <Paper variant="outlined" sx={{ height: 'calc(100vh - 48px)', padding: 2.5, display: 'flex', flexDirection: 'column', backgroundColor: '#f5f5f5', borderRadius: 2 }}>
       <Box sx={{ 
         height: 'calc(100% - 260px)',
         width: '100%',
@@ -124,42 +96,30 @@ export default function ImagePreviewAndGalleryPanel({
         flexDirection: 'column',
         mb: 2,
       }}>
-        <Typography variant="h6" sx={{ mb: 1, fontWeight: 500, color: 'rgba(255, 255, 255, 0.87)' }}>
-          {hasUserGeneratedContent ? 'Your Results' : 'Sample Image'}
+        <Typography variant="h6" sx={{ mb: 1, fontWeight: 500, color: 'text.secondary' }}>
+          Sample Image
         </Typography>
         <Box sx={{
           flexGrow: 1,
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center', 
-          backgroundColor: '#000', // Black background for image player
+          backgroundColor: '#e0e0e0', 
           borderRadius: 2, 
           overflow: 'hidden',
           position: 'relative',
         }}>
-          {hasUserGeneratedContent ? (
-            <OutputImagesDisplay
-              isLoading={isLoading}
-              generatedImagesInGCS={generatedImages}
-              generatedCount={generatedCount}
-              isPromptReplayAvailable={true}
-            />
-          ) : (
-            <FeaturedImagePlayer imageSrc={featuredSample.src} />
-          )}
+          <FeaturedImagePlayer imageSrc={featuredSample.src} />
         </Box>
-        {/* [SYNC] Adding the new Prompt display area */}
-        {!hasUserGeneratedContent && (
-          <Box sx={{ mt: 1, p: 1.5, backgroundColor: '#333', borderRadius: 2, maxHeight: '6em', overflowY: 'auto' }}>
-            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+        <Box sx={{ mt: 1, p: 1.5, backgroundColor: '#e0e0e0', borderRadius: 2, maxHeight: '6em', overflowY: 'auto' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               <strong>Prompt:</strong> {featuredSample.prompt}
             </Typography>
-          </Box>
-        )}
+        </Box>
       </Box>
 
       <Box sx={{ height: '260px', display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 500, color: 'rgba(255, 255, 255, 0.87)' }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 500, color: 'text.primary' }}>
           Inspiration Gallery
         </Typography>
         <Box 
@@ -167,12 +127,11 @@ export default function ImagePreviewAndGalleryPanel({
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* [SYNC] Applying the new dark theme styles to navigation buttons */}
           <IconButton
             onClick={() => scroll('left')}
             sx={{
               position: 'absolute', left: -16, top: '50%', transform: 'translateY(-50%)', zIndex: 20,
-              backgroundColor: 'rgba(40, 40, 40, 0.8)', color: 'white', '&:hover': { backgroundColor: '#424242' },
+              backgroundColor: 'rgba(255, 255, 255, 0.8)', '&:hover': { backgroundColor: 'white' },
               opacity: isHovered ? 1 : 0, transition: 'opacity 0.2s ease-in-out',
             }}
           >
@@ -182,7 +141,7 @@ export default function ImagePreviewAndGalleryPanel({
             onClick={() => scroll('right')}
             sx={{
               position: 'absolute', right: -16, top: '50%', transform: 'translateY(-50%)', zIndex: 20,
-              backgroundColor: 'rgba(40, 40, 40, 0.8)', color: 'white', '&:hover': { backgroundColor: '#424242' },
+              backgroundColor: 'rgba(255, 255, 255, 0.8)', '&:hover': { backgroundColor: 'white' },
               opacity: isHovered ? 1 : 0, transition: 'opacity 0.2s ease-in-out',
             }}
           >
@@ -208,7 +167,7 @@ export default function ImagePreviewAndGalleryPanel({
                 key={sample.id} 
                 sample={sample}
                 onClick={() => handleCardClick(sample)}
-                isActive={sample.id === featuredSample.id && !hasUserGeneratedContent}
+                isActive={sample.id === featuredSample.id}
               />
             ))}
           </Box>
