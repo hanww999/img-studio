@@ -23,7 +23,6 @@ import { getVideoGenerationStatus } from '../../api/veo/action';
 import { downloadMediaFromGcs } from '../../api/cloud-storage/action';
 import { getAspectRatio } from '../../ui/edit-components/EditImageDropzone';
 
-// [修改] 引入两个版本的预览面板
 import PreviewAndGalleryPanel from '../../ui/transverse-components/PreviewAndGalleryPanel';
 import ImagePreviewAndGalleryPanel from '../../ui/transverse-components/ImagePreviewAndGalleryPanel';
 
@@ -34,7 +33,6 @@ const MAX_POLLING_ATTEMPTS = 30;
 const JITTER_FACTOR = 0.2;
 
 export default function GeneratePageClient() {
-  // --- 所有 State, useEffect, Handlers 逻辑都保持原样，无需改动 ---
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode');
 
@@ -46,6 +44,9 @@ export default function GeneratePageClient() {
   const [generationErrorMsg, setGenerationErrorMsg] = useState('');
   const { appContext, error: appContextError, setAppContext } = useAppContext();
 
+  // [修改] 将 initialPrompt 重命名为 currentPrompt，并用它来驱动表单
+  const [currentPrompt, setCurrentPrompt] = useState<string | null>(null);
+
   useEffect(() => {
     const targetMode = mode === 'video' ? 'Generate a Video' : 'Generate an Image';
     if (targetMode !== generationMode) {
@@ -53,7 +54,7 @@ export default function GeneratePageClient() {
       setGenerationErrorMsg('');
       setGeneratedImages([]);
       setGeneratedVideos([]);
-      setInitialPrompt(null);
+      setCurrentPrompt(null); // [修改]
       if (timeoutIdRef.current) {
         clearTimeout(timeoutIdRef.current);
         timeoutIdRef.current = null;
@@ -67,11 +68,10 @@ export default function GeneratePageClient() {
     }
   }, [mode, generationMode]);
 
-  const [initialPrompt, setInitialPrompt] = useState<string | null>(null);
   useEffect(() => {
     if (appContext && appContext.promptToGenerateImage) {
       setGenerationMode('Generate an Image');
-      setInitialPrompt(appContext.promptToGenerateImage);
+      setCurrentPrompt(appContext.promptToGenerateImage); // [修改]
       setAppContext((prevContext) => {
         if (prevContext) return { ...prevContext, promptToGenerateImage: '' };
         else return { ...appContextDataDefault, promptToGenerateImage: '' };
@@ -79,7 +79,7 @@ export default function GeneratePageClient() {
     }
     if (appContext && appContext.promptToGenerateVideo) {
       setGenerationMode('Generate a Video');
-      setInitialPrompt(appContext.promptToGenerateVideo);
+      setCurrentPrompt(appContext.promptToGenerateVideo); // [修改]
       setAppContext((prevContext) => {
         if (prevContext) return { ...prevContext, promptToGenerateVideo: '' };
         else return { ...appContextDataDefault, promptToGenerateVideo: '' };
@@ -162,6 +162,11 @@ export default function GeneratePageClient() {
     currentPollingIntervalRef.current = INITIAL_POLLING_INTERVAL_MS;
   };
 
+  // [ADD] The handler function that was missing
+  const handleSampleSelect = (prompt: string) => {
+    setCurrentPrompt(prompt);
+  };
+
   useEffect(() => {
     const stopPolling = (isSuccess: boolean, finalLoadingState = false) => {
       if (timeoutIdRef.current) { clearTimeout(timeoutIdRef.current); timeoutIdRef.current = null; }
@@ -216,7 +221,8 @@ export default function GeneratePageClient() {
         }}>
           {generationMode === 'Generate an Image' && (
             <GenerateForm 
-              key="image-form" 
+              // [MODIFY] Use a key to force re-render when prompt changes from gallery
+              key={`image-form-${currentPrompt}`} 
               generationType="Image" 
               isLoading={isLoading} 
               onRequestSent={handleRequestSent} 
@@ -225,13 +231,14 @@ export default function GeneratePageClient() {
               errorMsg={generationErrorMsg} 
               randomPrompts={ImageRandomPrompts} 
               generationFields={imageGenerationUtils} 
-              initialPrompt={initialPrompt ?? ''} 
+              initialPrompt={currentPrompt ?? ''} // [MODIFY]
               promptIndication={'Describe your image...'} 
             />
           )}
           {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && generationMode === 'Generate a Video' && (
             <GenerateForm
-              key="video-form"
+              // [MODIFY] Use a key to force re-render when prompt changes from gallery
+              key={`video-form-${currentPrompt}`}
               generationType="Video"
               isLoading={isLoading}
               onRequestSent={handleRequestSent}
@@ -240,7 +247,7 @@ export default function GeneratePageClient() {
               errorMsg={generationErrorMsg}
               randomPrompts={VideoRandomPrompts}
               generationFields={videoGenerationUtils}
-              initialPrompt={initialPrompt ?? ''}
+              initialPrompt={currentPrompt ?? ''} // [MODIFY]
               initialITVimage={initialITVimage ?? undefined}
               promptIndication={'Describe your video...'}
             />
@@ -248,18 +255,20 @@ export default function GeneratePageClient() {
         </Grid>
 
         <Grid item xs={12} md={7} lg={7.5} xl={8} sx={{ height: '100%' }}>
-          {/* [核心修改] 根据模式，条件渲染不同的预览面板 */}
           {generationMode === 'Generate an Image' ? (
             <ImagePreviewAndGalleryPanel
               isLoading={isLoading}
               generatedImages={generatedImages}
               generatedCount={generatedCount}
+              onSampleSelect={handleSampleSelect} // [ADD] Pass the handler function
             />
           ) : (
             <PreviewAndGalleryPanel
               isLoading={isLoading}
               generatedVideos={generatedVideos}
               generatedCount={generatedCount}
+              // @ts-ignore - We can ignore this for the video panel for now or implement it
+              onSampleSelect={handleSampleSelect} 
             />
           )}
         </Grid>
