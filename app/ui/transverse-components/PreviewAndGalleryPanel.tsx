@@ -12,7 +12,7 @@ import OutputVideosDisplay from './VeoOutputVideosDisplay';
 const sampleMedias = [
   { id: 1, thumbnail: '/samples/1.mp4', prompt: 'Subject: Emma, a young woman in her 20s with anxious expression, wearing dark clothing,Context:dimly lit abandoned warehouse with shadows and mysterious atmosphere, fog effects,Action: moves cautiously through space, looking over shoulder with growing tension, subtle fearful reactions,Style: horror cinematography with dramatic chiaroscuro lighting, desaturated color palette,Camera: slow tracking shots with occasional quick movements, building suspense,Composition: dramatic angles with deep shadows, creating sense of unease,Ambiance: moody atmospheric lighting with stark contrasts, ominous shadows,Audio: tense atmospheric score with subtle environmental sounds, footsteps echoing, distant mysterious noises,Negative prompt: no text overlays, no watermarks, no cartoon effects, no unrealistic proportions, no blurry faces, no distorted hands, no artificial lighting, no oversaturation, no low resolution artifacts, no compression noise, no camera shake, no poor audio quality, no lip-sync issues, no unnatural movements' },
   { id: 2, thumbnail: '/samples/2.mp4', prompt: 'subject: a seasoned elf ranger dressed in forest camouflage leather armor, holding a shimmering rune longbow. scenario: on the top of an ancient, moss covered megalithic relic, the background is the dusk sky before a storm approaches. action: she leaped and jumped towards another stone pillar, drawing a bow and casting arrows in the air, with wind elemental energy condensed on the arrows. photography style: the highly dynamic low angle tracking lens captures her jumping from bottom to top, combined with bullet time like slow motion effects, with a strong dynamic blur in the background. lighting atmosphere: the jesus light at dusk penetrates through the clouds, illuminating her contours to form edge lights, and lightning in the distance instantly illuminates the entire scene. special effects and post production: there are clear and visible blue wind magic particles on the arrows, and raindrops are captured by the camera in slow motion. The overall color scheme is movie grade with cool tones. audio: a majestic symphony, the creaking sound of bowstring tension, the wind, and distant thunder.' },
-  { id: 3, thumbnail: '/samples/3.mp4', prompt: ' subject: a bottle of "fountain of life" potion in a delicate crystal bottle, with a bright emerald green liquid and slowly rotating golden light spots inside. scenario: on a seamless black background. action: the entire bottle body is slowly and uniformly rotating around the vertical axis. photography style: game asset display style, orthogonal projection, 45 degree top-down view, all details are clearly visible. lighting atmosphere: soft and uniform studio lighting clearly outlines the edges of the crystal bottle and the transparency of the liquid. special effects and post production: the potion itself emits a soft internal light, without any other environmental effects, requiring ultra-high resolution and sharp details. photography style: the highly dynamic low angle tracking lens captures her jumping from bottom to top, combined with bullet time like slow motion effects, with a strong dynamic blur in the background. lighting atmosphere: the jesus light at dusk penetrates through the clouds, illuminating her contours to form edge lights, and lightning in the distance instantly illuminates the entire scene. special effects and post production: there are clear and visible blue wind magic particles on the arrows, and raindrops are captured by the camera in slow motion. The overall color scheme is movie grade with cool tones. audio: a majestic symphony, the creaking sound of bowstring tension, ahe wind, and distant thunder.' },
+  { id:3, thumbnail: '/samples/3.mp4', prompt: ' subject: a bottle of "fountain of life" potion in a delicate crystal bottle, with a bright emerald green liquid and slowly rotating golden light spots inside. scenario: on a seamless black background. action: the entire bottle body is slowly and uniformly rotating around the vertical axis. photography style: game asset display style, orthogonal projection, 45 degree top-down view, all details are clearly visible. lighting atmosphere: soft and uniform studio lighting clearly outlines the edges of the crystal bottle and the transparency of the liquid. special effects and post production: the potion itself emits a soft internal light, without any other environmental effects, requiring ultra-high resolution and sharp details. photography style: the highly dynamic low angle tracking lens captures her jumping from bottom to top, combined with bullet time like slow motion effects, with a strong dynamic blur in the background. lighting atmosphere: the jesus light at dusk penetrates through the clouds, illuminating her contours to form edge lights, and lightning in the distance instantly illuminates the entire scene. special effects and post production: there are clear and visible blue wind magic particles on the arrows, and raindrops are captured by the camera in slow motion. The overall color scheme is movie grade with cool tones. audio: a majestic symphony, the creaking sound of bowstring tension, ahe wind, and distant thunder.' },
 ];
 
 const FeaturedSamplePlayer = ({ videoSrc }: { videoSrc: string }) => (
@@ -56,10 +56,11 @@ const VideoCard = ({ sample, onClick, isActive }: { sample: typeof sampleMedias[
         display: 'flex',
         flexDirection: 'column',
         cursor: 'pointer',
-        border: isActive ? '3px solid #1976d2' : '3px solid transparent',
+        border: isActive ? '3px solid #00BFFF' : '3px solid transparent', // Deep sky blue for highlight
+        backgroundColor: '#333', // Darker card background
         '&:hover': { 
           transform: 'scale(1.05)',
-          boxShadow: 6,
+          boxShadow: '0px 8px 20px rgba(0, 255, 255, 0.2)', // Cyan glow effect
           zIndex: 10,
         } 
       }}
@@ -81,7 +82,7 @@ const VideoCard = ({ sample, onClick, isActive }: { sample: typeof sampleMedias[
         <Typography 
           variant="caption" 
           sx={{ 
-            color: 'text.secondary',
+            color: 'rgba(255, 255, 255, 0.7)', // Lighter text for dark background
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
             WebkitLineClamp: 3,
@@ -124,25 +125,34 @@ export default function PreviewAndGalleryPanel({
   const hasUserGeneratedContent = generatedVideos.length > 0;
 
   return (
-    <Paper variant="outlined" sx={{ height: 'calc(100vh - 48px)', padding: 2.5, display: 'flex', flexDirection: 'column', backgroundColor: '#f5f5f5', borderRadius: 2 }}>
+    <Paper variant="outlined" sx={{ 
+      height: 'calc(100vh - 48px)', 
+      padding: 2.5, 
+      display: 'flex', 
+      flexDirection: 'column', 
+      backgroundColor: '#1E1E1E', // Main dark background
+      borderColor: '#424242', // Subtle border color
+      borderRadius: 2 
+    }}>
       
-      {/* [CORE FIX] Main preview area with a calculated, robust height */}
       <Box sx={{ 
-        height: 'calc(100% - 260px)', // Total height minus the fixed height of the gallery below
+        height: 'calc(100% - 260px)',
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
         mb: 2,
       }}>
-        <Typography variant="h6" sx={{ mb: 1, fontWeight: 500, color: 'text.secondary' }}>
-          {hasUserGeneratedContent ? 'Your Results' : 'Sample Video'}
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 500, color: 'rgba(255, 255, 255, 0.87)' }}>
+            {hasUserGeneratedContent ? 'Your Results' : 'Sample Video'}
+          </Typography>
+        </Box>
         <Box sx={{
           flexGrow: 1,
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center', 
-          backgroundColor: '#e0e0e0', 
+          backgroundColor: '#000', // Black background for video player
           borderRadius: 2, 
           overflow: 'hidden',
           position: 'relative',
@@ -157,11 +167,18 @@ export default function PreviewAndGalleryPanel({
             <FeaturedSamplePlayer videoSrc={featuredSample.thumbnail} />
           )}
         </Box>
+        {/* [新增] Prompt display area */}
+        {!hasUserGeneratedContent && (
+          <Box sx={{ mt: 1, p: 1.5, backgroundColor: '#333', borderRadius: 2, maxHeight: '6em', overflowY: 'auto' }}>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              <strong>Prompt:</strong> {featuredSample.prompt}
+            </Typography>
+          </Box>
+        )}
       </Box>
 
-      {/* [CORE FIX] Inspiration Gallery with a fixed, predictable height */}
       <Box sx={{ height: '260px', display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 500, color: 'text.primary' }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 500, color: 'rgba(255, 255, 255, 0.87)' }}>
           Inspiration Gallery
         </Typography>
         <Box 
@@ -173,7 +190,7 @@ export default function PreviewAndGalleryPanel({
             onClick={() => scroll('left')}
             sx={{
               position: 'absolute', left: -16, top: '50%', transform: 'translateY(-50%)', zIndex: 20,
-              backgroundColor: 'rgba(255, 255, 255, 0.8)', '&:hover': { backgroundColor: 'white' },
+              backgroundColor: 'rgba(40, 40, 40, 0.8)', color: 'white', '&:hover': { backgroundColor: '#424242' },
               opacity: isHovered ? 1 : 0, transition: 'opacity 0.2s ease-in-out',
             }}
           >
@@ -183,7 +200,7 @@ export default function PreviewAndGalleryPanel({
             onClick={() => scroll('right')}
             sx={{
               position: 'absolute', right: -16, top: '50%', transform: 'translateY(-50%)', zIndex: 20,
-              backgroundColor: 'rgba(255, 255, 255, 0.8)', '&:hover': { backgroundColor: 'white' },
+              backgroundColor: 'rgba(40, 40, 40, 0.8)', color: 'white', '&:hover': { backgroundColor: '#424242' },
               opacity: isHovered ? 1 : 0, transition: 'opacity 0.2s ease-in-out',
             }}
           >
