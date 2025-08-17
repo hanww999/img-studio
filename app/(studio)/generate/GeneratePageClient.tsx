@@ -6,7 +6,6 @@ import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-// [修改] 从 @mui/material 引入 Grid，而不是 @mui/material/Grid2
 import { Grid, Box, Typography } from '@mui/material'; 
 
 import GenerateForm from '../../ui/generate-components/GenerateForm';
@@ -24,12 +23,9 @@ import { getVideoGenerationStatus } from '../../api/veo/action';
 import { downloadMediaFromGcs } from '../../api/cloud-storage/action';
 import { getAspectRatio } from '../../ui/edit-components/EditImageDropzone';
 
-// [新增] 引入我们全新的预览面板
 import PreviewAndGalleryPanel from '../../ui/transverse-components/PreviewAndGalleryPanel';
-// [说明] OutputImagesDisplay 仍然需要，用于图片生成模式
 import OutputImagesDisplay from '../../ui/transverse-components/ImagenOutputImagesDisplay';
 
-// ... Polling Constants (保持不变)
 const INITIAL_POLLING_INTERVAL_MS = 6000;
 const MAX_POLLING_INTERVAL_MS = 60000;
 const BACKOFF_FACTOR = 1.2;
@@ -37,7 +33,7 @@ const MAX_POLLING_ATTEMPTS = 30;
 const JITTER_FACTOR = 0.2;
 
 export default function GeneratePageClient() {
-  // --- [说明] 以下所有 State, useEffect, Handlers 逻辑都保持原样，无需改动 ---
+  // --- 所有 State, useEffect, Handlers 逻辑都保持原样，无需改动 ---
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode');
 
@@ -206,20 +202,18 @@ export default function GeneratePageClient() {
     );
   }
 
-  // --- [核心改造] 返回全新的 JSX 布局 ---
   return (
     <Box p={3} sx={{ height: '100vh', overflow: 'hidden' }}>
       <Grid container spacing={3} sx={{ height: '100%', flexWrap: 'nowrap' }}>
         
-        {/* 第一栏：左侧设置区 (红色框) */}
-        <Grid item xs={12} md={5} lg={4} xl={3.5} sx={{ 
+        {/* [修改] 调整了Grid比例，让左侧更宽敞 */}
+        <Grid item xs={12} md={5} lg={4.5} xl={4} sx={{ 
           height: 'calc(100vh - 48px)', 
           overflowY: 'auto',
-          pr: 1, // Add some padding to the right of the scrollbar
+          pr: 1,
           '::-webkit-scrollbar': { width: '8px' },
           '::-webkit-scrollbar-thumb': { backgroundColor: '#ccc', borderRadius: '4px' }
         }}>
-          {/* 您的 GenerateForm 组件放在这里，它的内部逻辑和 props 都不需要改变 */}
           {generationMode === 'Generate an Image' && (
             <GenerateForm 
               key="image-form" 
@@ -253,14 +247,9 @@ export default function GeneratePageClient() {
           )}
         </Grid>
 
-        {/* 第二栏：右侧结果与灵感区 (蓝色框) */}
-        <Grid item xs={12} md={7} lg={8} xl={8.5} sx={{ height: '100%' }}>
-          {/* 
-            [说明] 这里我们根据模式，条件渲染不同的预览面板。
-          */}
+        {/* [修改] 调整了Grid比例 */}
+        <Grid item xs={12} md={7} lg={7.5} xl={8} sx={{ height: '100%' }}>
           {generationMode === 'Generate an Image' ? (
-            // TODO: 为图片生成也创建一个类似的 PreviewAndGalleryPanel
-            // 目前暂时还使用旧的 Display 组件
             <OutputImagesDisplay 
               isLoading={isLoading} 
               generatedImagesInGCS={generatedImages} 
@@ -268,7 +257,6 @@ export default function GeneratePageClient() {
               isPromptReplayAvailable={true} 
             />
           ) : (
-            // [使用新组件] 视频模式下，使用我们全新的预览面板
             <PreviewAndGalleryPanel
               isLoading={isLoading}
               generatedVideos={generatedVideos}
