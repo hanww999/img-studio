@@ -1,8 +1,3 @@
-// app/page.tsx (Corrected Version)
-
-// Copyright 2025 Google LLC
-// ... (license header)
-
 'use client';
 
 import * as React from 'react';
@@ -11,15 +6,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { pages } from './routes'; // 导入您的路由配置
 
-// 专为新主页设计的导航栏组件 (已修正)
+// 专为新主页设计的导航栏组件 (已按要求更新)
 const HomePageHeader = () => {
-  // 创建一个要显示的页面列表
+  // 1. 调整导航链接的顺序
   const navLinks = [
     pages.GenerateImage,
     pages.GenerateVideo,
+    pages.VirtualTryOn, // "Generate a Try-On" 已移到此处
     pages.Edit,
     pages.Library,
-    pages.VirtualTryOn,
   ];
 
   return (
@@ -37,38 +32,26 @@ const HomePageHeader = () => {
         zIndex: 10,
       }}
     >
-      {/* 左侧 Logo */}
+      {/* 2. 更换 Logo */}
       <Link href="/" passHref>
-        <Image src="/ImgStudioLogoReversedMini.svg" alt="ImgStudio Logo" width={180} height={40} />
+        <Image 
+          src="/cloudpuppy-logo.png" 
+          alt="CloudPuppy Logo" 
+          width={220} // 调整了宽度以适应新 Logo
+          height={60}  // 调整了高度以适应新 Logo
+        />
       </Link>
 
       {/* 右侧导航链接 (动态生成) */}
       <Box component="nav" sx={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
         {navLinks.map((page) =>
-          // 检查 status 字段，只有当 status 为 'true' 或未定义时才显示
           page.status === 'true' || page.status === undefined ? (
             <Link key={page.name} href={page.href} style={{ color: 'white', textDecoration: 'none', fontSize: '1rem' }}>
-              {/* 使用 routes.tsx 中定义的 name */}
               {page.name}
             </Link>
           ) : null
         )}
-        <Link href="#" passHref>
-           <Box component="button" sx={{
-              color: 'white',
-              border: '1px solid white',
-              backgroundColor: 'transparent',
-              borderRadius: '20px',
-              padding: '8px 20px',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              }
-           }}>
-            Free Trial
-           </Box>
-        </Link>
+        {/* 3. "Free Trial" 按钮已被移除 */}
       </Box>
     </Box>
   );
@@ -83,7 +66,7 @@ export default function Page() {
         width: '100vw',
         overflow: 'hidden',
         position: 'relative',
-        bgcolor: 'black', // Fallback background color
+        bgcolor: 'black',
       }}
     >
       {/* 视频背景 */}
@@ -156,7 +139,6 @@ export default function Page() {
               },
             }}
           >
-            {/* 您可以修改按钮文本 */}
             Try ImgStudio AI
           </Box>
         </Link>
