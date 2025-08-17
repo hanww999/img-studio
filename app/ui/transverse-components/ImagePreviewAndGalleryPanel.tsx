@@ -1,3 +1,6 @@
+
+// File Path: app/ui/transverse-components/ImagePreviewAndGalleryPanel.tsx
+
 'use client';
 
 import * as React from 'react';
@@ -24,11 +27,11 @@ const ImageCard = ({ sample, onClick, isActive }: { sample: typeof sampleImages[
         flexShrink: 0, 
         transition: 'all 0.2s ease-in-out',
         cursor: 'pointer',
-        border: isActive ? '3px solid #00BFFF' : '3px solid transparent',
-        backgroundColor: '#333',
+        border: isActive ? '3px solid #1976d2' : '3px solid transparent', // Blue highlight for active card
+        backgroundColor: 'white', // Light background for the card
         '&:hover': { 
           transform: 'scale(1.05)',
-          boxShadow: '0px 8px 20px rgba(0, 255, 255, 0.2)',
+          boxShadow: 6, // Standard shadow for light theme
           zIndex: 10,
         } 
       }}
@@ -78,8 +81,8 @@ export default function ImagePreviewAndGalleryPanel({
       padding: 2.5, 
       display: 'flex', 
       flexDirection: 'column', 
-      backgroundColor: '#1E1E1E',
-      borderColor: '#424242',
+      backgroundColor: '#f5f5f5', // Light grey background, same as video panel
+      borderColor: '#e0e0e0',
       borderRadius: 2 
     }}>
       
@@ -90,7 +93,7 @@ export default function ImagePreviewAndGalleryPanel({
         flexDirection: 'column',
         mb: 2,
       }}>
-        <Typography variant="h6" sx={{ mb: 1, fontWeight: 500, color: 'rgba(255, 255, 255, 0.87)' }}>
+        <Typography variant="h6" sx={{ mb: 1, fontWeight: 500, color: 'text.secondary' }}>
           {hasUserGeneratedContent ? 'Your Results' : 'Sample Image'}
         </Typography>
         <Box sx={{
@@ -98,7 +101,7 @@ export default function ImagePreviewAndGalleryPanel({
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center', 
-          backgroundColor: '#000', 
+          backgroundColor: '#e0e0e0', // Lighter grey for the preview box
           borderRadius: 2, 
           overflow: 'hidden',
           position: 'relative',
@@ -111,12 +114,12 @@ export default function ImagePreviewAndGalleryPanel({
               isPromptReplayAvailable={true}
             />
           ) : (
-            <img src={featuredSample.src} alt={featuredSample.prompt} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+            <img src={featuredSample.src} alt={featuredSample.prompt} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px' }} />
           )}
         </Box>
         {!hasUserGeneratedContent && (
-          <Box sx={{ mt: 1, p: 1.5, backgroundColor: '#333', borderRadius: 2, maxHeight: '6em', overflowY: 'auto' }}>
-            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+          <Box sx={{ mt: 1, p: 1.5, backgroundColor: '#e0e0e0', borderRadius: 2, maxHeight: '6em', overflowY: 'auto' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               <strong>Prompt:</strong> {featuredSample.prompt}
             </Typography>
           </Box>
@@ -124,7 +127,7 @@ export default function ImagePreviewAndGalleryPanel({
       </Box>
 
       <Box sx={{ height: '220px', display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 500, color: 'rgba(255, 255, 255, 0.87)' }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 500, color: 'text.primary' }}>
           Inspiration Gallery
         </Typography>
         <Box 
@@ -136,7 +139,7 @@ export default function ImagePreviewAndGalleryPanel({
             onClick={() => scroll('left')}
             sx={{
               position: 'absolute', left: -16, top: '50%', transform: 'translateY(-50%)', zIndex: 20,
-              backgroundColor: 'rgba(40, 40, 40, 0.8)', color: 'white', '&:hover': { backgroundColor: '#424242' },
+              backgroundColor: 'rgba(255, 255, 255, 0.8)', color: 'black', '&:hover': { backgroundColor: 'white' },
               opacity: isHovered ? 1 : 0, transition: 'opacity 0.2s ease-in-out',
             }}
           >
@@ -146,7 +149,7 @@ export default function ImagePreviewAndGalleryPanel({
             onClick={() => scroll('right')}
             sx={{
               position: 'absolute', right: -16, top: '50%', transform: 'translateY(-50%)', zIndex: 20,
-              backgroundColor: 'rgba(40, 40, 40, 0.8)', color: 'white', '&:hover': { backgroundColor: '#424242' },
+              backgroundColor: 'rgba(255, 255, 255, 0.8)', color: 'black', '&:hover': { backgroundColor: 'white' },
               opacity: isHovered ? 1 : 0, transition: 'opacity 0.2s ease-in-out',
             }}
           >
