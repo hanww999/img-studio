@@ -9,22 +9,20 @@ import {
   FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Dialog, DialogTitle, DialogContent, DialogActions, Chip
 } from '@mui/material';
 import { Check, Refresh, Visibility } from '@mui/icons-material';
-
-// [核心] 从您提供的权威 utils 文件中导入数据结构和选项
 import { 
   ImagenPromptData, 
   initialImagenPromptData, 
-  imagenPromptBuilderOptions 
+  imagenPromptBuilderOptions,
+  ImagenPromptOptions,
+  PromptOption
 } from '../../api/imagen-prompt-builder-utils';
 
-// [核心修复] 定义组件期望接收的 props 类型，解决构建错误
 interface ImagenPromptBuilderProps {
   onApply: (prompt: string, negativePrompt: string) => void;
   onClose: () => void;
 }
 
 export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBuilderProps) {
-  // [核心] 使用您提供的 initialImagenPromptData 初始化组件状态
   const [formState, setFormState] = useState<ImagenPromptData>(initialImagenPromptData);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState('');
@@ -40,33 +38,13 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
   };
 
   const generatePromptString = () => {
-    // [核心] 确保字段顺序和名称与您的 ImagenPromptData 接口一致
     const {
-      styleMedium,
-      subject,
-      detailedDescription,
-      environment,
-      composition,
-      lighting,
-      colorScheme,
-      lensType,
-      cameraSettings,
-      filmType,
-      quality
+      styleMedium, subject, detailedDescription, environment, composition,
+      lighting, colorScheme, lensType, cameraSettings, filmType, quality
     } = formState;
-
     const promptParts = [
-      styleMedium,
-      subject,
-      detailedDescription,
-      environment,
-      composition,
-      lighting,
-      colorScheme,
-      lensType,
-      cameraSettings,
-      filmType,
-      quality
+      styleMedium, subject, detailedDescription, environment, composition,
+      lighting, colorScheme, lensType, cameraSettings, filmType, quality
     ];
     return promptParts.filter(part => part && part.trim() !== '').join(', ');
   };
@@ -78,7 +56,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
   };
 
   const handleReset = () => {
-    // [核心] 重置时也使用您提供的初始数据
     setFormState(initialImagenPromptData);
   };
 
@@ -87,18 +64,20 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
     onApply(finalPrompt, formState.negativePrompt);
   };
 
-  const renderSelect = (name: keyof Omit<ImagenPromptData, 'subject' | 'detailedDescription' | 'environment' | 'negativePrompt'>, label: string) => (
+  const renderSelect = (name: keyof ImagenPromptOptions, label: string) => (
     <FormControl fullWidth variant="outlined" size="small">
       <InputLabel sx={{ fontSize: '0.9rem' }}>{label}</InputLabel>
       <Select
         name={name}
-        value={formState[name]}
+        value={formState[name as keyof ImagenPromptData]}
         onChange={handleSelectChange}
         label={label}
       >
         <MenuItem value=""><em>None</em></MenuItem>
-        {imagenPromptBuilderOptions[name].map(option => (
-          <MenuItem key={option} value={option}>{option}</MenuItem>
+        {imagenPromptBuilderOptions[name].map((option: PromptOption) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
         ))}
       </Select>
     </FormControl>
@@ -121,7 +100,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
   return (
     <Box sx={{ width: '100%', p: 1 }}>
       <Grid container spacing={2}>
-        {/* Column 1: Core Components */}
         <Grid item xs={12} md={4}>
           <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
             <Stack spacing={2.5}>
@@ -133,8 +111,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
             </Stack>
           </Paper>
         </Grid>
-
-        {/* Column 2: Photographic Style */}
         <Grid item xs={12} md={4}>
           <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
             <Stack spacing={2.5}>
@@ -149,8 +125,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
             </Stack>
           </Paper>
         </Grid>
-
-        {/* Column 3: Exclusions */}
         <Grid item xs={12} md={4}>
           <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
             <Stack spacing={2}>
@@ -160,8 +134,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
           </Paper>
         </Grid>
       </Grid>
-
-      {/* Bottom Action Buttons */}
       <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center" sx={{ mt: 2, p: 1 }}>
         <Box>
           <Button variant="outlined" onClick={handlePreview} startIcon={<Visibility />}>
@@ -175,8 +147,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
           应用到表单 (Apply to Form)
         </Button>
       </Stack>
-
-      {/* Preview Dialog */}
       <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>Generated Prompt Preview</DialogTitle>
         <DialogContent>
