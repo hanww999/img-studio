@@ -1,4 +1,4 @@
-// 文件路径: app/(studio)/generate/GeneratePageClient.tsx (最终完整版 - 已修复布局 & 翻译)
+// 文件路径: app/(studio)/generate/GeneratePageClient.tsx (最终完整版)
 
 'use client';
 
@@ -34,8 +34,7 @@ export default function GeneratePageClient() {
  const searchParams = useSearchParams();
  const mode = searchParams.get('mode');
 
- // [中文翻译] 更新状态的默认值为中文
- const [generationMode, setGenerationMode] = useState('生成图片');
+ const [generationMode, setGenerationMode] = useState('AI 图像创作');
  const [isLoading, setIsLoading] = useState(false);
  const [generatedImages, setGeneratedImages] = useState<ImageI[]>([]);
  const [generatedVideos, setGeneratedVideos] = useState<VideoI[]>([]);
@@ -44,8 +43,7 @@ export default function GeneratePageClient() {
  const { appContext, error: appContextError, setAppContext } = useAppContext();
 
  useEffect(() => {
-  // [中文翻译] 更新目标模式的判断为中文
-  const targetMode = mode === 'video' ? '生成视频' : '生成图片';
+  const targetMode = mode === 'video' ? 'AI 视频生成' : 'AI 图像创作';
   if (targetMode !== generationMode) {
    setGenerationMode(targetMode);
    setGenerationErrorMsg('');
@@ -68,7 +66,7 @@ export default function GeneratePageClient() {
  const [initialPrompt, setInitialPrompt] = useState<string | null>(null);
  useEffect(() => {
   if (appContext && appContext.promptToGenerateImage) {
-   setGenerationMode('生成图片'); // [中文翻译]
+   setGenerationMode('AI 图像创作');
    setInitialPrompt(appContext.promptToGenerateImage);
    setAppContext((prevContext) => {
     if (prevContext) return { ...prevContext, promptToGenerateImage: '' };
@@ -76,7 +74,7 @@ export default function GeneratePageClient() {
    });
   }
   if (appContext && appContext.promptToGenerateVideo) {
-   setGenerationMode('生成视频'); // [中文翻译]
+   setGenerationMode('AI 视频生成');
    setInitialPrompt(appContext.promptToGenerateVideo);
    setAppContext((prevContext) => {
     if (prevContext) return { ...prevContext, promptToGenerateVideo: '' };
@@ -89,7 +87,7 @@ export default function GeneratePageClient() {
  useEffect(() => {
   const fetchAndSetImage = async () => {
    if (appContext && appContext.imageToVideo) {
-    setGenerationMode('生成视频'); // [中文翻译]
+    setGenerationMode('AI 视频生成');
     try {
      const { data } = await downloadMediaFromGcs(appContext.imageToVideo);
      const newImage = `data:image/png;base64,${data}`;
@@ -167,7 +165,7 @@ export default function GeneratePageClient() {
   };
   const poll = async () => {
    if (!pollingOperationName || !operationMetadata) { stopPolling(false, false); return; }
-   if (pollingAttemptsRef.current >= MAX_POLLING_ATTEMPTS) { handleNewErrorMsg(`视频生成超时...`); return; } // [中文翻译]
+   if (pollingAttemptsRef.current >= MAX_POLLING_ATTEMPTS) { handleNewErrorMsg(`视频生成超时...`); return; }
    pollingAttemptsRef.current++;
    try {
     const statusResult: VideoGenerationStatusResult = await getVideoGenerationStatus(pollingOperationName, appContext, operationMetadata.formData, operationMetadata.prompt);
@@ -175,7 +173,7 @@ export default function GeneratePageClient() {
     if (statusResult.done) {
      if (statusResult.error) { handleNewErrorMsg(statusResult.error); }
      else if (statusResult.videos && statusResult.videos.length > 0) { handleVideoGenerationComplete(statusResult.videos); stopPolling(true, false); setPollingOperationName(null); setOperationMetadata(null); }
-     else { handleNewErrorMsg('视频生成完成，但未返回有效结果。'); } // [中文翻译]
+     else { handleNewErrorMsg('视频生成完成，但未返回有效结果。'); }
     } else {
      const jitter = currentPollingIntervalRef.current * JITTER_FACTOR * (Math.random() - 0.5);
      const nextInterval = Math.round(currentPollingIntervalRef.current + jitter);
@@ -184,7 +182,7 @@ export default function GeneratePageClient() {
     }
    } catch (error: any) {
     if (!pollingOperationName) { stopPolling(false, false); return; }
-    handleNewErrorMsg(error.message || '检查视频状态时发生意外错误。'); // [中文翻译]
+    handleNewErrorMsg(error.message || '检查视频状态时发生意外错误。');
    }
   };
   if (pollingOperationName && !timeoutIdRef.current) { timeoutIdRef.current = setTimeout(poll, currentPollingIntervalRef.current); }
@@ -195,41 +193,42 @@ export default function GeneratePageClient() {
   return (
    <Box p={5}>
     <Typography variant="h3" sx={{ fontWeight: 400, color: appContextError === null ? 'primary.main' : 'error.main' }}>
-     {appContextError === null ? '正在加载您的个人资料...' : '加载个人资料时出错！'} {/* [中文翻译] */}
+     {appContextError === null ? '正在加载您的个人资料...' : '加载个人资料时出错！'}
     </Typography>
    </Box>
   );
  }
 
  return (
-    // [布局修复] 调整两栏的 flex 属性，解决内容显示不全的问题
-   <Box sx={{ display: 'flex', gap: 3, height: 'calc(100vh - 48px)' }}>
-      
-      {/* 第一栏：表单区 - 让它成为主要伸缩区域 */}
+   <Box sx={{ 
+        display: 'flex', 
+        gap: 3, 
+        height: 'calc(100vh - 48px)',
+        overflowX: 'auto',
+    }}>
      <Box sx={{ 
-        flex: '1 1 60%', // 占据约60%的理想空间，并且可以自由伸缩
-        minWidth: 480,    // 设置一个更合理的最小宽度
+        width: 650,
+        flexShrink: 0,
         display: 'flex', 
         flexDirection: 'column' 
       }}>
       <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-       {generationMode === '生成图片' && (
+       {generationMode === 'AI 图像创作' && (
         <GenerateForm key="image-form" generationType="Image" isLoading={isLoading} onRequestSent={handleRequestSent} onImageGeneration={handleImageGeneration} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={ImageRandomPrompts} generationFields={imageGenerationUtils} initialPrompt={initialPrompt ?? ''} promptIndication={'描述您想要的图片...'} />
        )}
-       {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && generationMode === '生成视频' && (
+       {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && generationMode === 'AI 视频生成' && (
         <GenerateForm key="video-form" generationType="Video" isLoading={isLoading} onRequestSent={handleRequestSent} onVideoPollingStart={handleVideoPollingStart} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={VideoRandomPrompts} generationFields={videoGenerationUtils} initialPrompt={initialPrompt ?? ''} initialITVimage={initialITVimage ?? undefined} promptIndication={'描述您想要的视频...'} />
        )}
       </Paper>
      </Box>
 
-      {/* 第二栏：画廊区 - 作为一个灵活的侧边栏 */}
      <Box sx={{ 
-        flex: '1 1 40%', // 占据约40%的理想空间，也可以伸缩
-        minWidth: 400,    // 保证画廊区不会被过度挤压
+        width: 550,
+        flexShrink: 0,
         display: 'flex', 
         flexDirection: 'column' 
       }}>
-      {generationMode === '生成图片' ? (
+      {generationMode === 'AI 图像创作' ? (
        <OutputImagesDisplay isLoading={isLoading} generatedImagesInGCS={generatedImages} generatedCount={generatedCount} isPromptReplayAvailable={true} />
       ) : (
        <OutputVideosDisplay isLoading={isLoading} generatedVideosInGCS={generatedVideos} generatedCount={generatedCount} />
