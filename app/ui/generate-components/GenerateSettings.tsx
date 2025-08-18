@@ -11,6 +11,14 @@ import { Settings } from '@mui/icons-material'
 import CustomTooltip from '../ux-components/Tooltip'
 import { FormInputNumberSmall } from '../ux-components/FormInputNumberSmall'
 
+// [核心] 汉化标签的映射
+const labelTranslations: { [key: string]: string } = {
+    'Aspect ratio': '纵横比',
+    'Quantity of outputs': '输出数量',
+    'People generation': '人物生成',
+    'Safety Filter Level': '安全过滤级别',
+};
+
 export default function GenerateSettings({
  control,
  setValue,
@@ -79,11 +87,12 @@ export default function GenerateSettings({
      </Typography>
     )}
     {Object.entries(generalSettingsFields).map(function ([param, field]) {
+      const translatedLabel = labelTranslations[field.label] || field.label;
      return (
       <MenuItem key={param}>
        <FormInputChipGroup
         name={param}
-        label={field.label}
+        label={translatedLabel}
         key={param}
         control={control}
         setValue={setValue}
@@ -96,11 +105,12 @@ export default function GenerateSettings({
     })}
 
     {Object.entries(advancedSettingsFields).map(function ([param, field]) {
+      const translatedLabel = labelTranslations[field.label] || field.label;
      return (
       <MenuItem key={param}>
        <FormInputDropdown
         name={param}
-        label={field.label}
+        label={translatedLabel}
         key={param}
         control={control}
         field={field}
