@@ -6,9 +6,9 @@ import * as React from 'react';
 import { useState } from 'react';
 import {
   Box, Button, Grid, Paper, Stack, TextField, Typography,
-  FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Dialog, DialogTitle, DialogContent, DialogActions, Divider, Tooltip, IconButton
+  FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Tooltip
 } from '@mui/material';
-import { Check, Refresh, Visibility, ContentCopy, Close as CloseIcon, Block, Palette, Camera, NoPhotography } from '@mui/icons-material';
+import { Check, Refresh, Visibility, ContentCopy, Close as CloseIcon, Palette, Camera, NoPhotography } from '@mui/icons-material';
 import { 
   ImagenPromptData, 
   initialImagenPromptData, 
@@ -22,20 +22,19 @@ interface ImagenPromptBuilderProps {
   onClose: () => void;
 }
 
-// [核心] 用于结构化预览的辅助组件
 const PreviewSection = ({ title, icon, data }: { title: string, icon: React.ReactNode, data: { [key: string]: string } }) => {
   const entries = Object.entries(data).filter(([, value]) => value && value.trim() !== '');
   if (entries.length === 0) return null;
 
   return (
     <Box mb={2}>
-      <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+      <Stack direction="row" spacing={1.5} alignItems="center" mb={1}>
         {icon}
-        <Typography variant="h6" fontSize="1.1rem">{title}</Typography>
+        <Typography variant="h6" fontSize="1.1rem" fontWeight={600}>{title}</Typography>
       </Stack>
       {entries.map(([key, value]) => (
-        <Typography key={key} variant="body2" color="text.secondary" sx={{ pl: 4 }}>
-          <span style={{ textTransform: 'capitalize', color: 'white' }}>{key.replace(/([A-Z])/g, ' $1')}: </span>{value}
+        <Typography key={key} variant="body2" color="text.secondary" sx={{ pl: 4.5, mb: 0.5 }}>
+          <Typography component="span" variant="body2" color="text.primary" sx={{ textTransform: 'capitalize', fontWeight: 500 }}>{key.replace(/([A-Z])/g, ' $1')}: </Typography>{value}
         </Typography>
       ))}
     </Box>
@@ -177,8 +176,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
         </Button>
       </Stack>
 
-      {/* [核心] 恢复您想要的结构化预览弹窗 */}
-      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="sm">
+      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>
           Generated Prompt Preview
           <IconButton
@@ -189,7 +187,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ p: 3, bgcolor: 'background.default' }}>
           <PreviewSection 
             title="Core Components" 
             icon={<Palette />}
