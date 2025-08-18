@@ -1,3 +1,5 @@
+// 文件路径: app/ui/generate-components/GenerateForm.tsx (最终完整修正版)
+
 'use client';
 
 import * as React from 'react';
@@ -66,6 +68,11 @@ interface GenerateFormProps {
   promptIndication?: string;
 }
 
+// [核心修正] 创建一个自定义类型守卫函数
+function isVideoForm(data: GenerateImageFormI | GenerateVideoFormI, type: 'Image' | 'Video'): data is GenerateVideoFormI {
+  return type === 'Video';
+}
+
 export default function GenerateForm({
   generationType, isLoading, onRequestSent, errorMsg, onNewErrorMsg,
   generationFields, randomPrompts, onImageGeneration, onVideoPollingStart,
@@ -118,7 +125,6 @@ export default function GenerateForm({
   const referenceObjects = watch('referenceObjects');
   const [hasReferences, setHasReferences] = useState(false);
   
-  // [核心修正] 使用三元运算符根据 generationType 正确初始化状态
   const [modelOptionField, setModelOptionField] = useState<selectFieldsI>(
     generationType === 'Image'
       ? GenerateImageFormFields.modelVersion
@@ -265,9 +271,15 @@ export default function GenerateForm({
     } catch (error: any) { onNewErrorMsg(error.toString().replace('Error: ', '')) }
   };
 
-  const onSubmit: SubmitHandler<GenerateImageFormI | GenerateImageFormI> = async (formData) => {
-    if (generationType === 'Image') await onImageSubmit(formData as GenerateImageFormI);
-    else if (generationType === 'Video') await onVideoSubmit(formData as GenerateVideoFormI);
+  // [核心修正] 使用类型守卫来安全地处理表单提交
+  const onSubmit: SubmitHandler<GenerateImageFormI | GenerateVideoFormI> = async (formData) => {
+    if (isVideoForm(formData, generationType)) {
+      // 在这个代码块里，TypeScript 100% 确定 formData 是 GenerateVideoFormI 类型
+      await onVideoSubmit(formData);
+    } else {
+      // 在这个代码块里，TypeScript 100% 确定 formData 是 GenerateImageFormI 类型
+      await onImageSubmit(formData);
+    }
   };
 
   return (
