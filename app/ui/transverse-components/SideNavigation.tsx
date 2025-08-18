@@ -1,5 +1,3 @@
-// 文件路径: app/ui/transverse-components/SideNavigation.tsx (真正完整版)
-
 'use client';
 
 import * as React from 'react';
@@ -7,9 +5,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Drawer, List, ListItem, Typography, ListItemButton, Stack, IconButton, Box } from '@mui/material';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
-
-// [核心] 从您的路由文件中导入 pages 对象
-// 请确保这个相对路径是正确的
 import { pages } from '../../routes'; 
 
 export const drawerWidth = 265;
