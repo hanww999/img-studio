@@ -42,7 +42,7 @@ export default function SideNav() {
           {open && (
             <Image
               priority
-              src="/cloudpuppy-logo-dark.png"
+              src="/CloudPuppy.svg"
               width={180}
               height={50}
               alt="CloudPuppy Logo"
