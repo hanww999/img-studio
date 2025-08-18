@@ -1,50 +1,44 @@
+// 文件路径: app/ui/generate-components/GenerateForm.tsx (完整版)
+
 'use client';
 
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-
-import { Control, SubmitHandler, useForm, useWatch } from 'react-hook-form';
-
+import { SubmitHandler, useForm } from 'react-hook-form';
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Avatar, Box, Button,
   Dialog, DialogContent, DialogTitle, IconButton, Stack, Typography,
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import {
-  ArrowDownward as ArrowDownwardIcon, ArrowLeft, ArrowRight, Autorenew,
+  ArrowDownward as ArrowDownwardIcon, Autorenew,
   Build as BuildIcon, Close as CloseIcon, Lightbulb, Mms,
   Movie as MovieIcon,
   Send as SendIcon, WatchLater as WatchLaterIcon,
 } from '@mui/icons-material';
-
-import { CustomizedAccordion, CustomizedAccordionSummary } from '../ux-components/Accordion-SX';
-import { CustomizedAvatarButton, CustomizedIconButton, CustomizedSendButton } from '../ux-components/Button-SX';
+import { CustomizedAccordionSummary } from '../ux-components/Accordion-SX';
+import { CustomizedAvatarButton, CustomizedIconButton } from '../ux-components/Button-SX';
 import FormInputChipGroup from '../ux-components/InputChipGroup';
 import FormInputDropdown from '../ux-components/InputDropdown';
 import { FormInputText } from '../ux-components/InputText';
 import { GeminiSwitch } from '../ux-components/GeminiButton';
 import CustomTooltip from '../ux-components/Tooltip';
-
 import GenerateSettings from './GenerateSettings';
 import ImageToPromptModal from './ImageToPromptModal';
 import VideoToPromptModal from './VideoToPromptModal';
 import { ReferenceBox } from './ReferenceBox';
 import PromptBuilder from './PromptBuilder';
 import ImagenPromptBuilder from './ImagenPromptBuilder';
-
-import theme from '../../theme';
-const { palette } = theme;
-
 import { useAppContext } from '../../context/app-context';
 import { generateImage } from '../../api/imagen/action';
 import {
-  chipGroupFieldsI, GenerateImageFormFields, GenerateImageFormI, ImageGenerationFieldsI,
+  chipGroupFieldsI, GenerateImageFormI, ImageGenerationFieldsI,
   ImageI, maxReferences, ReferenceObjectDefaults, ReferenceObjectInit, selectFieldsI,
   imagenUltraSpecificSettings,
 } from '../../api/generate-image-utils';
 import { EditImageFormFields } from '../../api/edit-utils';
 import {
-  GenerateVideoFormFields, GenerateVideoFormI, InterpolImageDefaults, InterpolImageI,
+  GenerateVideoFormI, InterpolImageDefaults, InterpolImageI,
   OperationMetadataI, tempVeo3specificSettings, VideoGenerationFieldsI, videoGenerationUtils,
 } from '../../api/generate-video-utils';
 import { generateVideo } from '../../api/veo/action';
@@ -95,7 +89,6 @@ export default function GenerateForm({
   const [promptBuilderOpen, setPromptBuilderOpen] = useState(false);
   const [imagenPromptBuilderOpen, setImagenPromptBuilderOpen] = useState(false);
 
-  // Veo Builder Callbacks
   const handleApplyFromVeoBuilder = (prompt: string, negativePrompt: string) => {
     setValue('prompt', prompt, { shouldValidate: true });
     setValue('negativePrompt', negativePrompt);
@@ -105,7 +98,6 @@ export default function GenerateForm({
     setPromptBuilderOpen(false);
   };
   
-  // [核心修复] 为 Imagen Builder 创建同样的回调函数
   const handleApplyFromImagenBuilder = (prompt: string, negativePrompt: string) => {
     setValue('prompt', prompt, { shouldValidate: true });
     setValue('negativePrompt', negativePrompt);
@@ -268,165 +260,87 @@ export default function GenerateForm({
     } catch (error: any) { onNewErrorMsg(error.toString().replace('Error: ', '')) }
   };
 
-  const onSubmit: SubmitHandler<GenerateImageFormI | GenerateVideoFormI> = async (formData) => {
+  const onSubmit: SubmitHandler<GenerateImageFormI | GenerateImageFormI> = async (formData) => {
     if (generationType === 'Image') await onImageSubmit(formData as GenerateImageFormI);
     else if (generationType === 'Video') await onVideoSubmit(formData as GenerateVideoFormI);
   };
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Box sx={{ pb: 4 }}>
-          <Box sx={{ pb: 5 }}>
-            <Stack direction="row" spacing={2} justifyContent="flex-start" alignItems="center">
-              <Typography variant="h1" color={palette.text.secondary} sx={{ fontSize: '1.8rem' }}>
-                {'Generate with'}
-              </Typography>
-              <FormInputDropdown name="modelVersion" label="" control={control} field={modelOptionField} styleSize="big" width="" required={false} />
-            </Stack>
-          </Box>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 1 }}>
+          <Stack direction="row" spacing={2} justifyContent="flex-start" alignItems="center" sx={{ mb: 3 }}>
+            <Typography variant="h4" color="text.primary" sx={{ fontWeight: 600 }}>
+              Generate with
+            </Typography>
+            <FormInputDropdown name="modelVersion" label="" control={control} field={modelOptionField} styleSize="big" width="" required={false} />
+          </Stack>
+
           {errorMsg !== '' && (
-            <Alert severity="error" action={<IconButton aria-label="close" color="inherit" size="small" onClick={() => { onRequestSent(false, 0) }} sx={{ pt: 0.2 }}><CloseIcon fontSize="inherit" /></IconButton>} sx={{ height: 'auto', mb: 2, fontSize: 16, fontWeight: 500, pt: 1, color: palette.text.secondary }}>
+            <Alert severity="error" action={<IconButton aria-label="close" color="inherit" size="small" onClick={() => onRequestSent(false, 0)}><CloseIcon fontSize="inherit" /></IconButton>} sx={{ mb: 2 }}>
               {errorMsg}
             </Alert>
           )}
-          <FormInputText name="prompt" control={control} label={`${optionalVeoPrompt ? '(Optional)' : ''} Prompt - What would you like to generate?`} required={!optionalVeoPrompt} rows={7} promptIndication={`${promptIndication}${isAudioAvailable ? ', audio (dialogue/ sound effects/ music/ ambiant sounds)' : ''}`} />
-          <Stack justifyContent="flex-end" direction="row" gap={0} pb={3}>
+
+          <FormInputText name="prompt" control={control} label={`${optionalVeoPrompt ? '(Optional)' : ''} Prompt`} required={!optionalVeoPrompt} rows={7} promptIndication={`${promptIndication}${isAudioAvailable ? ', audio (dialogue/ sound effects/ music/ ambiant sounds)' : ''}`} />
+          
+          <Stack direction="row" gap={1} alignItems="center" sx={{ mt: -2, mb: 2 }}>
             {generationType === 'Video' && (
-              <CustomTooltip title="Video to prompt generator" size="small">
-                <IconButton onClick={() => setVideoToPromptOpen(true)} aria-label="Video Prompt Generator" disableRipple sx={{ px: 0.5 }}>
-                  <Avatar sx={CustomizedAvatarButton}><MovieIcon sx={CustomizedIconButton} /></Avatar>
-                </IconButton>
-              </CustomTooltip>
+              <CustomTooltip title="Video to prompt generator" size="small"><IconButton onClick={() => setVideoToPromptOpen(true)}><MovieIcon /></IconButton></CustomTooltip>
             )}
-            <CustomTooltip title="Image to prompt generator" size="small"><IconButton onClick={() => setImageToPromptOpen(true)} aria-label="Prompt Generator" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Mms sx={CustomizedIconButton} /></Avatar></IconButton></CustomTooltip>
-            <CustomTooltip title="Get prompt ideas" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())} aria-label="Random prompt" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Lightbulb sx={CustomizedIconButton} /></Avatar></IconButton></CustomTooltip>
-            <CustomTooltip title="Reset all fields" size="small"><IconButton disabled={isLoading} onClick={() => onReset()} aria-label="Reset form" disableRipple sx={{ px: 0.5 }}><Avatar sx={CustomizedAvatarButton}><Autorenew sx={CustomizedIconButton} /></Avatar></IconButton></CustomTooltip>
-            <GenerateSettings
-              control={control}
-              setValue={setValue}
-              generalSettingsFields={
-                currentModel === 'imagen-4.0-ultra-generate-001'
-                  ? { ...generationFields.settings, ...imagenUltraSpecificSettings }
-                  : currentModel.includes('veo-3.0')
-                    ? tempVeo3specificSettings
-                    : generationFields.settings
-              }
-              advancedSettingsFields={generationFields.advancedSettings}
-              warningMessage={currentModel.includes('veo-3.0') ? 'NB: for now, Veo 3 has fewer setting options than Veo 2!' : ''}
-            />
+            <CustomTooltip title="Image to prompt generator" size="small"><IconButton onClick={() => setImageToPromptOpen(true)}><Mms /></IconButton></CustomTooltip>
+            <CustomTooltip title="Get prompt ideas" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())}><Lightbulb /></IconButton></CustomTooltip>
+            <CustomTooltip title="Reset all fields" size="small"><IconButton disabled={isLoading} onClick={() => onReset()}><Autorenew /></IconButton></CustomTooltip>
+            <GenerateSettings control={control} setValue={setValue} generalSettingsFields={currentModel === 'imagen-4.0-ultra-generate-001' ? { ...generationFields.settings, ...imagenUltraSpecificSettings } : currentModel.includes('veo-3.0') ? tempVeo3specificSettings : generationFields.settings} advancedSettingsFields={generationFields.advancedSettings} warningMessage={currentModel.includes('veo-3.0') ? 'NB: for now, Veo 3 has fewer setting options than Veo 2!' : ''} />
+            <Box sx={{ flexGrow: 1 }} />
             {isAudioAvailable && (<CustomTooltip title="Add audio to your video" size="small"><AudioSwitch checked={isVideoWithAudio} onChange={handleVideoAudioCheck} /></CustomTooltip>)}
             {currentModel.includes('imagen') && !hasReferences && (<CustomTooltip title="Have Gemini enhance your prompt" size="small"><GeminiSwitch checked={isGeminiRewrite} onChange={handleGeminiRewrite} /></CustomTooltip>)}
-            <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>{'Generate'}</Button>
           </Stack>
 
           {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
-            <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')} sx={CustomizedAccordion}>
-              <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
-                <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>{'Subject & Style reference(s)'}</Typography>
-              </AccordionSummary>
-              <AccordionDetails sx={{ pt: 0, pb: 1, height: 'auto' }}>
-                <Stack direction="column" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={1} sx={{ pt: 0, pb: 1 }}>
-                  {referenceObjects.map((refObj, index) => (<ReferenceBox key={refObj.objectKey + index + '_box'} objectKey={refObj.objectKey} currentReferenceObject={refObj} onNewErrorMsg={onNewErrorMsg} control={control} setValue={setValue} removeReferenceObject={removeReferenceObject} addAdditionalRefObject={() => { }} refPosition={index} refCount={referenceObjects.length} />))}
-                </Stack>
-                {referenceObjects.length < maxReferences && (<Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start' }}><Button variant="contained" onClick={() => addNewRefObject()} disabled={referenceObjects.length >= maxReferences} sx={{ ...CustomizedSendButton, ...{ fontSize: '0.8rem', px: 0 } }}>{'Add'}</Button></Box>)}
-              </AccordionDetails>
+            <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')}>
+              <AccordionSummary expandIcon={<ArrowDownwardIcon />}><Typography fontWeight={500}>Subject & Style reference(s)</Typography></AccordionSummary>
+              <AccordionDetails sx={{ pt: 0, pb: 1, height: 'auto' }}><Stack direction="column" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={1} sx={{ pt: 0, pb: 1 }}>{referenceObjects.map((refObj, index) => (<ReferenceBox key={refObj.objectKey + index + '_box'} objectKey={refObj.objectKey} currentReferenceObject={refObj} onNewErrorMsg={onNewErrorMsg} control={control} setValue={setValue} removeReferenceObject={removeReferenceObject} addAdditionalRefObject={() => { }} refPosition={index} refCount={referenceObjects.length} />))}</Stack>{referenceObjects.length < maxReferences && (<Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start' }}><Button variant="contained" onClick={() => addNewRefObject()} disabled={referenceObjects.length >= maxReferences} sx={{ fontSize: '0.8rem', px: 0 }}>{'Add'}</Button></Box>)}</AccordionDetails>
+            </Accordion>
+          )}
+
+          {generationType === 'Video' && (
+            <Accordion disableGutters expanded={expanded === 'interpolation'} onChange={handleChange('interpolation')}>
+              <AccordionSummary expandIcon={<ArrowDownwardIcon />}><Typography fontWeight={500}>Image to video</Typography></AccordionSummary>
+              <AccordionDetails sx={{ pt: 1, pb: 1, height: 'auto' }}>{isAdvancedFeaturesAvailable && (<><Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}><VideoInterpolBox label="Base image" sublabel={'(or first frame)'} objectKey="interpolImageFirst" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageFirst} orientation={orientation} /><VideoInterpolBox label="Last frame" sublabel="(optional)" objectKey="interpolImageLast" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageLast} orientation={orientation} /></Stack><Box sx={{ py: 2 }}><FormInputChipGroup name="cameraPreset" label={videoGenerationUtils.cameraPreset.label ?? ''} control={control} setValue={setValue} width="450px" field={videoGenerationUtils.cameraPreset as chipGroupFieldsI} required={false} /></Box></>)}{isOnlyITVavailable && (<Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}><VideoInterpolBox label="Base image" sublabel={'(input)'} objectKey="interpolImageFirst" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageFirst} orientation={orientation} /><Typography color="warning.main" sx={{ fontSize: '0.85rem', fontWeight: 400, pt: 2, width: '70%' }}>{'For now, Veo 3 does not support Image Interpolation and Camera Presets, switch to Veo 2 to use them!'}</Typography></Stack>)}{!isAdvancedFeaturesAvailable && !isOnlyITVavailable && (<Typography sx={{ p: 2, color: 'text.secondary' }}>Image to video features are not available for the currently selected model. Please select Veo 2 or Veo 3 to see available options.</Typography>)}</AccordionDetails>
             </Accordion>
           )}
 
           {generationType === 'Image' && (
-            <Box sx={{ mt: 2 }}>
-              <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setImagenPromptBuilderOpen(true)} sx={{ py: 1.5, justifyContent: 'flex-start', textTransform: 'none', fontSize: '1rem', fontWeight: 500 }}>
-                Open Imagen Prompt Builder
-              </Button>
-            </Box>
+            <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setImagenPromptBuilderOpen(true)} sx={{ mt: 2 }}>Open Imagen Prompt Builder</Button>
           )}
-
           {generationType === 'Video' && (
-            <Accordion disableGutters expanded={expanded === 'interpolation'} onChange={handleChange('interpolation')} sx={CustomizedAccordion}>
-              <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} aria-controls="panel1-content" id="panel1-header" sx={CustomizedAccordionSummary}>
-                <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>
-                  Image to video
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails sx={{ pt: 1, pb: 1, height: 'auto' }}>
-                {isAdvancedFeaturesAvailable && (
-                  <>
-                    <Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}>
-                      <VideoInterpolBox label="Base image" sublabel={'(or first frame)'} objectKey="interpolImageFirst" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageFirst} orientation={orientation} />
-                      <ArrowRight color={interpolImageLast.base64Image === '' ? 'secondary' : 'primary'} />
-                      <VideoInterpolBox label="Last frame" sublabel="(optional)" objectKey="interpolImageLast" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageLast} orientation={orientation} />
-                    </Stack>
-                    <Box sx={{ py: 2 }}>
-                      <FormInputChipGroup name="cameraPreset" label={videoGenerationUtils.cameraPreset.label ?? ''} control={control} setValue={setValue} width="450px" field={videoGenerationUtils.cameraPreset as chipGroupFieldsI} required={false} />
-                    </Box>
-                  </>
-                )}
-                {isOnlyITVavailable && (
-                  <Stack direction="row" flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start" spacing={0.5} sx={{ pt: 1, pb: 1 }}>
-                    <VideoInterpolBox label="Base image" sublabel={'(input)'} objectKey="interpolImageFirst" onNewErrorMsg={onNewErrorMsg} setValue={setValue} interpolImage={interpolImageFirst} orientation={orientation} />
-                    <Typography color={palette.warning.main} sx={{ fontSize: '0.85rem', fontWeight: 400, pt: 2, width: '70%' }}>
-                      {'For now, Veo 3 does not support Image Interpolation and Camera Presets, switch to Veo 2 to use them!'}
-                    </Typography>
-                  </Stack>
-                )}
-                {!isAdvancedFeaturesAvailable && !isOnlyITVavailable && (
-                  <Typography sx={{ p: 2, color: 'text.secondary' }}>
-                    Image to video features are not available for the currently selected model. Please select Veo 2 or Veo 3 to see available options.
-                  </Typography>
-                )}
-              </AccordionDetails>
-            </Accordion>
+            <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setPromptBuilderOpen(true)} sx={{ mt: 2 }}>Open Video Prompt Builder</Button>
           )}
+        </Box>
 
-          {generationType === 'Video' && (
-            <Box sx={{ mt: 2 }}>
-              <Button variant="outlined" fullWidth startIcon={<BuildIcon />} onClick={() => setPromptBuilderOpen(true)} sx={{ py: 1.5, justifyContent: 'flex-start', textTransform: 'none', fontSize: '1rem', fontWeight: 500 }}>
-                Open Video Prompt Builder
-              </Button>
-            </Box>
-          )}
-
+        <Box sx={{ mt: 'auto', pt: 2 }}>
+          <Button type="submit" variant="contained" fullWidth size="large" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={{ py: 1.5, fontSize: '1.1rem' }}>
+            Generate
+          </Button>
         </Box>
       </form>
 
       <ThemeProvider theme={lightTheme}>
         <Dialog open={promptBuilderOpen} onClose={handleCloseVeoBuilder} fullWidth={true} maxWidth="xl">
-          <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
-            Video / Prompt Builder
-            <IconButton aria-label="close" onClick={handleCloseVeoBuilder} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent dividers>
-            <PromptBuilder 
-              onApply={handleApplyFromVeoBuilder} 
-              onClose={handleCloseVeoBuilder} 
-            />
-          </DialogContent>
+          <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Video / Prompt Builder<IconButton aria-label="close" onClick={handleCloseVeoBuilder} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}><CloseIcon /></IconButton></DialogTitle>
+          <DialogContent dividers><PromptBuilder onApply={handleApplyFromVeoBuilder} onClose={handleCloseVeoBuilder} /></DialogContent>
         </Dialog>
       </ThemeProvider>
 
-      {/* [核心修复] 正确地为 ImagenPromptBuilder 传递 props */}
       <ThemeProvider theme={lightTheme}>
         <Dialog open={imagenPromptBuilderOpen} onClose={handleCloseImagenBuilder} fullWidth={true} maxWidth="xl">
-          <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
-            Imagen / Prompt Builder
-            <IconButton aria-label="close" onClick={handleCloseImagenBuilder} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent dividers>
-            <ImagenPromptBuilder 
-              onApply={handleApplyFromImagenBuilder} 
-              onClose={handleCloseImagenBuilder} 
-            />
-          </DialogContent>
+          <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Imagen / Prompt Builder<IconButton aria-label="close" onClick={handleCloseImagenBuilder} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}><CloseIcon /></IconButton></DialogTitle>
+          <DialogContent dividers><ImagenPromptBuilder onApply={handleApplyFromImagenBuilder} onClose={handleCloseImagenBuilder} /></DialogContent>
         </Dialog>
       </ThemeProvider>
 
       <ImageToPromptModal open={imageToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setImageToPromptOpen={setImageToPromptOpen} target={generationType} />
-      
       <VideoToPromptModal open={videoToPromptOpen} setNewPrompt={(string) => setValue('prompt', string)} setVideoToPromptOpen={setVideoToPromptOpen} />
     </>
   );
