@@ -1,17 +1,3 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import {
   advancedSettingsI,
   generalSettingsI,
@@ -56,17 +42,17 @@ export const GenerateVideoFormFields = {
       {
         value: 'veo-3.0-generate-preview',
         label: 'Veo 3',
-        indication: 'Standard model version: Text-to-video & Image-to-video + Audio',
+        indication: '标准模型版本：文本到视频 & 图像到视频 + 音频',
       },
       {
         value: 'veo-3.0-fast-generate-preview',
         label: 'Veo 3 Fast',
-        indication: 'Low latency model version: Text-to-video + Audio',
+        indication: '低延迟模型版本：文本到视频 + 音频',
       },
       {
         value: 'veo-2.0-generate-001',
         label: 'Veo 2',
-        indication: 'Standard model version: Text-to-video & Image-to-video',
+        indication: '标准模型版本：文本到视频 & 图像到视频',
       },
     ],
     isDataResetable: false,
@@ -79,7 +65,7 @@ export const GenerateVideoFormFields = {
     isFullPromptAdditionalField: false,
   },
   sampleCount: {
-    label: 'Quantity of outputs',
+    label: '输出数量',
     type: 'chip-group',
     default: '1',
     options: ['1', '2', '3', '4'],
@@ -98,7 +84,7 @@ export const GenerateVideoFormFields = {
     isFullPromptAdditionalField: false,
   },
   aspectRatio: {
-    label: 'Aspect ratio',
+    label: '宽高比',
     type: 'chip-group',
     default: '16:9',
     options: ['16:9', '9:16'],
@@ -106,7 +92,7 @@ export const GenerateVideoFormFields = {
     isFullPromptAdditionalField: false,
   },
   resolution: {
-    label: 'Resolution',
+    label: '分辨率',
     type: 'chip-group',
     default: '720p',
     options: ['720p'],
@@ -114,7 +100,7 @@ export const GenerateVideoFormFields = {
     isFullPromptAdditionalField: false,
   },
   durationSeconds: {
-    label: 'Video duration (seconds)',
+    label: '视频时长（秒）',
     type: 'chip-group',
     default: '8',
     options: ['5', '6', '7', '8'],
@@ -122,17 +108,17 @@ export const GenerateVideoFormFields = {
     isFullPromptAdditionalField: false,
   },
   personGeneration: {
-    label: 'People generation',
+    label: '人物生成',
     type: 'select',
     default: 'allow_adult',
     options: [
       {
         value: 'allow_adult',
-        label: 'Adults only',
+        label: '仅限成人',
       },
       {
         value: 'dont_allow',
-        label: 'No people',
+        label: '不生成人物',
       },
     ],
     isDataResetable: false,
@@ -145,12 +131,12 @@ export const GenerateVideoFormFields = {
     options: [
       {
         value: 'cinematic',
-        label: 'Cinematic',
+        label: '电影风格',
         subID: 'cinematicSub',
       },
       {
         value: 'animation',
-        label: 'Animation',
+        label: '动画风格',
         subID: 'animationSub',
       },
     ],
@@ -161,41 +147,41 @@ export const GenerateVideoFormFields = {
     type: 'controled-chip-group',
     options: [
       {
-        label: 'Cinematic style',
+        label: '电影风格子类型',
         subID: 'cinematicSub',
         type: 'select',
         options: [
-          'Film',
-          'Black & White',
-          'Horror',
-          'Fantasy',
-          'Western',
-          'Silent film',
-          'Vintage',
-          'Documentary',
-          'Action sequence',
-          'Footage',
-          'Drone footage',
+          '电影',
+          '黑白',
+          '恐怖',
+          '奇幻',
+          '西部',
+          '默片',
+          '复古',
+          '纪录片',
+          '动作场面',
+          '素材片段',
+          '航拍镜头',
         ],
         default: '',
       },
       {
-        label: 'Animation style',
+        label: '动画风格子类型',
         subID: 'animationSub',
         type: 'select',
         options: [
-          '3D animation',
-          '3D cartoon',
-          'Japan anime',
-          'Classic cartoon',
-          'Comic book',
-          'Stop-motion',
-          'Claymation',
-          'Pixel art',
-          'Vector art',
-          'Motion graphics',
-          'Whiteboard',
-          'Cutout',
+          '3D 动画',
+          '3D 卡通',
+          '日本动漫',
+          '经典卡通',
+          '漫画风格',
+          '定格动画',
+          '黏土动画',
+          '像素艺术',
+          '矢量艺术',
+          '运动图形',
+          '白板动画',
+          '剪纸',
         ],
         default: '',
       },
@@ -204,46 +190,46 @@ export const GenerateVideoFormFields = {
     isFullPromptAdditionalField: false,
   },
   motion: {
-    label: 'Camera motion',
+    label: '相机运动',
     type: 'chip-group',
-    options: ['Aerial', 'Tracking', 'POV', 'Orbit', 'Zoom in', 'Zoom out', 'Static', 'Panning', 'Tilting', 'Handheld'],
+    options: ['航拍', '跟随', '第一视角', '环绕', '放大', '缩小', '静态', '平移', '俯仰', '手持'],
     isDataResetable: true,
     isFullPromptAdditionalField: true,
   },
   framing: {
-    label: 'Framing',
+    label: '取景',
     type: 'chip-group',
-    options: ['Extreme wide', 'Wide', 'Medium', 'Close-up', 'Extreme close-Up', 'Over-the-shoulder'],
+    options: ['极宽景', '宽景', '中景', '特写', '极特写', '肩越过视角'],
     isDataResetable: true,
     isFullPromptAdditionalField: true,
   },
   angle: {
-    label: 'Angle',
+    label: '角度',
     type: 'chip-group',
-    options: ['High', 'Low', 'Eye-level', "Bird's eye"],
+    options: ['高角度', '低角度', '平视', '鸟瞰'],
     isDataResetable: true,
     isFullPromptAdditionalField: true,
   },
   ambiance: {
-    label: 'Ambiance',
+    label: '氛围',
     type: 'chip-group',
-    options: ['Bright daylight', 'Golden hour', 'Night scene', 'Moody', 'Monochrome', 'Neon', 'Silhouette', 'Dramatic'],
+    options: ['明亮日光', '金色时刻', '夜景', '沉郁', '单色', '霓虹', '剪影', '戏剧化'],
     isDataResetable: true,
     isFullPromptAdditionalField: true,
   },
   effects: {
-    label: 'Special effects',
+    label: '特效',
     type: 'chip-group',
     options: [
-      'Film grain',
-      'Slow motion',
-      'Hyperlapse',
-      'Split screen',
-      'Glitch',
-      'Analog noise',
-      'Projection',
-      'Visual collage',
-      'Motion blur',
+      '电影颗粒',
+      '慢动作',
+      '延时摄影',
+      '分屏',
+      '故障效果',
+      '模拟噪点',
+      '投影',
+      '视觉拼贴',
+      '运动模糊',
     ],
     isDataResetable: true,
     isFullPromptAdditionalField: true,
@@ -259,76 +245,76 @@ export const GenerateVideoFormFields = {
     isFullPromptAdditionalField: false,
   },
   cameraPreset: {
-    label: 'Camera preset',
+    label: '相机预设',
     type: 'chip-group',
     default: '',
     options: [
-      'Fixed',
-      'Pan left',
-      'Pan right',
-      'Push in',
-      'Pull out',
-      'Pedestal down',
-      'Pedestal up',
-      'Truck left',
-      'Truck right',
-      'Tilt down',
-      'Tilt up',
+      '固定',
+      '左平移',
+      '右平移',
+      '推进',
+      '拉远',
+      '升降台下',
+      '升降台上',
+      '车左移',
+      '车右移',
+      '俯仰下',
+      '俯仰上',
     ],
     isDataResetable: true,
     isFullPromptAdditionalField: false,
   },
 }
 
-// Camera preset options
+// 相机预设选项
 export const cameraPresetsOptions = [
   {
     value: 'FIXED',
-    label: 'Fixed',
+    label: '固定',
   },
   {
     value: 'PAN_LEFT',
-    label: 'Pan left',
+    label: '左平移',
   },
   {
     value: 'PAN_RIGHT',
-    label: 'Pan right',
+    label: '右平移',
   },
   {
     value: 'PULL_OUT',
-    label: 'Pull out',
+    label: '拉远',
   },
   {
     value: 'PUSH_IN',
-    label: 'Push in',
+    label: '推进',
   },
   {
     value: 'PEDESTAL_DOWN',
-    label: 'Pedestal down',
+    label: '升降台下',
   },
   {
     value: 'PEDESTAL_UP',
-    label: 'Pedestal up',
+    label: '升降台上',
   },
   {
     value: 'TRUCK_LEFT',
-    label: 'Truck left',
+    label: '车左移',
   },
   {
     value: 'TRUCK_RIGHT',
-    label: 'Truck right',
+    label: '车右移',
   },
   {
     value: 'TILT_DOWN',
-    label: 'Tilt down',
+    label: '俯仰下',
   },
   {
     value: 'TILT_UP',
-    label: 'Tilt up',
+    label: '俯仰上',
   },
 ]
 
-// Interface of Image use for interpolation during video generation
+// 用于视频插值的图像默认值
 export const InterpolImageDefaults = {
   format: 'image/png',
   base64Image: '',
@@ -347,7 +333,7 @@ export interface InterpolImageI {
   height: number
 }
 
-// Set default values for Generate Form
+// 为生成表单设置默认值
 const generateFieldList: [keyof GenerateVideoFormFieldsI] = Object.keys(GenerateVideoFormFields) as [
   keyof GenerateVideoFormFieldsI
 ]
@@ -381,7 +367,7 @@ export interface VideoGenerationFieldsI {
   defaultValues: any
 }
 
-// Sort out Generate fields depending on purpose
+// 根据用途整理生成字段
 export const videoGenerationUtils: VideoGenerationFieldsI = {
   model: GenerateVideoFormFields.modelVersion,
   settings: {
@@ -410,10 +396,10 @@ export const videoGenerationUtils: VideoGenerationFieldsI = {
   defaultValues: formDataDefaults,
 }
 
-//TODO temp - remove when Veo 3 is fully released
+// TODO 临时 - 在 Veo 3 完全发布后移除
 export const tempVeo3specificSettings = {
   sampleCount: {
-    label: 'Quantity of outputs',
+    label: '输出数量',
     type: 'chip-group',
     default: '1',
     options: ['1'],
@@ -421,7 +407,7 @@ export const tempVeo3specificSettings = {
     isFullPromptAdditionalField: false,
   },
   aspectRatio: {
-    label: 'Aspect ratio',
+    label: '宽高比',
     type: 'chip-group',
     default: '16:9',
     options: ['16:9'],
@@ -429,7 +415,7 @@ export const tempVeo3specificSettings = {
     isFullPromptAdditionalField: false,
   },
   durationSeconds: {
-    label: 'Video duration (seconds)',
+    label: '视频时长（秒）',
     type: 'chip-group',
     default: '8',
     options: ['8'],
@@ -437,7 +423,7 @@ export const tempVeo3specificSettings = {
     isFullPromptAdditionalField: false,
   },
   resolution: {
-    label: 'Resolution',
+    label: '分辨率',
     type: 'chip-group',
     default: '1080p',
     options: ['720p', '1080p'],
@@ -446,7 +432,7 @@ export const tempVeo3specificSettings = {
   },
 }
 
-// Interface of Generate form fields
+// 生成表单字段接口
 export interface GenerateVideoFormI {
   prompt: string
   modelVersion: string
@@ -470,7 +456,7 @@ export interface GenerateVideoFormI {
   cameraPreset: string
 }
 
-// Interface of Video object created after image generation
+// 视频生成后创建的视频对象接口
 export interface VideoI {
   src: string
   gcsUri: string
@@ -490,18 +476,18 @@ export interface VideoI {
   mode: string
 }
 
-// Interface for the successful initiation response
+// 成功发起请求时的返回接口
 export interface GenerateVideoInitiationResult {
   operationName: string
   prompt: string
 }
 
-// Interface for error responses
+// 错误返回接口
 export interface ErrorResult {
   error: string
 }
 
-// Interface definitions needed for polling
+// 用于轮询的接口定义
 export interface VideoSample {
   video: { uri: string; encoding: string }
 }
@@ -527,13 +513,13 @@ export interface VideoGenerationStatusResult {
   error?: string
 }
 
-// Interface of result sent back by Veo within GCS
+// Veo 在 GCS 中返回的结果对象接口
 export interface VeoModelResultI {
   gcsUri: string
   mimeType: string
 }
 
-// Interface defining the input structure for clarity and type safety
+// 输入结构说明接口，用于增强类型安全
 export interface BuildVideoListParams {
   videosInGCS: VeoModelResultI[]
   aspectRatio: string
@@ -547,21 +533,22 @@ export interface BuildVideoListParams {
   mode: string
 }
 
-// Interface defining the potential output objects from the map before filtering
+// map 处理后在过滤前可能产生的输出类型
 export type ProcessedVideoResult = VideoI | { warning: string } | { error: string }
 
-// Metadata needed for polling result processing
+// 轮询结果处理所需的元数据
 export interface OperationMetadataI {
   formData: GenerateVideoFormI
   prompt: string
 }
 
-// List of Veo available ratio and their corresponding generation dimentions
+// 支持的宽高比与对应生成像素
 export const VideoRatioToPixel = [
   { ratio: '9:16', width: 720, height: 1280 },
   { ratio: '16:9', width: 1280, height: 720 },
 ]
 
+// 随机提示词列表（供用户在缺乏灵感时使用）
 // Random prompt list the user can use if they lack prompt ideas
 export const VideoRandomPrompts = [
   'A cinematic advertisement for a luxury watch. The video starts with an extreme close-up on the watch face, the second hand sweeping smoothly. The camera pulls back to reveal a man in a tailored suit dialing a vintage rotary phone in a moody, dimly lit office. The shallow depth of field and green neon light from the window create a mysterious, film noir atmosphere, associating the product with sophistication and intrigue.',
