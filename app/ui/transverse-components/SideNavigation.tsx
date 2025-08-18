@@ -1,4 +1,4 @@
-// 文件路径: app/ui/transverse-components/SideNavigation.tsx (完整版)
+// 文件路径: app/ui/transverse-components/SideNavigation.tsx (最终完整修正版)
 
 'use client';
 
@@ -7,17 +7,22 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Drawer, List, ListItem, Typography, ListItemButton, Stack, IconButton, Box } from '@mui/material';
 import Image from 'next/image';
 import { pages } from '../../routes';
-import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 
-const drawerWidth = 265;
-const drawerWidthClosed = 75;
+// [核心修正] 导出宽度常量，供父布局使用
+export const drawerWidth = 265;
+export const drawerWidthClosed = 75;
 
-export default function SideNav() {
+// [核心修正] 接收 open 和 setOpen 作为 props
+interface SideNavProps {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function SideNav({ open, setOpen }: SideNavProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [open, setOpen] = useState(true);
   const currentQuery = searchParams.get('mode');
   const fullPath = currentQuery ? `${pathname}?mode=${currentQuery}` : pathname;
 
