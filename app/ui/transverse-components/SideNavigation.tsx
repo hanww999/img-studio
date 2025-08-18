@@ -1,4 +1,4 @@
-// 文件路径: app/ui/transverse-components/SideNavigation.tsx (最终完整版 - 已翻译)
+// 文件路径: app/ui/transverse-components/SideNavigation.tsx (真正完整版)
 
 'use client';
 
@@ -6,9 +6,11 @@ import * as React from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Drawer, List, ListItem, Typography, ListItemButton, Stack, IconButton, Box } from '@mui/material';
 import Image from 'next/image';
-// [中文翻译] 假设您的 routes.ts 文件也已更新为中文
-import { pages } from '../../routes'; 
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+
+// [核心] 从您的路由文件中导入 pages 对象
+// 请确保这个相对路径是正确的
+import { pages } from '../../routes'; 
 
 export const drawerWidth = 265;
 export const drawerWidthClosed = 75;
@@ -17,16 +19,6 @@ interface SideNavProps {
  open: boolean;
  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
-// [中文翻译] 临时在组件内定义翻译后的页面数据，建议您在 routes.ts 中完成翻译
-const translatedPages = {
-  generateImage: { name: '生成图片', description: '从零开始或使用参考图创作新图片', href: '/studio/generate', status: 'true' },
-  generateTryOn: { name: '虚拟试穿', description: '使用模特和服装生成试穿图片', href: '/studio/try-on', status: 'true' },
-  generateEdit: { name: '生成式编辑', description: '导入、编辑并转换现有内容', href: '/studio/edit', status: 'true' },
-  generateVideo: { name: '生成视频', description: '通过文本或图片生成动态视频', href: '/studio/generate?mode=video', status: 'true' },
-  browse: { name: '浏览', description: '浏览和管理您的个人作品', href: '/studio/library', status: 'true' },
-};
-
 
 export default function SideNav({ open, setOpen }: SideNavProps) {
  const router = useRouter();
@@ -59,7 +51,7 @@ export default function SideNav({ open, setOpen }: SideNavProps) {
        src="/CloudPuppy.svg"
        width={180}
        height={50}
-       alt="CloudPuppy 标志" // [中文翻译]
+       alt="CloudPuppy 标志"
       />
      )}
      <IconButton onClick={() => setOpen(!open)}>
@@ -67,13 +59,13 @@ export default function SideNav({ open, setOpen }: SideNavProps) {
      </IconButton>
     </ListItem>
 
-    {Object.values(translatedPages).map(({ name, description, href, status }) => { // [中文翻译] 使用翻译后的数据
+    {Object.values(pages).map(({ name, description, href, status }) => {
      const isSelected = fullPath === href;
      return (
       <ListItemButton
        key={name}
        selected={isSelected}
-       disabled={status == 'false'}
+       disabled={status === 'false'}
        onClick={() => router.push(href)}
        sx={{
         py: 1.5,
