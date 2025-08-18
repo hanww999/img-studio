@@ -17,6 +17,9 @@ const labelTranslations: { [key: string]: string } = {
     'Quantity of outputs': '输出数量',
     'People generation': '人物生成',
     'Safety Filter Level': '安全过滤级别',
+    'Output format': '输出格式', 
+    'Video duration (seconds)': '视频时长（秒）',
+    'Resolution': '分辨率',
 };
 
 export default function GenerateSettings({
@@ -77,6 +80,12 @@ export default function GenerateSettings({
     open={open}
     onClose={handleClose}
     sx={CustomizedMenu}
+      // [核心] 确保下拉菜单的样式正确
+      MenuListProps={{
+        sx: {
+          backgroundColor: 'background.paper',
+        },
+      }}
    >
     {warningMessage !== '' && (
      <Typography
