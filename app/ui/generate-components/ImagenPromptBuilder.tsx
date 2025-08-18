@@ -6,9 +6,9 @@ import * as React from 'react';
 import { useState } from 'react';
 import {
   Box, Button, Grid, Paper, Stack, TextField, Typography,
-  FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Dialog, DialogTitle, DialogContent, DialogActions, Chip
+  FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Dialog, DialogTitle, DialogContent, DialogActions, Divider, Tooltip, IconButton
 } from '@mui/material';
-import { Check, Refresh, Visibility } from '@mui/icons-material';
+import { Check, Refresh, Visibility, ContentCopy, Close as CloseIcon, Block, Palette, Camera, NoPhotography } from '@mui/icons-material';
 import { 
   ImagenPromptData, 
   initialImagenPromptData, 
@@ -22,10 +22,30 @@ interface ImagenPromptBuilderProps {
   onClose: () => void;
 }
 
+// [核心] 用于结构化预览的辅助组件
+const PreviewSection = ({ title, icon, data }: { title: string, icon: React.ReactNode, data: { [key: string]: string } }) => {
+  const entries = Object.entries(data).filter(([, value]) => value && value.trim() !== '');
+  if (entries.length === 0) return null;
+
+  return (
+    <Box mb={2}>
+      <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+        {icon}
+        <Typography variant="h6" fontSize="1.1rem">{title}</Typography>
+      </Stack>
+      {entries.map(([key, value]) => (
+        <Typography key={key} variant="body2" color="text.secondary" sx={{ pl: 4 }}>
+          <span style={{ textTransform: 'capitalize', color: 'white' }}>{key.replace(/([A-Z])/g, ' $1')}: </span>{value}
+        </Typography>
+      ))}
+    </Box>
+  );
+};
+
 export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBuilderProps) {
   const [formState, setFormState] = useState<ImagenPromptData>(initialImagenPromptData);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [generatedPrompt, setGeneratedPrompt] = useState('');
+  const [copySuccess, setCopySuccess] = useState('');
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
@@ -50,8 +70,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
   };
 
   const handlePreview = () => {
-    const prompt = generatePromptString();
-    setGeneratedPrompt(prompt);
     setPreviewOpen(true);
   };
 
@@ -62,6 +80,17 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
   const handleApply = () => {
     const finalPrompt = generatePromptString();
     onApply(finalPrompt, formState.negativePrompt);
+  };
+
+  const handleCopy = () => {
+    const fullPrompt = generatePromptString();
+    navigator.clipboard.writeText(fullPrompt).then(() => {
+      setCopySuccess('已复制!');
+      setTimeout(() => setCopySuccess(''), 2000);
+    }, () => {
+      setCopySuccess('复制失败!');
+      setTimeout(() => setCopySuccess(''), 2000);
+    });
   };
 
   const renderSelect = (name: keyof ImagenPromptOptions, label: string) => (
@@ -147,21 +176,56 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
           应用到表单 (Apply to Form)
         </Button>
       </Stack>
-      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="md">
-        <DialogTitle>Generated Prompt Preview</DialogTitle>
-        <DialogContent>
-          <Paper variant="outlined" sx={{ p: 2, backgroundColor: 'background.default' }}>
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-              {generatedPrompt}
-            </Typography>
-            <Chip label="Negative Prompt" size="small" sx={{ mt: 2, mb: 1 }} />
-            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-              {formState.negativePrompt || 'None'}
-            </Typography>
-          </Paper>
+
+      {/* [核心] 恢复您想要的结构化预览弹窗 */}
+      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>
+          Generated Prompt Preview
+          <IconButton
+            aria-label="close"
+            onClick={() => setPreviewOpen(false)}
+            sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          <PreviewSection 
+            title="Core Components" 
+            icon={<Palette />}
+            data={{
+              'Style / Medium': formState.styleMedium,
+              'Subject': formState.subject,
+              'Detailed Description': formState.detailedDescription,
+              'Environment / Background': formState.environment,
+            }}
+          />
+          <PreviewSection 
+            title="Photographic Style" 
+            icon={<Camera />}
+            data={{
+              'Composition / View': formState.composition,
+              'Lighting': formState.lighting,
+              'Color Scheme': formState.colorScheme,
+              'Lens Type': formState.lensType,
+              'Camera Settings': formState.cameraSettings,
+              'Film Type': formState.filmType,
+              'Quality': formState.quality,
+            }}
+          />
+          <PreviewSection 
+            title="Exclusions (Negative Prompt)" 
+            icon={<NoPhotography />}
+            data={{
+              'Negative Prompt': formState.negativePrompt,
+            }}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPreviewOpen(false)}>关闭</Button>
+          <Button onClick={handleCopy} startIcon={<ContentCopy />}>
+            {copySuccess || '复制全部 (Copy All)'}
+          </Button>
+          <Button onClick={() => setPreviewOpen(false)}>关闭 (Close)</Button>
         </DialogActions>
       </Dialog>
     </Box>
