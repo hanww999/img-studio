@@ -192,8 +192,20 @@ export default function GeneratePageClient() {
   }
 
   return (
-    <Box sx={{ display: 'flex', gap: 3, height: 'calc(100vh - 48px)' }}>
-      <Box sx={{ width: 550, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{
+      display: 'flex',
+      gap: 3,
+      height: 'calc(100vh - 48px)',
+      overflow: 'hidden',
+    }}>
+      <Box sx={{
+        width: 550,
+        flexShrink: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        overflowY: 'auto',
+        pr: 1, // Add a little padding to prevent scrollbar from touching the edge
+      }}>
         <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           {generationMode === 'AI 图像创作' && (
             <GenerateForm key="image-form" generationType="Image" isLoading={isLoading} onRequestSent={handleRequestSent} onImageGeneration={handleImageGeneration} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={ImageRandomPrompts} generationFields={imageGenerationUtils} initialPrompt={initialPrompt ?? ''} promptIndication={'描述您想要生成图片的提示词...'} />
@@ -204,8 +216,14 @@ export default function GeneratePageClient() {
         </Paper>
       </Box>
 
-      {/* [需求3 修复] 统一右侧布局 */}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minWidth: 400,
+        overflowY: 'auto',
+        pr: 1, // Add a little padding to prevent scrollbar from touching the edge
+      }}>
         <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           {generationMode === 'AI 图像创作' ? (
             <OutputImagesDisplay isLoading={isLoading} generatedImagesInGCS={generatedImages} generatedCount={generatedCount} isPromptReplayAvailable={true} />
