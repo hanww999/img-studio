@@ -284,25 +284,25 @@ export default function GenerateForm({
       </Alert>
      )}
 
-     <FormInputText name="prompt" control={control} label={`${optionalVeoPrompt ? '(可选)' : ''} Prompt`} required={!optionalVeoPrompt} rows={7} promptIndication={`${promptIndication}${isAudioAvailable ? ', 音频 (对话/音效/音乐/环境声)' : ''}`} />
+      {/* [核心] 将 Prompt 输入框和其下方的图标行包裹在一个 Box 中 */}
+      <Box sx={{ position: 'relative' }}>
+      <FormInputText name="prompt" control={control} label={`${optionalVeoPrompt ? '(可选)' : ''} Prompt`} required={!optionalVeoPrompt} rows={7} promptIndication={`${promptIndication}${isAudioAvailable ? ', 音频 (对话/音效/音乐/环境声)' : ''}`} />
+        {/* [核心] 将图标行绝对定位于输入框的右下角 */}
+        <Stack direction="row" alignItems="center" sx={{ position: 'absolute', bottom: 12, right: 8 }}>
+        {generationType === 'Video' && (
+          <CustomTooltip title="视频生成提示词" size="small"><IconButton onClick={() => setVideoToPromptOpen(true)}><MovieIcon /></IconButton></CustomTooltip>
+        )}
+        <CustomTooltip title="图片生成提示词" size="small"><IconButton onClick={() => setImageToPromptOpen(true)}><Mms /></IconButton></CustomTooltip>
+        <CustomTooltip title="获取提示词灵感" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())}><Lightbulb /></IconButton></CustomTooltip>
+        <CustomTooltip title="重置所有字段" size="small"><IconButton disabled={isLoading} onClick={() => onReset()}><Autorenew /></IconButton></CustomTooltip>
+        <GenerateSettings control={control} setValue={setValue} generalSettingsFields={currentModel === 'imagen-4.0-ultra-generate-001' ? { ...generationFields.settings, ...imagenUltraSpecificSettings } : currentModel.includes('veo-3.0') ? tempVeo3specificSettings : generationFields.settings} advancedSettingsFields={generationFields.advancedSettings} warningMessage={currentModel.includes('veo-3.0') ? '注意: Veo 3 目前的设置选项比 Veo 2 少！' : ''} />
+        {isAudioAvailable && (<CustomTooltip title="为视频添加音频" size="small"><AudioSwitch checked={isVideoWithAudio} onChange={handleVideoAudioCheck} /></CustomTooltip>)}
+        {currentModel.includes('imagen') && !hasReferences && (<CustomTooltip title="使用 Gemini 优化提示词" size="small"><GeminiSwitch checked={isGeminiRewrite} onChange={handleGeminiRewrite} /></CustomTooltip>)}
+        </Stack>
+      </Box>
       
-     <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: -2, mb: 2 }}>
-      <Stack direction="row" alignItems="center">
-       {generationType === 'Video' && (
-        <CustomTooltip title="视频生成提示词" size="small"><IconButton onClick={() => setVideoToPromptOpen(true)}><MovieIcon /></IconButton></CustomTooltip>
-       )}
-       <CustomTooltip title="图片生成提示词" size="small"><IconButton onClick={() => setImageToPromptOpen(true)}><Mms /></IconButton></CustomTooltip>
-       <CustomTooltip title="获取提示词灵感" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())}><Lightbulb /></IconButton></CustomTooltip>
-       <CustomTooltip title="重置所有字段" size="small"><IconButton disabled={isLoading} onClick={() => onReset()}><Autorenew /></IconButton></CustomTooltip>
-       <GenerateSettings control={control} setValue={setValue} generalSettingsFields={currentModel === 'imagen-4.0-ultra-generate-001' ? { ...generationFields.settings, ...imagenUltraSpecificSettings } : currentModel.includes('veo-3.0') ? tempVeo3specificSettings : generationFields.settings} advancedSettingsFields={generationFields.advancedSettings} warningMessage={currentModel.includes('veo-3.0') ? '注意: Veo 3 目前的设置选项比 Veo 2 少！' : ''} />
-        </Stack>
-      <Stack direction="row" alignItems="center">
-       {isAudioAvailable && (<CustomTooltip title="为视频添加音频" size="small"><AudioSwitch checked={isVideoWithAudio} onChange={handleVideoAudioCheck} /></CustomTooltip>)}
-       {currentModel.includes('imagen') && !hasReferences && (<CustomTooltip title="使用 Gemini 优化提示词" size="small"><GeminiSwitch checked={isGeminiRewrite} onChange={handleGeminiRewrite} /></CustomTooltip>)}
-        </Stack>
-     </Stack>
-
-     <Stack direction="column" spacing={2}>
+      {/* [核心] 将下面的组件用一个 Stack 包裹，并设置间距和上边距 */}
+     <Stack direction="column" spacing={2} sx={{ mt: 2 }}>
       {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
        <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')}>
         <AccordionSummary expandIcon={<ArrowDownwardIcon />}><Typography fontWeight={500} color="text.primary">主体与风格参考</Typography></AccordionSummary>
