@@ -1,4 +1,4 @@
-// 文件路径: app/(studio)/generate/GeneratePageClient.tsx (最终完整版)
+// 文件路径: app/(studio)/generate/GeneratePageClient.tsx (真正完整版)
 
 'use client';
 
@@ -101,4 +101,138 @@ export default function GeneratePageClient() {
        width: img.width,
        height: img.height,
       };
-      data && setInitialITVimage(initialITVimage as InterpolIma... (829 lines left)
+      data && setInitialITVimage(initialITVimage as InterpolImageI);
+      setAppContext((prevContext) => {
+       if (prevContext) return { ...prevContext, imageToVideo: '' };
+       else return { ...appContextDataDefault, imageToVideo: '' };
+      });
+     };
+     img.onerror = () => { throw Error('Error loading image for dimension calculation.'); };
+     img.src = newImage;
+    } catch (error) { console.error('Error fetching image:', error); }
+   }
+  };
+  fetchAndSetImage();
+ }, [appContext?.imageToVideo, setAppContext]);
+
+ const [pollingOperationName, setPollingOperationName] = useState<string | null>(null);
+ const [operationMetadata, setOperationMetadata] = useState<OperationMetadataI | null>(null);
+ const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+ const pollingAttemptsRef = useRef<number>(0);
+ const currentPollingIntervalRef = useRef<number>(INITIAL_POLLING_INTERVAL_MS);
+
+ const handleRequestSent = (loading: boolean, count: number) => {
+  setIsLoading(loading);
+  setGenerationErrorMsg('');
+  setGeneratedCount(count);
+  setGeneratedImages([]);
+  setGeneratedVideos([]);
+ };
+
+ const handleNewErrorMsg = (newErrorMsg: string) => {
+  setIsLoading(false);
+  setGenerationErrorMsg(newErrorMsg);
+  if (timeoutIdRef.current) { clearTimeout(timeoutIdRef.current); timeoutIdRef.current = null; }
+  setPollingOperationName(null);
+  setOperationMetadata(null);
+ };
+
+ const handleImageGeneration = (newImages: ImageI[]) => {
+  setGeneratedImages(newImages);
+  setIsLoading(false);
+  setGeneratedVideos([]);
+  setGenerationErrorMsg('');
+ };
+
+ const handleVideoGenerationComplete = (newVideos: VideoI[]) => {
+  setGeneratedVideos(newVideos);
+  setGeneratedImages([]);
+  setGenerationErrorMsg('');
+ };
+
+ const handleVideoPollingStart = (operationName: string, metadata: OperationMetadataI) => {
+  if (timeoutIdRef.current) { clearTimeout(timeoutIdRef.current); timeoutIdRef.current = null; }
+  setPollingOperationName(operationName);
+  setOperationMetadata(metadata);
+  pollingAttemptsRef.current = 0;
+  currentPollingIntervalRef.current = INITIAL_POLLING_INTERVAL_MS;
+ };
+
+ useEffect(() => {
+  const stopPolling = (isSuccess: boolean, finalLoadingState = false) => {
+   if (timeoutIdRef.current) { clearTimeout(timeoutIdRef.current); timeoutIdRef.current = null; }
+   setIsLoading(finalLoadingState);
+  };
+  const poll = async () => {
+   if (!pollingOperationName || !operationMetadata) { stopPolling(false, false); return; }
+   if (pollingAttemptsRef.current >= MAX_POLLING_ATTEMPTS) { handleNewErrorMsg(`视频生成超时...`); return; }
+   pollingAttemptsRef.current++;
+   try {
+    const statusResult: VideoGenerationStatusResult = await getVideoGenerationStatus(pollingOperationName, appContext, operationMetadata.formData, operationMetadata.prompt);
+    if (!pollingOperationName) { stopPolling(false, false); return; }
+    if (statusResult.done) {
+     if (statusResult.error) { handleNewErrorMsg(statusResult.error); }
+     else if (statusResult.videos && statusResult.videos.length > 0) { handleVideoGenerationComplete(statusResult.videos); stopPolling(true, false); setPollingOperationName(null); setOperationMetadata(null); }
+     else { handleNewErrorMsg('视频生成完成，但未返回有效结果。'); }
+    } else {
+     const jitter = currentPollingIntervalRef.current * JITTER_FACTOR * (Math.random() - 0.5);
+     const nextInterval = Math.round(currentPollingIntervalRef.current + jitter);
+     timeoutIdRef.current = setTimeout(poll, nextInterval);
+     currentPollingIntervalRef.current = Math.min(currentPollingIntervalRef.current * BACKOFF_FACTOR, MAX_POLLING_INTERVAL_MS);
+    }
+   } catch (error: any) {
+    if (!pollingOperationName) { stopPolling(false, false); return; }
+    handleNewErrorMsg(error.message || '检查视频状态时发生意外错误。');
+   }
+  };
+  if (pollingOperationName && !timeoutIdRef.current) { timeoutIdRef.current = setTimeout(poll, currentPollingIntervalRef.current); }
+  return () => { if (timeoutIdRef.current) { clearTimeout(timeoutIdRef.current); timeoutIdRef.current = null; } };
+ }, [pollingOperationName, operationMetadata, appContext]);
+
+ if (appContext?.isLoading === true) {
+  return (
+   <Box p={5}>
+    <Typography variant="h3" sx={{ fontWeight: 400, color: appContextError === null ? 'primary.main' : 'error.main' }}>
+     {appContextError === null ? '正在加载您的个人资料...' : '加载个人资料时出错！'}
+    </Typography>
+   </Box>
+  );
+ }
+
+ return (
+   <Box sx={{ 
+        display: 'flex', 
+        gap: 3, 
+        height: 'calc(100vh - 48px)',
+    }}>
+     <Box sx={{ 
+        width: 650,
+        flexShrink: 0,
+        display: 'flex', 
+        flexDirection: 'column' 
+      }}>
+      <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+       {generationMode === 'AI 图像创作' && (
+        <GenerateForm key="image-form" generationType="Image" isLoading={isLoading} onRequestSent={handleRequestSent} onImageGeneration={handleImageGeneration} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={ImageRandomPrompts} generationFields={imageGenerationUtils} initialPrompt={initialPrompt ?? ''} promptIndication={'描述您想要的图片...'} />
+       )}
+       {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && generationMode === 'AI 视频生成' && (
+        <GenerateForm key="video-form" generationType="Video" isLoading={isLoading} onRequestSent={handleRequestSent} onVideoPollingStart={handleVideoPollingStart} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={VideoRandomPrompts} generationFields={videoGenerationUtils} initialPrompt={initialPrompt ?? ''} initialITVimage={initialITVimage ?? undefined} promptIndication={'描述您想要的视频...'} />
+       )}
+      </Paper>
+     </Box>
+
+     <Box sx={{ 
+        width: 550,
+        flexShrink: 0,
+        display: 'flex', 
+        flexDirection: 'column' 
+      }}>
+      {generationMode === 'AI 图像创作' ? (
+       <OutputImagesDisplay isLoading={isLoading} generatedImagesInGCS={generatedImages} generatedCount={generatedCount} isPromptReplayAvailable={true} />
+      ) : (
+       <OutputVideosDisplay isLoading={isLoading} generatedVideosInGCS={generatedVideos} generatedCount={generatedCount} />
+      )}
+     </Box>
+   </Box>
+ );
+}
