@@ -1,32 +1,34 @@
+// 文件路径: app/routes.ts (或您定义 pages 常量的文件)
+
 export const pages = {
-  GenerateImage: {
-    name: 'Generate an Image',
-    description: 'Create new images from scratch or with references',
-    href: '/generate?mode=image',
-    status: 'true',
-  },
-  VirtualTryOn: {
-    name: 'Generate a Try-On',
-    description: 'Generate a try-on image with a model and a garment',
-    href: '/try-on',
-    status: process.env.NEXT_PUBLIC_VTO_ENABLED,
-  },
-  Edit: {
-    name: 'Generate an Edit',
-    description: 'Import, edit and transform existing content',
-    href: '/edit',
-    status: process.env.NEXT_PUBLIC_EDIT_ENABLED,
-  },
-  GenerateVideo: {
-    name: 'Generate a Video',
-    description: 'Produce dynamic videos from text or images',
-    href: '/generate?mode=video',
-    status: process.env.NEXT_PUBLIC_VEO_ENABLED,
-  },
-  Library: {
-    name: 'Browse',
-    description: "Browse and manage your personal creations",
-    href: '/library',
-    status: 'true',
-  },
+ GenerateImage: {
+  name: 'AI 图像创作',
+  description: '从文本或参考图出发，生成全新图像',
+  href: '/studio/generate?mode=image', // [修正] 确保 href 指向正确的页面
+  status: 'true',
+ },
+ VirtualTryOn: {
+  name: '虚拟试穿',
+  description: '上传模特与服装，生成逼真试穿效果',
+  href: '/studio/try-on', // [修正] 确保 href 指向正确的页面
+  status: process.env.NEXT_PUBLIC_VTO_ENABLED,
+ },
+ Edit: {
+  name: '生成式编辑',
+  description: '对现有图像进行智能编辑、替换与变换',
+  href: '/studio/edit', // [修正] 确保 href 指向正确的页面
+  status: process.env.NEXT_PUBLIC_EDIT_ENABLED,
+ },
+ GenerateVideo: {
+  name: 'AI 视频生成',
+  description: '根据文本或图像，创作生动的动态视频',
+  href: '/studio/generate?mode=video', // [修正] 确保 href 指向正确的页面
+  status: process.env.NEXT_PUBLIC_VEO_ENABLED,
+ },
+ Library: {
+  name: '我的素材库',
+  description: "浏览、管理并分享您的所有 AI 创作",
+  href: '/studio/library', // [修正] 确保 href 指向正确的页面
+  status: 'true',
+ },
 };
