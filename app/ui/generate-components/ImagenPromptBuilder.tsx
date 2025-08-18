@@ -1,5 +1,3 @@
-// 文件路径: app/ui/generate-components/ImagenPromptBuilder.tsx 
-
 'use client';
 
 import * as React from 'react';
@@ -39,12 +37,16 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
   const [previewOpen, setPreviewOpen] = useState(false);
   const [copySuccess, setCopySuccess] = useState('');
 
+  // [核心修复] 重新添加 const { name, value } = event.target;
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormState(prevState => ({ ...prevState, [name]: event.target.value }));
+    const { name, value } = event.target;
+    setFormState(prevState => ({ ...prevState, [name]: value }));
   };
 
+  // [核心修复] 重新添加 const { name, value } = event.target;
   const handleSelectChange = (event: SelectChangeEvent<string>) => {
-    setFormState(prevState => ({ ...prevState, [name]: event.target.value }));
+    const { name, value } = event.target;
+    setFormState(prevState => ({ ...prevState, [name]: value }));
   };
 
   const generatePromptString = () => {
