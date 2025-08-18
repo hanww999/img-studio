@@ -1,24 +1,8 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// 文件路径: app/ui/generate-components/GenerateSettings.tsx (最终完整修正版)
 
 import * as React from 'react'
 import { IconButton, Typography, Box, Menu, MenuItem, Avatar } from '@mui/material'
 import { CustomizedAvatarButton, CustomizedIconButton, CustomizedIconButtonOpen } from '../ux-components/Button-SX'
-
-import theme from '../../theme'
-const { palette } = theme
-
 import FormInputDropdown from '../ux-components/InputDropdown'
 import FormInputChipGroup from '../ux-components/InputChipGroup'
 import { GenerateSettingsI } from '../ux-components/InputInterface'
@@ -26,20 +10,6 @@ import { FormInputTextSmall } from '../ux-components/InputTextSmall'
 import { Settings } from '@mui/icons-material'
 import CustomTooltip from '../ux-components/Tooltip'
 import { FormInputNumberSmall } from '../ux-components/FormInputNumberSmall'
-
-const CustomizedMenu = {
-  '& .MuiPaper-root': {
-    background: 'white',
-    color: palette.text.primary,
-    boxShadow: 5,
-    p: 0.5,
-    width: 250,
-    '& .MuiMenuItem-root': {
-      background: 'transparent',
-      pb: 1,
-    },
-  },
-}
 
 export default function GenerateSettings({
   control,
@@ -58,6 +28,20 @@ export default function GenerateSettings({
 
   const handleClose = () => {
     setAnchorEl(null)
+  }
+
+  // [核心修正] 移除硬编码的白色背景，让 Menu 继承主题
+  const CustomizedMenu = {
+    '& .MuiPaper-root': {
+      // bgcolor: 'background.paper' 会自动从主题继承
+      boxShadow: 5,
+      p: 1,
+      width: 280, // 稍微加宽以获得更好的布局
+      '& .MuiMenuItem-root': {
+        p: 1, // 统一内边距
+        borderRadius: 2, // 为菜单项增加圆角
+      },
+    },
   }
 
   return (
@@ -90,7 +74,7 @@ export default function GenerateSettings({
       >
         {warningMessage !== '' && (
           <Typography
-            color={palette.warning.main}
+            color="warning.main"
             sx={{ m: 1, fontSize: '0.7rem', fontWeight: 400, fontStyle: 'italic', px: 1 }}
           >
             {warningMessage}
@@ -105,7 +89,7 @@ export default function GenerateSettings({
                 key={param}
                 control={control}
                 setValue={setValue}
-                width="260px"
+                width="100%" // 使用100%宽度
                 field={field}
                 required={true}
               />
@@ -123,86 +107,34 @@ export default function GenerateSettings({
                 control={control}
                 field={field}
                 styleSize="small"
-                width="160px"
+                width="100%" // 使用100%宽度
                 required={true}
               />
             </MenuItem>
           )
         })}
         <MenuItem key={'negativePrompt'}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-start',
-              alignContent: 'flex-start',
-              width: '100%',
-            }}
-          >
-            <Typography
-              variant="caption"
-              sx={{
-                color: palette.text.primary,
-                fontSize: '0.75rem',
-                fontWeight: 500,
-                lineHeight: '1.3em',
-                pb: 0.5,
-              }}
-            >
-              {'Negative prompt (content to avoid)'}
+          <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
+              {'Negative prompt'}
             </Typography>
-
             <FormInputTextSmall
               rows={2}
               name="negativePrompt"
-              label="negativePrompt"
+              label="" // 移除重复的 label
               control={control}
               required={false}
             />
           </Box>
         </MenuItem>
-        <MenuItem
-          key={'seedNumber'}
-          sx={{
-            lineHeight: 0.8,
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-start',
-              alignContent: 'flex-start',
-              width: '100%',
-            }}
-          >
-            <Typography
-              variant="caption"
-              sx={{
-                color: palette.text.primary,
-                fontSize: '0.75rem',
-                fontWeight: 500,
-                lineHeight: '1em',
-                pb: 0,
-              }}
-            >
+        <MenuItem key={'seedNumber'}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
               {'Seed number (optional)'}
             </Typography>
-            <Box sx={{ width: '90%', pb: 1 }}>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: palette.text.secondary,
-                  fontSize: '0.75rem',
-                  fontWeight: 400,
-                  lineHeight: 0,
-
-                  whiteSpace: 'normal',
-                }}
-              >
-                {'A specific seed and prompt will always produce the same output'}
-              </Typography>
-            </Box>
+            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'normal', mb: 1 }}>
+              {'A specific seed and prompt will always produce the same output'}
+            </Typography>
             <FormInputNumberSmall name="seedNumber" control={control} min={1} max={2147483647} />
           </Box>
         </MenuItem>
