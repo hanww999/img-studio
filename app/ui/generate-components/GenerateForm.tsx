@@ -1,4 +1,4 @@
-// 文件路径: app/ui/generate-components/GenerateForm.tsx (最终布局修复版)
+// 文件路径: app/ui/generate-components/GenerateForm.tsx (最终对齐修复版)
 
 'use client';
 
@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
  Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button,
- Dialog, DialogContent, DialogTitle, IconButton, Stack, Typography,
+ Dialog, DialogContent, DialogTitle, IconButton, Stack, Typography, InputAdornment
 } from '@mui/material';
 import {
  ArrowDownward as ArrowDownwardIcon, Autorenew,
@@ -267,6 +267,27 @@ export default function GenerateForm({
   }
  };
 
+  const PromptAdornment = (
+    <InputAdornment position="end">
+      <Stack direction="row" alignItems="center" sx={{ position: 'absolute', bottom: 8, right: 8 }}>
+        {generationType === 'Video' && (
+          <CustomTooltip title="视频生成提示词" size="small"><IconButton onClick={() => setVideoToPromptOpen(true)}><MovieIcon /></IconButton></CustomTooltip>
+        )}
+        <CustomTooltip title="图片生成提示词" size="small"><IconButton onClick={() => setImageToPromptOpen(true)}><Mms /></IconButton></CustomTooltip>
+        <CustomTooltip title="获取提示词灵感" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())}><Lightbulb /></IconButton></CustomTooltip>
+        <CustomTooltip title="重置所有字段" size="small"><IconButton disabled={isLoading} onClick={() => onReset()}><Autorenew /></IconButton></CustomTooltip>
+        <GenerateSettings control={control} setValue={setValue} generalSettingsFields={currentModel === 'imagen-4.0-ultra-generate-001' ? { ...generationFields.settings, ...imagenUltraSpecificSettings } : currentModel.includes('veo-3.0') ? tempVeo3specificSettings : generationFields.settings} advancedSettingsFields={generationFields.advancedSettings} warningMessage={currentModel.includes('veo-3.0') ? '注意: Veo 3 目前的设置选项比 Veo 2 少！' : ''} />
+        {isAudioAvailable && (<CustomTooltip title="为视频添加音频" size="small"><AudioSwitch checked={isVideoWithAudio} onChange={handleVideoAudioCheck} /></CustomTooltip>)}
+        {/* [核心] 为 GeminiSwitch 添加一个 Box 包裹并微调边距，以实现视觉对齐 */}
+        {currentModel.includes('imagen') && !hasReferences && (
+          <Box sx={{ mb: '-4px' }}>
+            <CustomTooltip title="使用 Gemini 优化提示词" size="small"><GeminiSwitch checked={isGeminiRewrite} onChange={handleGeminiRewrite} /></CustomTooltip>
+          </Box>
+        )}
+      </Stack>
+    </InputAdornment>
+  );
+
  return (
   <>
    <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -284,7 +305,6 @@ export default function GenerateForm({
       </Alert>
      )}
 
-      {/* [最终核心修复] 1. 移除相对定位的 Box */}
       <FormInputText 
         name="prompt" 
         control={control} 
@@ -292,22 +312,9 @@ export default function GenerateForm({
         required={!optionalVeoPrompt} 
         rows={7} 
         promptIndication={`${promptIndication}${isAudioAvailable ? ', 音频 (对话/音效/音乐/环境声)' : ''}`}
+        endAdornment={PromptAdornment}
       />
-
-      {/* [最终核心修复] 2. 将图标行作为一个独立的 Stack，放置在正确的位置 */}
-      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ width: '100%', mt: 1 }}>
-        {generationType === 'Video' && (
-          <CustomTooltip title="视频生成提示词" size="small"><IconButton onClick={() => setVideoToPromptOpen(true)}><MovieIcon /></IconButton></CustomTooltip>
-        )}
-        <CustomTooltip title="图片生成提示词" size="small"><IconButton onClick={() => setImageToPromptOpen(true)}><Mms /></IconButton></CustomTooltip>
-        <CustomTooltip title="获取提示词灵感" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())}><Lightbulb /></IconButton></CustomTooltip>
-        <CustomTooltip title="重置所有字段" size="small"><IconButton disabled={isLoading} onClick={() => onReset()}><Autorenew /></IconButton></CustomTooltip>
-        <GenerateSettings control={control} setValue={setValue} generalSettingsFields={currentModel === 'imagen-4.0-ultra-generate-001' ? { ...generationFields.settings, ...imagenUltraSpecificSettings } : currentModel.includes('veo-3.0') ? tempVeo3specificSettings : generationFields.settings} advancedSettingsFields={generationFields.advancedSettings} warningMessage={currentModel.includes('veo-3.0') ? '注意: Veo 3 目前的设置选项比 Veo 2 少！' : ''} />
-        {isAudioAvailable && (<CustomTooltip title="为视频添加音频" size="small"><AudioSwitch checked={isVideoWithAudio} onChange={handleVideoAudioCheck} /></CustomTooltip>)}
-        {currentModel.includes('imagen') && !hasReferences && (<CustomTooltip title="使用 Gemini 优化提示词" size="small"><GeminiSwitch checked={isGeminiRewrite} onChange={handleGeminiRewrite} /></CustomTooltip>)}
-      </Stack>
       
-      {/* [最终核心修复] 3. 将下面的组件用一个 Stack 包裹，并设置间距和上边距，确保严格左对齐 */}
      <Stack direction="column" spacing={2} sx={{ mt: 2 }}>
       {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
        <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')}>
