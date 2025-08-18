@@ -1,4 +1,4 @@
-// 文件路径: app/(studio)/generate/GeneratePageClient.tsx (真正完整版)
+// 文件路径: app/(studio)/generate/GeneratePageClient.tsx (最终完整版)
 
 'use client';
 
@@ -205,9 +205,10 @@ export default function GeneratePageClient() {
         gap: 3, 
         height: 'calc(100vh - 48px)',
     }}>
+      {/* [核心] 左侧表单区: 固定宽度，永不收缩 */}
      <Box sx={{ 
-        width: 650,
-        flexShrink: 0,
+        width: 620,      // 调整后的固定宽度
+        flexShrink: 0,   // 禁止此区域收缩
         display: 'flex', 
         flexDirection: 'column' 
       }}>
@@ -221,9 +222,10 @@ export default function GeneratePageClient() {
       </Paper>
      </Box>
 
+      {/* [核心] 右侧画廊区: 固定宽度，永不收缩 */}
      <Box sx={{ 
-        width: 550,
-        flexShrink: 0,
+        width: 580,      // 调整后的固定宽度
+        flexShrink: 0,   // 禁止此区域收缩
         display: 'flex', 
         flexDirection: 'column' 
       }}>
