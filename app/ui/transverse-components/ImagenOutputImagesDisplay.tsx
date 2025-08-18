@@ -1,10 +1,10 @@
-// 文件路径: app/ui/transverse-components/ImagenOutputImagesDisplay.tsx (最终精确修正版)
+// 文件路径: app/ui/transverse-components/ImagenOutputImagesDisplay.tsx (最终完整版)
 
 'use client';
 
 import * as React from 'react';
-import { useState } from 'react';
-import { CreateNewFolderRounded, Download, Edit, Favorite, VideocamRounded } from '@mui/icons-material';
+import { useState, useRef } from 'react';
+import { CreateNewFolderRounded, Download, Edit, Favorite, VideocamRounded, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import Image from 'next/image';
 import {
  Box, IconButton, Modal, Skeleton, ImageListItem, ImageList,
@@ -25,9 +25,9 @@ interface ExampleImage {
  height: number;
 }
 
-// 空状态组件，已完成汉化
 const EmptyState = () => {
  const [imageFullScreen, setImageFullScreen] = useState<ExampleImage | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
  const examplePrompts: ExampleImage[] = [
   { image: '/examples/222.png', prompt: 'A close up of a warm and fuzzy colorful Peruvian poncho laying on a top of a chair in a bright day', width: 800, height: 800 },
@@ -36,11 +36,17 @@ const EmptyState = () => {
   { image: '/examples/444.png', prompt: 'A photo of a forest canopy with blue skies from below', width: 800, height: 800 },
  ];
 
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
  return (
   <>
    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', p: 3 }}>
     <Image src="/cloudpuppy-illustration.svg" alt="CloudPuppy" width={150} height={150} />
-      {/* [核心修正] 汉化标题和描述 */}
     <Typography variant="h5" component="h2" sx={{ mt: 3, fontWeight: 'bold' }}>
      您的创意画廊
     </Typography>
@@ -48,31 +54,40 @@ const EmptyState = () => {
      您的杰作将会出现在这里。在左侧输入您最大胆的想法，让 CloudPuppy 将它们变为现实！
     </Typography>
      
-    <Box sx={{ width: '100%', overflowX: 'auto', pb: 1, '&::-webkit-scrollbar': { height: '8px' }, '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '4px' } }}>
-     <Stack direction="row" spacing={2} justifyContent="flex-start" sx={{ display: 'inline-flex', p: 1 }}>
-      {examplePrompts.map((ex, index) => (
-       <Tooltip title={ex.prompt} placement="top" arrow key={index}>
-        <Paper
-         elevation={3}
-         onClick={() => setImageFullScreen(ex)}
-         sx={{
-          width: 200,
-          height: 200,
-          overflow: 'hidden',
-          position: 'relative',
-          cursor: 'pointer',
-          borderRadius: 3,
-          transition: 'transform 0.2s ease-in-out',
-          flexShrink: 0,
-          '&:hover': { transform: 'scale(1.05)' },
-         }}
-        >
-         <Image src={ex.image} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
-        </Paper>
-       </Tooltip>
-      ))}
-     </Stack>
-    </Box>
+      {/* [核心] 包含滚动按钮和滚动区域的容器 */}
+      <Box sx={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'center' }}>
+        <IconButton onClick={() => handleScroll('left')} sx={{ position: 'absolute', left: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}>
+          <ChevronLeft />
+        </IconButton>
+        <Box ref={scrollContainerRef} sx={{ width: '100%', overflowX: 'auto', pb: 1, scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
+          <Stack direction="row" spacing={2} justifyContent="flex-start" sx={{ display: 'inline-flex', p: 1 }}>
+            {examplePrompts.map((ex, index) => (
+              <Tooltip title={ex.prompt} placement="top" arrow key={index}>
+                <Paper
+                  elevation={3}
+                  onClick={() => setImageFullScreen(ex)}
+                  sx={{
+                    width: 200,
+                    height: 200,
+                    overflow: 'hidden',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    borderRadius: 3,
+                    transition: 'transform 0.2s ease-in-out',
+                    flexShrink: 0,
+                    '&:hover': { transform: 'scale(1.05)' },
+                  }}
+                >
+                  <Image src={ex.image} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
+                </Paper>
+              </Tooltip>
+            ))}
+          </Stack>
+        </Box>
+        <IconButton onClick={() => handleScroll('right')} sx={{ position: 'absolute', right: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}>
+          <ChevronRight />
+        </IconButton>
+      </Box>
    </Box>
 
    {imageFullScreen && (
