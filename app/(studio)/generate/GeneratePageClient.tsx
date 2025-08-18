@@ -205,10 +205,9 @@ export default function GeneratePageClient() {
         gap: 3, 
         height: 'calc(100vh - 48px)',
     }}>
-      {/* [核心] 左侧表单区: 固定宽度，永不收缩 */}
      <Box sx={{ 
-        width: 620,      // 调整后的固定宽度
-        flexShrink: 0,   // 禁止此区域收缩
+        width: 550,
+        flexShrink: 0,
         display: 'flex', 
         flexDirection: 'column' 
       }}>
@@ -222,10 +221,9 @@ export default function GeneratePageClient() {
       </Paper>
      </Box>
 
-      {/* [核心] 右侧画廊区: 固定宽度，永不收缩 */}
      <Box sx={{ 
-        width: 580,      // 调整后的固定宽度
-        flexShrink: 0,   // 禁止此区域收缩
+        width: 650,
+        flexShrink: 0,
         display: 'flex', 
         flexDirection: 'column' 
       }}>
