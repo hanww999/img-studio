@@ -20,8 +20,8 @@ import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action';
 
 const EmptyState = () => {
   const examplePrompts = [
-    { image: '/examples/dog-astronaut.png', prompt: 'A Corgi dog in an astronaut suit, digital art style' },
-    { image: '/examples/mountain-reflection.png', prompt: 'A woman hiking, reflected in a puddle, dramatic mountains in the background' },
+    { image: '/examples/222.png', prompt: 'A close up of a warm and fuzzy colorful Peruvian poncho laying on a top of a chair in a bright day' },
+    { image: '/examples/111.png', prompt: 'A winning touchdown, fast shutter speed, movement tracking' },
   ];
 
   return (
