@@ -1,20 +1,16 @@
-// 文件路径: app/(studio)/generate/GeneratePageClient.tsx
+// 文件路径: app/(studio)/generate/GeneratePageClient.tsx (完整版)
 
 'use client';
 
 import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
-import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
 import GenerateForm from '../../ui/generate-components/GenerateForm';
 import { useEffect, useRef, useState } from 'react';
 import { imageGenerationUtils, ImageI, ImageRandomPrompts } from '../../api/generate-image-utils';
 import OutputImagesDisplay from '../../ui/transverse-components/ImagenOutputImagesDisplay';
 import { appContextDataDefault, useAppContext } from '../../context/app-context';
-import { Typography } from '@mui/material';
-
-import theme from '../../theme';
-const { palette } = theme;
+import { Paper, Typography } from '@mui/material';
 import {
   InterpolImageI,
   OperationMetadataI,
@@ -28,7 +24,6 @@ import OutputVideosDisplay from '../../ui/transverse-components/VeoOutputVideosD
 import { downloadMediaFromGcs } from '../../api/cloud-storage/action';
 import { getAspectRatio } from '../../ui/edit-components/EditImageDropzone';
 
-// Video Polling Constants
 const INITIAL_POLLING_INTERVAL_MS = 6000;
 const MAX_POLLING_INTERVAL_MS = 60000;
 const BACKOFF_FACTOR = 1.2;
@@ -86,7 +81,7 @@ export default function GeneratePageClient() {
         else return { ...appContextDataDefault, promptToGenerateVideo: '' };
       });
     }
-  }, [appContext?.promptToGenerateImage, appContext?.promptToGenerateVideo]);
+  }, [appContext?.promptToGenerateImage, appContext?.promptToGenerateVideo, setAppContext]);
 
   const [initialITVimage, setInitialITVimage] = useState<InterpolImageI | null>(null);
   useEffect(() => {
@@ -197,7 +192,7 @@ export default function GeneratePageClient() {
   if (appContext?.isLoading === true) {
     return (
       <Box p={5}>
-        <Typography variant="h3" sx={{ fontWeight: 400, color: appContextError === null ? palette.primary.main : palette.error.main }}>
+        <Typography variant="h3" sx={{ fontWeight: 400, color: appContextError === null ? 'primary.main' : 'error.main' }}>
           {appContextError === null ? 'Loading your profile content...' : 'Error while loading your profile content!'}
         </Typography>
       </Box>
@@ -205,33 +200,25 @@ export default function GeneratePageClient() {
   }
 
   return (
-    <Box p={5} sx={{ maxHeight: '100vh' }}>
-      <Grid wrap="nowrap" container spacing={6} direction="row" columns={2}>
-        <Grid size={1.1} flex={0} sx={{ maxWidth: 700, minWidth: 610 }}>
-          
-          {/* [删除] 移除此处的页面主标题，因为它在白色背景下不可见且多余 */}
-          {/* 
-          <Typography variant="h4" component="h1" sx={{ mb: 4, fontWeight: 500, color: 'white' }}>
-            {generationMode}
-          </Typography> 
-          */}
-
+    <Box sx={{ display: 'flex', gap: 3, height: 'calc(100vh - 48px)' }}>
+      <Box sx={{ flex: '0 1 550px', minWidth: 450, maxWidth: 650, display: 'flex', flexDirection: 'column' }}>
+        <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           {generationMode === 'Generate an Image' && (
             <GenerateForm key="image-form" generationType="Image" isLoading={isLoading} onRequestSent={handleRequestSent} onImageGeneration={handleImageGeneration} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={ImageRandomPrompts} generationFields={imageGenerationUtils} initialPrompt={initialPrompt ?? ''} promptIndication={'Describe your image...'} />
           )}
           {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && generationMode === 'Generate a Video' && (
             <GenerateForm key="video-form" generationType="Video" isLoading={isLoading} onRequestSent={handleRequestSent} onVideoPollingStart={handleVideoPollingStart} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={VideoRandomPrompts} generationFields={videoGenerationUtils} initialPrompt={initialPrompt ?? ''} initialITVimage={initialITVimage ?? undefined} promptIndication={'Describe your video...'} />
           )}
-        </Grid>
-        {/* [修改] 调整右侧内容区域的顶部内边距，使其与左侧表单对齐 */}
-        <Grid size={0.9} flex={1} sx={{ pt: 5.5, maxWidth: 850, minWidth: 400 }}>
-          {generationMode === 'Generate an Image' ? (
-            <OutputImagesDisplay isLoading={isLoading} generatedImagesInGCS={generatedImages} generatedCount={generatedCount} isPromptReplayAvailable={true} />
-          ) : (
-            <OutputVideosDisplay isLoading={isLoading} generatedVideosInGCS={generatedVideos} generatedCount={generatedCount} />
-          )}
-        </Grid>
-      </Grid>
+        </Paper>
+      </Box>
+
+      <Box sx={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column' }}>
+        {generationMode === 'Generate an Image' ? (
+          <OutputImagesDisplay isLoading={isLoading} generatedImagesInGCS={generatedImages} generatedCount={generatedCount} isPromptReplayAvailable={true} />
+        ) : (
+          <OutputVideosDisplay isLoading={isLoading} generatedVideosInGCS={generatedVideos} generatedCount={generatedCount} />
+        )}
+      </Box>
     </Box>
   );
 }
