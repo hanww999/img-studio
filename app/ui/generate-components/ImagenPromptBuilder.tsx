@@ -1,157 +1,192 @@
-// 文件路径: app/ui/generate-components/ImagenPromptBuilder.tsx (最终完整修正版)
+// 文件路径: app/ui/generate-components/ImageToPromptModal.tsx (最终完整版 - 已修复样式 & 翻译)
 
-'use client';
-
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import {
-  Box, Button, Grid, Typography, Stack, Paper, TextField, Select, MenuItem, FormControl, InputLabel,
-  Dialog, DialogTitle, DialogContent, DialogActions
+ Box, Button, CircularProgress, Dialog, DialogContent, DialogTitle,
+ IconButton, Slide, Stack, TextField, Typography,
 } from '@mui/material';
-import {
-  RestartAlt, AutoFixHigh, CheckCircle, ContentCopy, Block, Style, CameraAlt
-} from '@mui/icons-material';
-import { initialImagenPromptData, imagenPromptBuilderOptions, ImagenPromptData } from '../../api/imagen-prompt-builder-utils';
+import { TransitionProps } from '@mui/material/transitions';
+import { Check, Close, Replay, Send } from '@mui/icons-material';
+import ImageDropzone from './ImageDropzone';
+import { getPromptFromImageFromGemini } from '@/app/api/gemini/action';
+import { CustomizedSendButton } from '../ux-components/Button-SX';
 
-interface ImagenPromptBuilderProps {
-  onApply: (prompt: string, negativePrompt: string) => void;
-  onClose: () => void;
-}
+const Transition = React.forwardRef(function Transition(
+ props: TransitionProps & { children: React.ReactElement<any, any>; },
+ ref: React.Ref<unknown>
+) {
+ return <Slide direction="up" ref={ref} {...props} />;
+});
 
-const PreviewCard = ({ icon, title, content }: { icon: React.ReactNode, title: string, content: string | undefined }) => {
-  if (!content) return null;
-  return (
-    <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: 'action.hover' }}>
-      <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-        {icon}
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>{title}</Typography>
+export default function ImageToPromptModal({
+ open, setNewPrompt, setImageToPromptOpen, target,
+}: {
+ open: boolean;
+ setNewPrompt: (newPormpt: string) => void;
+ setImageToPromptOpen: (state: boolean) => void;
+ target: 'Image' | 'Video';
+}) {
+ const [image, setImage] = useState<string | null>(null);
+ const [prompt, setPrompt] = useState('');
+ const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+ const [errorMsg, setErrorMsg] = useState('');
+ const [userQuery, setUserQuery] = useState('');
+
+ const getPromptFromImage = async () => {
+  if (!image) {
+   setErrorMsg('请先上传一张图片。'); // [中文翻译]
+   return;
+  }
+  setIsGeneratingPrompt(true);
+  setErrorMsg('');
+  setPrompt('');
+  try {
+   const geminiReturnedPrompt = await getPromptFromImageFromGemini(image as string, target, userQuery);
+   if (typeof geminiReturnedPrompt === 'object' && 'error' in geminiReturnedPrompt) {
+    setErrorMsg(geminiReturnedPrompt.error);
+   } else {
+    setPrompt(geminiReturnedPrompt as string);
+   }
+  } catch (error: any) {
+   console.error(error);
+   setErrorMsg(error.toString());
+  } finally {
+   setIsGeneratingPrompt(false);
+  }
+ };
+
+ const onValidate = () => {
+  if (prompt) setNewPrompt(prompt);
+  onClose();
+ };
+
+ const onReset = () => {
+  setErrorMsg('');
+  setIsGeneratingPrompt(false);
+  setImage(null);
+  setPrompt('');
+  setUserQuery('');
+ };
+
+ const onClose = () => {
+  setImageToPromptOpen(false);
+  onReset();
+ };
+
+ return (
+  <Dialog
+   open={open}
+   onClose={onClose}
+   aria-describedby="parameter the export of an image"
+   TransitionComponent={Transition}
+   PaperProps={{
+    sx: {
+        // [样式修复] 移除硬编码的背景色，让其从主题继承
+     display: 'flex',
+     justifyContent: 'center',
+     alignItems: 'left',
+     p: 1,
+     cursor: 'default',
+     height: 'auto',
+     minHeight: '63%',
+     maxWidth: '70%',
+     width: '60%',
+     borderRadius: 1,
+        // background: 'white', // <-- 已删除此行
+    },
+   }}
+  >
+   <IconButton
+    aria-label="close"
+    onClick={onClose}
+    sx={{
+     position: 'absolute',
+     right: 8,
+     top: 8,
+     color: 'text.secondary', // 确保在暗色模式下可见
+     '&:hover': { color: 'primary.main' }
+    }}
+   >
+    <Close sx={{ fontSize: '1.5rem' }} />
+   </IconButton>
+   <DialogContent sx={{ m: 1 }}>
+    <DialogTitle sx={{ p: 0, pb: 3 }}>
+     <Typography
+      sx={{
+       fontSize: '1.7rem',
+       color: 'text.primary', // 确保在暗色模式下可见
+       fontWeight: 400,
+       display: 'flex',
+       alignContent: 'center',
+      }}
+     >
+      {'图片转提示词生成器'} {/* [中文翻译] */}
+     </Typography>
+    </DialogTitle>
+    <Stack
+     direction="row"
+     spacing={2.5}
+     justifyContent="flex-start"
+     alignItems="flex-start"
+     sx={{ pt: 2, px: 1, width: '100%' }}
+    >
+     <ImageDropzone
+      setImage={(base64Image: string) => setImage(base64Image)}
+      image={image}
+      onNewErrorMsg={setErrorMsg}
+      size={{ width: '110vw', height: '110vw' }}
+      maxSize={{ width: 280, height: 280 }}
+      object={'contain'}
+     />
+     <Stack
+      direction="column"
+      spacing={2}
+      justifyContent="space-between"
+      alignItems="flex-end"
+      sx={{ width: '100%', height: 340 }}
+     >
+      <Box sx={{ position: 'relative', width: '100%' }}>
+       {isGeneratingPrompt && (
+        <CircularProgress size={30} thickness={6} color="primary" sx={{ position: 'absolute', top: '50%', left: '50%', marginTop: '-15px', marginLeft: '-15px', zIndex: 1 }} />
+       )}
+       <TextField
+        label="生成的提示词" // [中文翻译]
+        disabled
+        error={errorMsg !== ''}
+        helperText={errorMsg}
+        value={isGeneratingPrompt ? '正在生成...' : prompt} // [中文翻译]
+        multiline
+        rows={6}
+        sx={{ width: '98%', opacity: isGeneratingPrompt ? 0.5 : 1 }}
+       />
+      </Box>
+
+      <TextField
+       label="针对图片提出具体问题 (可选)" // [中文翻译]
+       value={userQuery}
+       onChange={(e) => setUserQuery(e.target.value)}
+       disabled={isGeneratingPrompt || !image}
+       multiline
+       rows={2}
+       sx={{ width: '98%' }}
+       onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); getPromptFromImage(); } }}
+      />
+       
+      <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="flex-end" sx={{ width: '100%' }}>
+       <Button onClick={getPromptFromImage} variant="contained" disabled={!image || isGeneratingPrompt} endIcon={<Send />} sx={CustomizedSendButton}>
+        {'生成'} {/* [中文翻译] */}
+       </Button>
+       <Button onClick={onReset} variant="outlined" disabled={isGeneratingPrompt} endIcon={<Replay />}>
+        {'重置'} {/* [中文翻译] */}
+       </Button>
+       <Button onClick={onValidate} variant="contained" disabled={!prompt || isGeneratingPrompt} endIcon={<Check />} sx={CustomizedSendButton}>
+        {'使用此提示词'} {/* [中文翻译] */}
+       </Button>
       </Stack>
-      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{content}</Typography>
-    </Paper>
-  );
-};
-
-export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBuilderProps) {
-  const [promptData, setPromptData] = useState<ImagenPromptData>(initialImagenPromptData);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [copyStatus, setCopyStatus] = useState('Copy All');
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setPromptData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (e: any) => {
-    const { name, value } = e.target;
-    setPromptData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const generateFinalPrompt = () => {
-    const parts = [
-      promptData.styleMedium,
-      `of ${promptData.subject}`,
-      promptData.detailedDescription,
-      promptData.environment,
-      promptData.composition,
-      promptData.lighting,
-      promptData.colorScheme,
-      promptData.lensType,
-      promptData.cameraSettings,
-      promptData.filmType,
-      promptData.quality,
-    ];
-    return parts.filter(part => part).join(', ');
-  };
-
-  const handlePreview = () => {
-    setPreviewOpen(true);
-  };
-
-  const handleCopy = () => {
-    const finalPrompt = generateFinalPrompt();
-    const fullTextToCopy = `Prompt: ${finalPrompt}\n\nNegative Prompt: ${promptData.negativePrompt}`;
-    navigator.clipboard.writeText(fullTextToCopy).then(() => {
-      setCopyStatus('Copied!');
-      setTimeout(() => setCopyStatus('Copy All'), 2000);
-    });
-  };
-
-  const handleApply = () => {
-    const finalPrompt = generateFinalPrompt();
-    onApply(finalPrompt, promptData.negativePrompt);
-    onClose();
-  };
-
-  const handleReset = () => {
-    setPromptData(initialImagenPromptData);
-  };
-
-  // [核心修正] 移除 bgcolor，让组件继承 Dialog 的背景色
-  return (
-    <Box sx={{ p: 2 }}>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%', bgcolor: 'background.default' }}>
-            <Typography variant="h6" gutterBottom>Core Components</Typography>
-            <Stack spacing={2}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Style / Medium</InputLabel>
-                <Select name="styleMedium" value={promptData.styleMedium} label="Style / Medium" onChange={handleSelectChange}>
-                  {imagenPromptBuilderOptions.styleMedium.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}
-                </Select>
-              </FormControl>
-              <TextField name="subject" label="Subject" value={promptData.subject} onChange={handleInputChange} size="small" />
-              <TextField name="detailedDescription" label="Detailed Description" value={promptData.detailedDescription} onChange={handleInputChange} multiline rows={4} />
-              <TextField name="environment" label="Environment / Background" value={promptData.environment} onChange={handleInputChange} multiline rows={3} />
-            </Stack>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%', bgcolor: 'background.default' }}>
-            <Typography variant="h6" gutterBottom>Photographic Style</Typography>
-            <Stack spacing={2}>
-              <FormControl fullWidth size="small"><InputLabel>Composition / View</InputLabel><Select name="composition" value={promptData.composition} label="Composition / View" onChange={handleSelectChange}>{imagenPromptBuilderOptions.composition.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
-              <FormControl fullWidth size="small"><InputLabel>Lighting</InputLabel><Select name="lighting" value={promptData.lighting} label="Lighting" onChange={handleSelectChange}>{imagenPromptBuilderOptions.lighting.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
-              <FormControl fullWidth size="small"><InputLabel>Color Scheme</InputLabel><Select name="colorScheme" value={promptData.colorScheme} label="Color Scheme" onChange={handleSelectChange}>{imagenPromptBuilderOptions.colorScheme.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
-              <FormControl fullWidth size="small"><InputLabel>Lens Type</InputLabel><Select name="lensType" value={promptData.lensType} label="Lens Type" onChange={handleSelectChange}>{imagenPromptBuilderOptions.lensType.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
-              <FormControl fullWidth size="small"><InputLabel>Camera Settings</InputLabel><Select name="cameraSettings" value={promptData.cameraSettings} label="Camera Settings" onChange={handleSelectChange}>{imagenPromptBuilderOptions.cameraSettings.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
-              <FormControl fullWidth size="small"><InputLabel>Film Type</InputLabel><Select name="filmType" value={promptData.filmType} label="Film Type" onChange={handleSelectChange}>{imagenPromptBuilderOptions.filmType.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
-              <FormControl fullWidth size="small"><InputLabel>Quality</InputLabel><Select name="quality" value={promptData.quality} label="Quality" onChange={handleSelectChange}>{imagenPromptBuilderOptions.quality.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
-            </Stack>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%', bgcolor: 'background.default' }}>
-            <Typography variant="h6" gutterBottom>Exclusions (Negative Prompt)</Typography>
-            <TextField name="negativePrompt" label="Negative Prompt" value={promptData.negativePrompt} onChange={handleInputChange} fullWidth multiline rows={10} />
-          </Paper>
-        </Grid>
-      </Grid>
-
-      <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 3 }}>
-        <Button variant="outlined" onClick={handlePreview} startIcon={<AutoFixHigh />}>Preview Generated Prompt</Button>
-        <Button variant="text" onClick={handleReset} startIcon={<RestartAlt />}>Reset All</Button>
-      </Stack>
-
-      <Stack sx={{ mt: 4 }} alignItems="flex-end">
-        <Button variant="contained" startIcon={<CheckCircle />} onClick={handleApply} size="large">Apply to Form</Button>
-      </Stack>
-
-      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="md">
-        <DialogTitle>Generated Prompt Preview</DialogTitle>
-        <DialogContent>
-          <Stack spacing={1}>
-            <PreviewCard icon={<Style fontSize="small" />} title="Core Components" content={`Style / Medium: ${promptData.styleMedium}\nSubject: ${promptData.subject}\nDetailed Description: ${promptData.detailedDescription}\nEnvironment / Background: ${promptData.environment}`} />
-            <PreviewCard icon={<CameraAlt fontSize="small" />} title="Photographic Style" content={`Composition / View: ${promptData.composition}\nLighting: ${promptData.lighting}\nColor Scheme: ${promptData.colorScheme}\nLens Type: ${promptData.lensType}\nCamera Settings: ${promptData.cameraSettings}\nFilm Type: ${promptData.filmType}\nQuality: ${promptData.quality}`} />
-            <PreviewCard icon={<Block fontSize="small" color="error" />} title="Exclusions (Negative Prompt)" content={promptData.negativePrompt} />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCopy} startIcon={<ContentCopy />}>{copyStatus}</Button>
-          <Button onClick={() => setPreviewOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  );
+     </Stack>
+    </Stack>
+   </DialogContent>
+  </Dialog>
+ );
 }
