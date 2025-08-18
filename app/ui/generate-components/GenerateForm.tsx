@@ -1,4 +1,4 @@
-// 文件路径: app/ui/generate-components/GenerateForm.tsx (完整版)
+// 文件路径: app/ui/generate-components/GenerateForm.tsx (完整修正版)
 
 'use client';
 
@@ -32,13 +32,13 @@ import ImagenPromptBuilder from './ImagenPromptBuilder';
 import { useAppContext } from '../../context/app-context';
 import { generateImage } from '../../api/imagen/action';
 import {
-  chipGroupFieldsI, GenerateImageFormI, ImageGenerationFieldsI,
+  chipGroupFieldsI, GenerateImageFormFields, GenerateImageFormI, ImageGenerationFieldsI,
   ImageI, maxReferences, ReferenceObjectDefaults, ReferenceObjectInit, selectFieldsI,
   imagenUltraSpecificSettings,
 } from '../../api/generate-image-utils';
 import { EditImageFormFields } from '../../api/edit-utils';
 import {
-  GenerateVideoFormI, InterpolImageDefaults, InterpolImageI,
+  GenerateVideoFormFields, GenerateVideoFormI, InterpolImageDefaults, InterpolImageI,
   OperationMetadataI, tempVeo3specificSettings, VideoGenerationFieldsI, videoGenerationUtils,
 } from '../../api/generate-video-utils';
 import { generateVideo } from '../../api/veo/action';
@@ -119,7 +119,10 @@ export default function GenerateForm({
 
   const referenceObjects = watch('referenceObjects');
   const [hasReferences, setHasReferences] = useState(false);
-  const [modelOptionField, setModelOptionField] = useState<selectFieldsI>(GenerateImageFormFields.modelVersion);
+  
+  // [核心修正] 使用 props 中的 generationFields 来初始化状态
+  const [modelOptionField, setModelOptionField] = useState<selectFieldsI>(generationFields.modelVersion);
+  
   useEffect(() => {
     if (generationType === 'Image') {
       if (referenceObjects.some((obj) => obj.base64Image !== '')) {
