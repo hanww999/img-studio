@@ -264,7 +264,7 @@ export default function Page() {
                     color={palette.primary.main}
                     sx={{ fontWeight: 500, fontSize: '2rem', pl: 1 }}
                 >
-                    {'Shared content'}
+                    {'My Library'}
                 </Typography>
             </Box>
             <Collapse
