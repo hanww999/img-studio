@@ -1,3 +1,5 @@
+// 文件路径: app/ui/generate-components/PromptBuilder.tsx (Veo - 最终汉化修复版)
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -7,16 +9,12 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import {
-  ExpandMore, AccountCircle, Place, DirectionsRun, Palette, Mic, Movie,
-  RestartAlt, AutoFixHigh, CheckCircle, Block, ContentCopy, WbSunny, Theaters
+  ExpandMore, RestartAlt, AutoFixHigh, CheckCircle, Block, ContentCopy, WbSunny, Theaters, Movie, Mic
 } from '@mui/icons-material';
 import { initialPromptData, professionalTemplates, industryKeywords, PromptData, Template } from '../../api/prompt-builder-utils';
 
-// ... (其他组件定义保持不变) ...
-interface PromptBuilderProps {
-  onApply: (prompt: string, negativePrompt: string) => void;
-  onClose: () => void;
-}
+interface Keyword { label: string; value: string; }
+interface PromptBuilderProps { onApply: (prompt: string, negativePrompt: string) => void; onClose: () => void; }
 
 const SectionHeader = ({ icon, title }: { icon: React.ReactNode, title: string }) => (
   <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
@@ -25,39 +23,32 @@ const SectionHeader = ({ icon, title }: { icon: React.ReactNode, title: string }
   </Stack>
 );
 
-const ChipInput = ({ label, value, onChange, keywords }: { label: string, value: string, onChange: (newValue: string) => void, keywords: string[] }) => {
-  const handleAddChip = (chip: string) => {
+const ChipInput = ({ label, value, onChange, keywords }: { label: string, value: string, onChange: (newValue: string) => void, keywords: Keyword[] }) => {
+  const handleAddChip = (chipValue: string) => {
     const currentValue = value || '';
-    const newValue = currentValue ? `${currentValue}, ${chip}` : chip;
+    const newValue = currentValue ? `${currentValue}, ${chipValue}` : chipValue;
     onChange(newValue);
   };
 
   return (
     <Stack spacing={1.5}>
       <TextField
-        label={label}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        fullWidth
-        multiline
-        rows={3}
-        variant="outlined"
-        placeholder={`Type freely or add keywords from below...`}
+        label={label} value={value} onChange={(e) => onChange(e.target.value)}
+        fullWidth multiline rows={3} variant="outlined" placeholder={`自由输入或从下方添加关键词...`}
       />
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
         {keywords.map((keyword) => (
-          <Chip key={keyword} label={keyword} onClick={() => handleAddChip(keyword)} size="small" />
+          <Chip key={keyword.value} label={keyword.label} onClick={() => handleAddChip(keyword.value)} size="small" />
         ))}
       </Box>
     </Stack>
   );
 };
 
-// [新增] 用于 Preview 弹窗的卡片组件
 const PreviewCard = ({ icon, title, content }: { icon: React.ReactNode, title: string, content: string }) => {
-  if (!content) return null; // 如果内容为空则不渲染
+  if (!content) return null;
   return (
-    <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+    <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: 'background.default' }}>
       <Stack direction="row" spacing={1} alignItems="center" mb={1}>
         {icon}
         <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>{title}</Typography>
@@ -67,23 +58,21 @@ const PreviewCard = ({ icon, title, content }: { icon: React.ReactNode, title: s
   );
 };
 
-
 export default function PromptBuilder({ onApply, onClose }: PromptBuilderProps) {
   const [promptData, setPromptData] = useState<PromptData>(initialPromptData);
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>('Cinematic Vlog');
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>('电影感Vlog');
   const [industry, setIndustry] = useState<'common' | 'gaming' | 'ecommerce' | 'advertising'>('common');
-  
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [copyStatus, setCopyStatus] = useState('Copy All');
+  const [copyStatus, setCopyStatus] = useState('复制全部');
 
   const keywords = useMemo(() => {
     const industryCinematography = industryKeywords[industry]?.cinematography || [];
     const industryLightingVfx = industryKeywords[industry]?.lightingVfx || [];
-    
-    return {
-      cinematography: [...new Set([...industryKeywords.common.cinematography, ...industryCinematography])],
-      lightingVfx: [...new Set([...industryKeywords.common.lightingVfx, ...industryLightingVfx])],
-    };
+    const combinedCinematography = [...industryKeywords.common.cinematography, ...industryCinematography];
+    const combinedLightingVfx = [...industryKeywords.common.lightingVfx, ...industryLightingVfx];
+    const uniqueCinematography = Array.from(new Map(combinedCinematography.map(item => [item.value, item])).values());
+    const uniqueLightingVfx = Array.from(new Map(combinedLightingVfx.map(item => [item.value, item])).values());
+    return { cinematography: uniqueCinematography, lightingVfx: uniqueLightingVfx };
   }, [industry]);
 
   const handleDataChange = (field: keyof PromptData, value: string) => {
@@ -106,37 +95,31 @@ export default function PromptBuilder({ onApply, onClose }: PromptBuilderProps) 
     return parts.filter(part => part).join(' ').replace(/\s+/g, ' ').trim();
   };
 
-  const handlePreview = () => {
-    setPreviewOpen(true);
-  };
-
   const handleCopyFromPreview = () => {
     const finalPrompt = generateFinalPrompt();
     const fullTextToCopy = `Prompt: ${finalPrompt}\n\nNegative Prompt: ${promptData.negativePrompt}`;
     navigator.clipboard.writeText(fullTextToCopy).then(() => {
-      setCopyStatus('Copied!');
-      setTimeout(() => setCopyStatus('Copy All'), 2000);
+      setCopyStatus('已复制!');
+      setTimeout(() => setCopyStatus('复制全部'), 2000);
     });
   };
 
   const handleApplyAndClose = () => {
-    const finalPrompt = generateFinalPrompt();
-    onApply(finalPrompt, promptData.negativePrompt);
+    onApply(generateFinalPrompt(), promptData.negativePrompt);
     onClose();
   };
 
   const handleReset = () => {
     setPromptData(initialPromptData);
-    setSelectedTemplate('Cinematic Vlog');
+    setSelectedTemplate('电影感Vlog');
     setIndustry('common');
   };
 
   return (
-    <Box sx={{ width: '100%', p: 1, bgcolor: 'grey.50' }}>
+    <Box sx={{ width: '100%', p: 1, bgcolor: 'background.paper' }}>
       <Grid container spacing={3}>
-        {/* 左侧模板列表 */}
         <Grid item xs={12} md={3}>
-          <Typography variant="h6" gutterBottom>Templates</Typography>
+          <Typography variant="h6" gutterBottom>模板</Typography>
           <Stack spacing={1.5}>
             {professionalTemplates.map((template) => (
               <Card key={template.title} variant="outlined" sx={{ borderColor: selectedTemplate === template.title ? 'primary.main' : 'grey.300', borderWidth: 2 }}>
@@ -155,101 +138,56 @@ export default function PromptBuilder({ onApply, onClose }: PromptBuilderProps) 
             ))}
           </Stack>
         </Grid>
-
-        {/* 右侧构建区域 */}
         <Grid item xs={12} md={9}>
           <Stack spacing={2}>
-            {/* 核心创意区域 */}
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>Core Creative</Typography>
+              <Typography variant="h6" gutterBottom>核心创意</Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12}><TextField label="Subject" value={promptData.subject} onChange={(e) => handleDataChange('subject', e.target.value)} fullWidth multiline rows={2} /></Grid>
-                <Grid item xs={12} md={6}><TextField label="Context & Scene" value={promptData.context} onChange={(e) => handleDataChange('context', e.target.value)} fullWidth multiline rows={3} /></Grid>
-                <Grid item xs={12} md={6}><TextField label="Action & Performance" value={promptData.action} onChange={(e) => handleDataChange('action', e.target.value)} fullWidth multiline rows={3} /></Grid>
+                <Grid item xs={12}><TextField label="主体" value={promptData.subject} onChange={(e) => handleDataChange('subject', e.target.value)} fullWidth multiline rows={2} /></Grid>
+                <Grid item xs={12} md={6}><TextField label="背景与场景" value={promptData.context} onChange={(e) => handleDataChange('context', e.target.value)} fullWidth multiline rows={3} /></Grid>
+                <Grid item xs={12} md={6}><TextField label="动作与表演" value={promptData.action} onChange={(e) => handleDataChange('action', e.target.value)} fullWidth multiline rows={3} /></Grid>
               </Grid>
             </Paper>
-
-            {/* 专业控制区域 */}
             <Accordion defaultExpanded>
-              <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography variant="h6">Professional Controls</Typography>
-              </AccordionSummary>
+              <AccordionSummary expandIcon={<ExpandMore />}><Typography variant="h6">专业控制</Typography></AccordionSummary>
               <AccordionDetails>
                 <Stack spacing={3}>
                   <FormControl size="small" sx={{ maxWidth: 200 }}>
-                    <InputLabel>Industry Focus</InputLabel>
-                    <Select value={industry} label="Industry Focus" onChange={(e) => setIndustry(e.target.value as any)}>
-                      <MenuItem value="common">General</MenuItem>
-                      <MenuItem value="gaming">Gaming</MenuItem>
-                      <MenuItem value="ecommerce">E-commerce</MenuItem>
-                      <MenuItem value="advertising">Advertising</MenuItem>
+                    <InputLabel>行业焦点</InputLabel>
+                    <Select value={industry} label="行业焦点" onChange={(e) => setIndustry(e.target.value as any)}>
+                      <MenuItem value="common">通用</MenuItem><MenuItem value="gaming">游戏</MenuItem>
+                      <MenuItem value="ecommerce">电商</MenuItem><MenuItem value="advertising">广告</MenuItem>
                     </Select>
                   </FormControl>
-
-                  <ChipInput label="Cinematography & Visuals" value={promptData.cinematography} onChange={(v) => handleDataChange('cinematography', v)} keywords={keywords.cinematography} />
-                  <ChipInput label="Lighting & VFX" value={promptData.lightingVfx} onChange={(v) => handleDataChange('lightingVfx', v)} keywords={keywords.lightingVfx} />
-                  
-                  <TextField
-                    label="Negative Prompt (what to avoid)"
-                    value={promptData.negativePrompt}
-                    onChange={(e) => handleDataChange('negativePrompt', e.target.value)}
-                    fullWidth
-                    multiline
-                    rows={2}
-                    placeholder="e.g., blurry, low quality, watermark, text..."
-                  />
-                  <TextField label="Audio" value={promptData.audio} onChange={(e) => handleDataChange('audio', e.target.value)} fullWidth multiline rows={2} />
+                  <ChipInput label="电影摄影与视觉效果" value={promptData.cinematography} onChange={(v) => handleDataChange('cinematography', v)} keywords={keywords.cinematography} />
+                  <ChipInput label="灯光与视觉特效" value={promptData.lightingVfx} onChange={(v) => handleDataChange('lightingVfx', v)} keywords={keywords.lightingVfx} />
+                  <TextField label="负面提示词 (需要避免的内容)" value={promptData.negativePrompt} onChange={(e) => handleDataChange('negativePrompt', e.target.value)} fullWidth multiline rows={2} placeholder="例如：模糊, 低质量, 水印, 文字..." />
+                  <TextField label="音频" value={promptData.audio} onChange={(e) => handleDataChange('audio', e.target.value)} fullWidth multiline rows={2} />
                 </Stack>
               </AccordionDetails>
             </Accordion>
           </Stack>
         </Grid>
       </Grid>
-
-      {/* 底部操作按钮 */}
       <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3, p: 1 }}>
-        <Button variant="outlined" onClick={handlePreview} startIcon={<AutoFixHigh />}>Preview Generated Prompt</Button>
-        <Button variant="text" onClick={handleReset} startIcon={<RestartAlt />}>Reset</Button>
-        <Button variant="contained" onClick={handleApplyAndClose} startIcon={<CheckCircle />} size="large">Apply to Form</Button>
+        <Button variant="outlined" onClick={() => setPreviewOpen(true)} startIcon={<AutoFixHigh />}>预览生成的提示词</Button>
+        <Button variant="text" onClick={handleReset} startIcon={<RestartAlt />}>重置</Button>
+        <Button variant="contained" onClick={handleApplyAndClose} startIcon={<CheckCircle />} size="large">应用到表单</Button>
       </Stack>
-
-      {/* [核心修复] 全新的、结构化的 Preview 弹窗 */}
       <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="md">
-        <DialogTitle>Generated Prompt Preview</DialogTitle>
+        <DialogTitle>生成的提示词预览</DialogTitle>
         <DialogContent>
           <Stack spacing={1}>
-            <PreviewCard 
-              icon={<Theaters fontSize="small" />} 
-              title="Core Description" 
-              content={`${promptData.subject}, ${promptData.action}, ${promptData.context}.`} 
-            />
-            <PreviewCard 
-              icon={<Movie fontSize="small" />} 
-              title="Cinematography & Visuals" 
-              content={promptData.cinematography} 
-            />
-            <PreviewCard 
-              icon={<WbSunny fontSize="small" />} 
-              title="Lighting & VFX" 
-              content={promptData.lightingVfx} 
-            />
-            <PreviewCard 
-              icon={<Block fontSize="small" color="error" />} 
-              title="Negative Prompt" 
-              content={promptData.negativePrompt} 
-            />
-            <PreviewCard 
-              icon={<Mic fontSize="small" />} 
-              title="Audio" 
-              content={promptData.audio} 
-            />
+            <PreviewCard icon={<Theaters fontSize="small" />} title="核心描述" content={`${promptData.subject}, ${promptData.action}, ${promptData.context}.`} />
+            <PreviewCard icon={<Movie fontSize="small" />} title="电影摄影与视觉效果" content={promptData.cinematography} />
+            <PreviewCard icon={<WbSunny fontSize="small" />} title="灯光与视觉特效" content={promptData.lightingVfx} />
+            <PreviewCard icon={<Block fontSize="small" color="error" />} title="负面提示词" content={promptData.negativePrompt} />
+            <PreviewCard icon={<Mic fontSize="small" />} title="音频" content={promptData.audio} />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCopyFromPreview} startIcon={<ContentCopy />}>
-            {copyStatus}
-          </Button>
-          <Button onClick={() => setPreviewOpen(false)}>Close</Button>
+          <Button onClick={handleCopyFromPreview} startIcon={<ContentCopy />}>{copyStatus}</Button>
+          <Button onClick={() => setPreviewOpen(false)}>关闭</Button>
         </DialogActions>
       </Dialog>
     </Box>
