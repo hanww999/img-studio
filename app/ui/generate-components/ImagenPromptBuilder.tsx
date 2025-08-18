@@ -1,3 +1,5 @@
+// 文件路径: app/ui/generate-components/ImagenPromptBuilder.tsx (最终完整修正版)
+
 'use client';
 
 import React, { useState } from 'react';
@@ -6,21 +8,19 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import {
-  RestartAlt, AutoFixHigh, CheckCircle, ContentCopy, Block, Style, CameraAlt, PhotoFilter
+  RestartAlt, AutoFixHigh, CheckCircle, ContentCopy, Block, Style, CameraAlt
 } from '@mui/icons-material';
 import { initialImagenPromptData, imagenPromptBuilderOptions, ImagenPromptData } from '../../api/imagen-prompt-builder-utils';
 
-// 定义组件的 Props 接口
 interface ImagenPromptBuilderProps {
   onApply: (prompt: string, negativePrompt: string) => void;
   onClose: () => void;
 }
 
-// 预览弹窗的卡片组件
 const PreviewCard = ({ icon, title, content }: { icon: React.ReactNode, title: string, content: string | undefined }) => {
   if (!content) return null;
   return (
-    <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+    <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: 'action.hover' }}>
       <Stack direction="row" spacing={1} alignItems="center" mb={1}>
         {icon}
         <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>{title}</Typography>
@@ -85,12 +85,12 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
     setPromptData(initialImagenPromptData);
   };
 
+  // [核心修正] 移除 bgcolor，让组件继承 Dialog 的背景色
   return (
-    <Box sx={{ p: 2, bgcolor: 'grey.50' }}>
+    <Box sx={{ p: 2 }}>
       <Grid container spacing={3}>
-        {/* Core Components */}
         <Grid item xs={12} md={4}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
+          <Paper variant="outlined" sx={{ p: 2, height: '100%', bgcolor: 'background.default' }}>
             <Typography variant="h6" gutterBottom>Core Components</Typography>
             <Stack spacing={2}>
               <FormControl fullWidth size="small">
@@ -106,9 +106,8 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
           </Paper>
         </Grid>
 
-        {/* Photographic Style */}
         <Grid item xs={12} md={4}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
+          <Paper variant="outlined" sx={{ p: 2, height: '100%', bgcolor: 'background.default' }}>
             <Typography variant="h6" gutterBottom>Photographic Style</Typography>
             <Stack spacing={2}>
               <FormControl fullWidth size="small"><InputLabel>Composition / View</InputLabel><Select name="composition" value={promptData.composition} label="Composition / View" onChange={handleSelectChange}>{imagenPromptBuilderOptions.composition.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}</Select></FormControl>
@@ -122,59 +121,30 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
           </Paper>
         </Grid>
 
-        {/* Exclusions */}
         <Grid item xs={12} md={4}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
+          <Paper variant="outlined" sx={{ p: 2, height: '100%', bgcolor: 'background.default' }}>
             <Typography variant="h6" gutterBottom>Exclusions (Negative Prompt)</Typography>
             <TextField name="negativePrompt" label="Negative Prompt" value={promptData.negativePrompt} onChange={handleInputChange} fullWidth multiline rows={10} />
           </Paper>
         </Grid>
       </Grid>
 
-      {/* 底部操作按钮 */}
       <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 3 }}>
         <Button variant="outlined" onClick={handlePreview} startIcon={<AutoFixHigh />}>Preview Generated Prompt</Button>
         <Button variant="text" onClick={handleReset} startIcon={<RestartAlt />}>Reset All</Button>
       </Stack>
 
-      {/* 主应用按钮 */}
       <Stack sx={{ mt: 4 }} alignItems="flex-end">
         <Button variant="contained" startIcon={<CheckCircle />} onClick={handleApply} size="large">Apply to Form</Button>
       </Stack>
 
-      {/* 预览弹窗 */}
       <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>Generated Prompt Preview</DialogTitle>
         <DialogContent>
           <Stack spacing={1}>
-            <PreviewCard 
-              icon={<Style fontSize="small" />} 
-              title="Core Components" 
-              content={
-                `Style / Medium: ${promptData.styleMedium}\n` +
-                `Subject: ${promptData.subject}\n` +
-                `Detailed Description: ${promptData.detailedDescription}\n` +
-                `Environment / Background: ${promptData.environment}`
-              } 
-            />
-            <PreviewCard 
-              icon={<CameraAlt fontSize="small" />} 
-              title="Photographic Style" 
-              content={
-                `Composition / View: ${promptData.composition}\n` +
-                `Lighting: ${promptData.lighting}\n` +
-                `Color Scheme: ${promptData.colorScheme}\n` +
-                `Lens Type: ${promptData.lensType}\n` +
-                `Camera Settings: ${promptData.cameraSettings}\n` +
-                `Film Type: ${promptData.filmType}\n` +
-                `Quality: ${promptData.quality}`
-              } 
-            />
-            <PreviewCard 
-              icon={<Block fontSize="small" color="error" />} 
-              title="Exclusions (Negative Prompt)" 
-              content={promptData.negativePrompt} 
-            />
+            <PreviewCard icon={<Style fontSize="small" />} title="Core Components" content={`Style / Medium: ${promptData.styleMedium}\nSubject: ${promptData.subject}\nDetailed Description: ${promptData.detailedDescription}\nEnvironment / Background: ${promptData.environment}`} />
+            <PreviewCard icon={<CameraAlt fontSize="small" />} title="Photographic Style" content={`Composition / View: ${promptData.composition}\nLighting: ${promptData.lighting}\nColor Scheme: ${promptData.colorScheme}\nLens Type: ${promptData.lensType}\nCamera Settings: ${promptData.cameraSettings}\nFilm Type: ${promptData.filmType}\nQuality: ${promptData.quality}`} />
+            <PreviewCard icon={<Block fontSize="small" color="error" />} title="Exclusions (Negative Prompt)" content={promptData.negativePrompt} />
           </Stack>
         </DialogContent>
         <DialogActions>
