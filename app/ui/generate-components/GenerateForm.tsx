@@ -1,5 +1,3 @@
-// 文件路径: app/ui/generate-components/GenerateForm.tsx (完整修正版)
-
 'use client';
 
 import * as React from 'react';
@@ -120,8 +118,12 @@ export default function GenerateForm({
   const referenceObjects = watch('referenceObjects');
   const [hasReferences, setHasReferences] = useState(false);
   
-  // [核心修正] 使用 props 中的 generationFields 来初始化状态
-  const [modelOptionField, setModelOptionField] = useState<selectFieldsI>(generationFields.modelVersion);
+  // [核心修正] 使用三元运算符根据 generationType 正确初始化状态
+  const [modelOptionField, setModelOptionField] = useState<selectFieldsI>(
+    generationType === 'Image'
+      ? GenerateImageFormFields.modelVersion
+      : GenerateVideoFormFields.modelVersion
+  );
   
   useEffect(() => {
     if (generationType === 'Image') {
