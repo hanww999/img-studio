@@ -1,4 +1,4 @@
-// 文件路径: app/ui/transverse-components/ImagenOutputImagesDisplay.tsx (完整版)
+
 
 'use client';
 
@@ -14,7 +14,7 @@ import { ImageI } from '../../api/generate-image-utils';
 import ExportStepper, { downloadBase64Media } from './ExportDialog';
 import DownloadDialog from './DownloadDialog';
 import { blurDataURL } from '../ux-components/BlurImage';
-import { useAppContext } from '../../context/app-context';
+import { appContextDataDefault, useAppContext } from '../../context/app-context'; // 确保引入 appContextDataDefault
 import { useRouter } from 'next/navigation';
 import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action';
 
@@ -79,17 +79,42 @@ export default function OutputImagesDisplay({
   const { setAppContext } = useAppContext();
   const router = useRouter();
 
+  // [核心修正] 使用安全的方式更新 context
   const handleMoreLikeThisClick = (prompt: string) => {
-    setAppContext((prevContext) => ({ ...prevContext, promptToGenerateImage: prompt, promptToGenerateVideo: '' }));
+    setAppContext((prevContext) => {
+      const baseContext = prevContext ?? appContextDataDefault;
+      return {
+        ...baseContext,
+        promptToGenerateImage: prompt,
+        promptToGenerateVideo: '',
+      };
+    });
   };
+
+  // [核心修正] 使用安全的方式更新 context
   const handleEditClick = (imageGcsURI: string) => {
-    setAppContext((prevContext) => ({ ...prevContext, imageToEdit: imageGcsURI }));
+    setAppContext((prevContext) => {
+      const baseContext = prevContext ?? appContextDataDefault;
+      return {
+        ...baseContext,
+        imageToEdit: imageGcsURI,
+      };
+    });
     router.push('/edit');
   };
+
+  // [核心修正] 使用安全的方式更新 context
   const handleITVClick = (imageGcsURI: string) => {
-    setAppContext((prevContext) => ({ ...prevContext, imageToVideo: imageGcsURI }));
+    setAppContext((prevContext) => {
+      const baseContext = prevContext ?? appContextDataDefault;
+      return {
+        ...baseContext,
+        imageToVideo: imageGcsURI,
+      };
+    });
     router.push('/generate?mode=video');
   };
+
   const handleDLimage = async (image: ImageI) => {
     try {
       const res = await downloadMediaFromGcs(image.gcsUri);
