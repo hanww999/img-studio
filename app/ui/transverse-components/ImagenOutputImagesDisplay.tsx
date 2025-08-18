@@ -30,10 +30,10 @@ const EmptyState = () => {
   const [imageFullScreen, setImageFullScreen] = useState<ExampleImage | null>(null);
 
   const examplePrompts: ExampleImage[] = [
-    { image: '/examples/222.png', prompt: 'A close up of a warm and fuzzy colorful Peruvian poncho laying on a top of a chair in a bright day' },
-    { image: '/examples/111.png', prompt: 'A winning touchdown, fast shutter speed, movement tracking' },
-    { image: '/examples/333.png', prompt: 'Aerial shot of a river flowing up a mystical valley' },
-    { image: '/examples/444.png', prompt: 'A photo of a forest canopy with blue skies from below' },
+    { image: '/examples/222.png', prompt: 'A close up of a warm and fuzzy colorful Peruvian poncho laying on a top of a chair in a bright day', width: 800, height: 800 },
+    { image: '/examples/111.png', prompt: 'A winning touchdown, fast shutter speed, movement tracking', width: 800, height: 800 },
+    { image: '/examples/333.png', prompt: 'Aerial shot of a river flowing up a mystical valley', width: 800, height: 800 },
+    { image: '/examples/444.png', prompt: 'A photo of a forest canopy with blue skies from below', width: 800, height: 800 },
   ];
 
   return (
