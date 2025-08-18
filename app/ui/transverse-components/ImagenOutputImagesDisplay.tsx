@@ -1,6 +1,5 @@
 
-
-'use client';
+ 'use client';
 
 import * as React from 'react';
 import { useState } from 'react';
@@ -14,49 +13,83 @@ import { ImageI } from '../../api/generate-image-utils';
 import ExportStepper, { downloadBase64Media } from './ExportDialog';
 import DownloadDialog from './DownloadDialog';
 import { blurDataURL } from '../ux-components/BlurImage';
-import { appContextDataDefault, useAppContext } from '../../context/app-context'; // 确保引入 appContextDataDefault
+import { appContextDataDefault, useAppContext } from '../../context/app-context';
 import { useRouter } from 'next/navigation';
 import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action';
 
+// [核心修正] 示例图片接口
+interface ExampleImage {
+  image: string;
+  prompt: string;
+  width: number;
+  height: number;
+}
+
+// [核心修正] 空状态组件，增加交互功能
 const EmptyState = () => {
-  const examplePrompts = [
+  const [imageFullScreen, setImageFullScreen] = useState<ExampleImage | null>(null);
+
+  const examplePrompts: ExampleImage[] = [
     { image: '/examples/222.png', prompt: 'A close up of a warm and fuzzy colorful Peruvian poncho laying on a top of a chair in a bright day' },
     { image: '/examples/111.png', prompt: 'A winning touchdown, fast shutter speed, movement tracking' },
+    { image: '/examples/333.png', prompt: 'Aerial shot of a river flowing up a mystical valley' },
+    { image: '/examples/444.png', prompt: 'A photo of a forest canopy with blue skies from below' },
   ];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', p: 3 }}>
-      <Image src="/cloudpuppy-illustration.svg" alt="CloudPuppy" width={150} height={150} />
-      <Typography variant="h5" component="h2" sx={{ mt: 3, fontWeight: 'bold' }}>
-        Your Creative Gallery
-      </Typography>
-      <Typography color="text.secondary" sx={{ mt: 1, mb: 4, maxWidth: '450px' }}>
-        Your masterpieces will appear here. Type your wildest ideas on the left and let CloudPuppy bring them to life!
-      </Typography>
-      <Grid container spacing={2} justifyContent="center">
-        {examplePrompts.map((ex, index) => (
-          <Grid item key={index}>
-            <Tooltip title={ex.prompt} placement="top" arrow>
-              <Paper
-                elevation={3}
-                sx={{
-                  width: 200,
-                  height: 200,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  cursor: 'pointer',
-                  borderRadius: 3,
-                  transition: 'transform 0.2s ease-in-out',
-                  '&:hover': { transform: 'scale(1.05)' },
-                }}
-              >
-                <Image src={ex.image} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
-              </Paper>
-            </Tooltip>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
+    <>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', p: 3 }}>
+        <Image src="/cloudpuppy-illustration.svg" alt="CloudPuppy" width={150} height={150} />
+        <Typography variant="h5" component="h2" sx={{ mt: 3, fontWeight: 'bold' }}>
+          Your Creative Gallery
+        </Typography>
+        <Typography color="text.secondary" sx={{ mt: 1, mb: 4, maxWidth: '450px' }}>
+          Your masterpieces will appear here. Type your wildest ideas on the left and let CloudPuppy bring them to life!
+        </Typography>
+        
+        {/* [核心修正] 横向滚动容器 */}
+        <Box sx={{ width: '100%', overflowX: 'auto', pb: 1, '&::-webkit-scrollbar': { height: '8px' }, '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '4px' } }}>
+          <Stack direction="row" spacing={2} justifyContent="flex-start" sx={{ display: 'inline-flex', p: 1 }}>
+            {examplePrompts.map((ex, index) => (
+              <Tooltip title={ex.prompt} placement="top" arrow key={index}>
+                <Paper
+                  elevation={3}
+                  onClick={() => setImageFullScreen(ex)} // [核心修正] 点击放大
+                  sx={{
+                    width: 200,
+                    height: 200,
+                    overflow: 'hidden',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    borderRadius: 3,
+                    transition: 'transform 0.2s ease-in-out',
+                    flexShrink: 0,
+                    '&:hover': { transform: 'scale(1.05)' },
+                  }}
+                >
+                  <Image src={ex.image} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
+                </Paper>
+              </Tooltip>
+            ))}
+          </Stack>
+        </Box>
+      </Box>
+
+      {/* [核心修正] 用于放大示例图的 Modal */}
+      {imageFullScreen && (
+        <Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}>
+            <Image
+              src={imageFullScreen.image}
+              alt={imageFullScreen.prompt}
+              width={imageFullScreen.width}
+              height={imageFullScreen.height}
+              style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }}
+            />
+          </Box>
+        </Modal>
+      )}
+    </>
   );
 };
 
@@ -79,38 +112,25 @@ export default function OutputImagesDisplay({
   const { setAppContext } = useAppContext();
   const router = useRouter();
 
-  // [核心修正] 使用安全的方式更新 context
   const handleMoreLikeThisClick = (prompt: string) => {
     setAppContext((prevContext) => {
       const baseContext = prevContext ?? appContextDataDefault;
-      return {
-        ...baseContext,
-        promptToGenerateImage: prompt,
-        promptToGenerateVideo: '',
-      };
+      return { ...baseContext, promptToGenerateImage: prompt, promptToGenerateVideo: '' };
     });
   };
 
-  // [核心修正] 使用安全的方式更新 context
   const handleEditClick = (imageGcsURI: string) => {
     setAppContext((prevContext) => {
       const baseContext = prevContext ?? appContextDataDefault;
-      return {
-        ...baseContext,
-        imageToEdit: imageGcsURI,
-      };
+      return { ...baseContext, imageToEdit: imageGcsURI };
     });
     router.push('/edit');
   };
 
-  // [核心修正] 使用安全的方式更新 context
   const handleITVClick = (imageGcsURI: string) => {
     setAppContext((prevContext) => {
       const baseContext = prevContext ?? appContextDataDefault;
-      return {
-        ...baseContext,
-        imageToVideo: imageGcsURI,
-      };
+      return { ...baseContext, imageToVideo: imageGcsURI };
     });
     router.push('/generate?mode=video');
   };
@@ -144,7 +164,7 @@ export default function OutputImagesDisplay({
 
   return (
     <>
-      <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16} sx={{ m: 0 }}>
+      <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16} sx={{ m: 0, overflowY: 'auto' }}>
         {generatedImagesInGCS.map((image) => (
           <ImageListItem key={image.key} sx={{ '&:hover .actions-bar': { opacity: 1 }, borderRadius: 3, overflow: 'hidden', position: 'relative' }}>
             <Image
@@ -152,7 +172,7 @@ export default function OutputImagesDisplay({
               alt={image.altText}
               width={image.width}
               height={image.height}
-              style={{ width: '100%', height: 'auto', display: 'block' }}
+              style={{ width: '100%', height: 'auto', display: 'block', cursor: 'pointer' }}
               placeholder="blur"
               blurDataURL={blurDataURL}
               quality={80}
