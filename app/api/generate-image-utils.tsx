@@ -1,29 +1,17 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// 文件路径: app/api/generate-image-utils.ts (最终汉化修复版)
 
 export interface GenerateFieldI1 {
  label?: string
  type?: string
  default?: string
  options?:
-  | string[]
-  | {
-    value: string
-    label: string
-    indication?: string
-    type?: string
-   }[]
+ | string[]
+ | {
+  value: string
+  label: string
+  indication?: string
+  type?: string
+  }[]
  isDataResetable: boolean
  isFullPromptAdditionalField: boolean
 }
@@ -32,9 +20,9 @@ export interface GenerateFieldStyleI {
  default: string
  defaultSub: string
  options: {
-  value: string
-  label: string
-  subID: string
+ value: string
+ label: string
+ subID: string
  }[]
  isDataResetable: boolean
  isFullPromptAdditionalField: boolean
@@ -43,11 +31,11 @@ export interface GenerateFieldStyleI {
 export interface GenerateFieldSecondartStyleI {
  type: string
  options: {
-  label: string
-  subID: string
-  type: string
-  options: string[]
-  default: string
+ label: string
+ subID: string
+ type: string
+ options: string[]
+ default: string
  }[]
  isDataResetable: boolean
  isFullPromptAdditionalField: boolean
@@ -61,7 +49,7 @@ export interface GenerateImageFormFieldsI {
  seedNumber: GenerateFieldI1
  aspectRatio: GenerateFieldI1
  personGeneration: GenerateFieldI1
- safetySetting: GenerateFieldI1 // [MODIFIED] Interface property added
+ safetySetting: GenerateFieldI1
  outputOptions: GenerateFieldI1
  style: GenerateFieldStyleI
  secondary_style: GenerateFieldSecondartStyleI
@@ -75,314 +63,271 @@ export interface GenerateImageFormFieldsI {
 
 export const GenerateImageFormFields = {
  prompt: {
-  type: 'textInput',
-  isDataResetable: true,
-  isFullPromptAdditionalField: false,
+ type: 'textInput',
+ isDataResetable: true,
+ isFullPromptAdditionalField: false,
  },
  modelVersion: {
-  type: 'select',
-  default: 'imagen-4.0-generate-001',
-  options: [
-   {
-    value: 'imagen-4.0-generate-001',
-    label: 'Imagen 4',
-    indication: 'Standard model version',
-   },
-   {
-    value: 'imagen-4.0-ultra-generate-001',
-    label: 'Imagen 4 - Ultra',
-    indication: 'Ultra high performance model version',
-   },
-   {
-    value: 'imagen-4.0-fast-generate-001',
-    label: 'Imagen 4 - Fast',
-    indication: 'Low latency model version',
-   },
-  ],
-  isDataResetable: false,
-  isFullPromptAdditionalField: false,
+ type: 'select',
+ default: 'imagen-4.0-generate-001',
+ options: [
+  {
+  value: 'imagen-4.0-generate-001',
+  label: 'Imagen 4',
+  indication: '标准模型版本',
+  },
+  {
+  value: 'imagen-4.0-ultra-generate-001',
+  label: 'Imagen 4 - Ultra',
+  indication: '超高性能模型版本',
+  },
+  {
+  value: 'imagen-4.0-fast-generate-001',
+  label: 'Imagen 4 - Fast',
+  indication: '低延迟模型版本',
+  },
+ ],
+ isDataResetable: false,
+ isFullPromptAdditionalField: false,
  },
  sampleCount: {
-  label: 'Quantity of outputs',
-  type: 'chip-group',
-  default: '2',
-  options: ['1', '2'],
-  isDataResetable: false,
-  isFullPromptAdditionalField: false,
+ label: '输出数量',
+ type: 'chip-group',
+ default: '2',
+ options: ['1', '2'],
+ isDataResetable: false,
+ isFullPromptAdditionalField: false,
  },
  negativePrompt: {
-  type: 'textInput',
-  isDataResetable: true,
-  isFullPromptAdditionalField: false,
+ type: 'textInput',
+ isDataResetable: true,
+ isFullPromptAdditionalField: false,
  },
  seedNumber: {
-  type: 'numberInput',
-  default: '',
-  isDataResetable: false,
-  isFullPromptAdditionalField: false,
+ type: 'numberInput',
+ default: '',
+ isDataResetable: false,
+ isFullPromptAdditionalField: false,
  },
  aspectRatio: {
-  label: 'Aspect ratio',
-  type: 'chip-group',
-  default: '1:1',
-  options: ['1:1', '9:16', '16:9', '3:4', '4:3'],
-  isDataResetable: false,
-  isFullPromptAdditionalField: false,
+ label: '纵横比',
+ type: 'chip-group',
+ default: '1:1',
+ options: ['1:1', '9:16', '16:9', '3:4', '4:3'],
+ isDataResetable: false,
+ isFullPromptAdditionalField: false,
  },
  personGeneration: {
-  label: 'People generation',
-  type: 'select',
-  default: 'allow_adult',
-  options: [
-   {
-    value: 'dont_allow',
-    label: 'No people',
-   },
-   {
-    value: 'allow_adult',
-    label: 'Adults only',
-   },
-   {
-    value: 'allow_all',
-    label: 'Adults & Children',
-   },
-  ],
-  isDataResetable: false,
-  isFullPromptAdditionalField: false,
+ label: '人物生成',
+ type: 'select',
+ default: 'allow_adult',
+ options: [
+  {
+  value: 'dont_allow',
+  label: '没有人',
+  },
+  {
+  value: 'allow_adult',
+  label: '仅限成人',
+  },
+  {
+  value: 'allow_all',
+  label: '成人和儿童',
+  },
+ ],
+ isDataResetable: false,
+ isFullPromptAdditionalField: false,
  },
- // [MODIFIED] New safetySetting field added here
  safetySetting: {
-  label: 'Safety Filter',
-  type: 'select',
-  default: 'block_only_high',
-  options: [
-    {
-      value: 'block_low_and_above',
-      label: 'Strongest',
-    },
-    {
-      value: 'block_medium_and_above',
-      label: 'Medium',
-    },
-    {
-      value: 'block_only_high',
-      label: 'Less',
-    },
-    {
-      value: 'block_none',
-      label: 'None',
-    },
-  ],
-  isDataResetable: false,
-  isFullPromptAdditionalField: false,
+ label: '安全过滤级别',
+ type: 'select',
+ default: 'block_only_high',
+ options: [
+  {
+   value: 'block_low_and_above',
+   label: '最强',
+  },
+  {
+   value: 'block_medium_and_above',
+   label: '中等',
+  },
+  {
+   value: 'block_only_high',
+   label: '较弱',
+  },
+  {
+   value: 'block_none',
+   label: '无',
+  },
+ ],
+ isDataResetable: false,
+ isFullPromptAdditionalField: false,
  },
  outputOptions: {
-  label: 'Ouput format',
-  type: 'select',
-  default: 'image/png',
-  options: [
-   {
-    value: 'image/png',
-    label: 'PNG',
-   },
-   {
-    value: 'image/jpeg',
-    label: 'JPEG',
-   },
-  ],
-  isDataResetable: false,
-  isFullPromptAdditionalField: false,
+ label: '输出格式',
+ type: 'select',
+ default: 'image/png',
+ options: [
+  {
+  value: 'image/png',
+  label: 'PNG',
+  },
+  {
+  value: 'image/jpeg',
+  label: 'JPEG',
+  },
+ ],
+ isDataResetable: false,
+ isFullPromptAdditionalField: false,
  },
  style: {
-  type: 'select',
-  default: 'photo',
-  defaultSub: 'photographySub',
-  options: [
-   {
-    value: 'photo',
-    label: 'Photography',
-    subID: 'photographySub',
-   },
-   {
-    value: 'drawing',
-    label: 'Drawing',
-    subID: 'drawingSub',
-   },
-   {
-    value: 'painting',
-    label: 'Painting',
-    subID: 'paintingSub',
-   },
-   {
-    value: 'computer digital creation',
-    label: 'Digital art',
-    subID: 'digitalSub',
-   },
-  ],
-  isDataResetable: false,
-  isFullPromptAdditionalField: false,
+ type: 'select',
+ default: 'photo',
+ defaultSub: 'photographySub',
+ options: [
+  {
+  value: 'photo',
+  label: '摄影',
+  subID: 'photographySub',
+  },
+  {
+  value: 'drawing',
+  label: '绘画',
+  subID: 'drawingSub',
+  },
+  {
+  value: 'painting',
+  label: '油画',
+  subID: 'paintingSub',
+  },
+  {
+  value: 'computer digital creation',
+  label: '数字艺术',
+  subID: 'digitalSub',
+  },
+ ],
+ isDataResetable: false,
+ isFullPromptAdditionalField: false,
  },
  secondary_style: {
-  type: 'controled-chip-group',
+ type: 'controled-chip-group',
+ options: [
+  {
+  label: '摄影风格',
+  subID: 'photographySub',
+  type: 'select',
   options: [
-   {
-    label: 'Photography style',
-    subID: 'photographySub',
-    type: 'select',
-    options: [
-     'Landscape',
-     'Studio',
-     'Portrait',
-     'Candid',
-     'Street',
-     'Architectural',
-     'Wildlife',
-     'Photojournalism',
-     'Fashion',
-     'Food',
-     'Travel',
-     'Fine Art',
-     'Polaroid',
-     'Astronomy',
-    ],
-    default: '',
-   },
-   {
-    label: 'Drawing style',
-    subID: 'drawingSub',
-    type: 'select',
-    options: [
-     'Technical pencil',
-     'Color pencil',
-     'Cartoon',
-     'Graphic Novel',
-     'Charcoal',
-     'Pastel',
-     'Ink',
-     'Sketch',
-     'Doodle',
-    ],
-    default: '',
-   },
-   {
-    label: 'Painting style',
-    subID: 'paintingSub',
-    type: 'select',
-    options: [
-     'Gouache',
-     'Oil',
-     'Watercolor',
-     'Pastel',
-     'Street Art',
-     'Impressionism',
-     'Expressionism',
-     'Surrealism',
-     'Abstract',
-     'Minimalism',
-    ],
-    default: '',
-   },
-   {
-    label: 'Digital creation style',
-    subID: 'digitalSub',
-    type: 'select',
-    options: [
-     'Typography',
-     'Digital illustration',
-     'Pop Art',
-     'Cyberpunk poster',
-     'Pixel Art',
-     'Vector Art',
-     '3D Rendering',
-     'Video game',
-     'Animation',
-     'Visual Effects',
-     'Motion Graphics',
-    ],
-    default: '',
-   },
+   '风景', '工作室', '肖像', '抓拍', '街头', '建筑', '野生动物', '新闻摄影', '时尚', '美食', '旅行', '美术', '宝丽来', '天文',
   ],
-  isDataResetable: true,
-  isFullPromptAdditionalField: false,
+  default: '',
+  },
+  {
+  label: '绘画风格',
+  subID: 'drawingSub',
+  type: 'select',
+  options: [
+   '技术铅笔', '彩色铅笔', '卡通', '漫画小说', '木炭', '粉彩', '墨水', '素描', '涂鸦',
+  ],
+  default: '',
+  },
+  {
+  label: '油画风格',
+  subID: 'paintingSub',
+  type: 'select',
+  options: [
+   '水粉', '油彩', '水彩', '粉彩', '街头艺术', '印象派', '表现主义', '超现实主义', '抽象', '极简主义',
+  ],
+  default: '',
+  },
+  {
+  label: '数字创作风格',
+  subID: 'digitalSub',
+  type: 'select',
+  options: [
+   '排版', '数字插画', '波普艺术', '赛博朋克海报', '像素艺术', '矢量艺术', '3D渲染', '视频游戏', '动画', '视觉效果', '动态图形',
+  ],
+  default: '',
+  },
+ ],
+ isDataResetable: true,
+ isFullPromptAdditionalField: false,
  },
  light: {
-  label: 'Lighting',
-  type: 'chip-group',
-  options: ['Natural', 'Bright Sun', 'Golden Hour', 'Night time', 'Dramatic', 'Warm', 'Cold'],
-  isDataResetable: true,
-  isFullPromptAdditionalField: true,
+ label: '光照',
+ type: 'chip-group',
+ options: ['自然光', '明亮太阳光', '黄金时刻', '夜间', '戏剧性', '暖光', '冷光'],
+ isDataResetable: true,
+ isFullPromptAdditionalField: true,
  },
  light_coming_from: {
-  label: 'Light origin',
-  type: 'chip-group',
-  options: ['Front', 'Back', 'Above', 'Below', 'Side'],
-  isDataResetable: true,
-  isFullPromptAdditionalField: true,
+ label: '光源方向',
+ type: 'chip-group',
+ options: ['正面', '背面', '上方', '下方', '侧面'],
+ isDataResetable: true,
+ isFullPromptAdditionalField: true,
  },
  shot_from: {
-  label: 'View angle',
-  type: 'chip-group',
-  options: ['Front', 'Back', 'Above', 'Below', 'Side'],
-  isDataResetable: true,
-  isFullPromptAdditionalField: true,
+ label: '视角',
+ type: 'chip-group',
+ options: ['正面', '背面', '上方', '下方', '侧面'],
+ isDataResetable: true,
+ isFullPromptAdditionalField: true,
  },
  perspective: {
-  label: 'Perspective',
-  type: 'chip-group',
-  options: ['Macro', 'Close-up', 'Standard', 'Wide angle', 'Extra wide', 'Aerial'],
-  isDataResetable: true,
-  isFullPromptAdditionalField: true,
+ label: '透视',
+ type: 'chip-group',
+ options: ['微距', '特写', '标准', '广角', '超广角', '航拍'],
+ isDataResetable: true,
+ isFullPromptAdditionalField: true,
  },
  image_colors: {
-  label: 'Colors',
-  type: 'chip-group',
-  options: ['Colorful', 'Light', 'Dark', 'Black & White', 'Vintage', 'Cinematic grain'],
-  isDataResetable: true,
-  isFullPromptAdditionalField: true,
+ label: '色彩',
+ type: 'chip-group',
+ options: ['彩色', '明亮', '黑暗', '黑白', '复古', '电影颗粒感'],
+ isDataResetable: true,
+ isFullPromptAdditionalField: true,
  },
  use_case: {
-  label: 'Specific use case',
-  type: 'chip-group',
-  options: [
-   'Food, insects, plants (still life)',
-   'Sports, wildlife (motion)',
-   'Astronomical, landscape (wide-angle)',
-  ],
-  isDataResetable: true,
-  isFullPromptAdditionalField: false,
+ label: '特定用例',
+ type: 'chip-group',
+ options: [
+  '食物, 昆虫, 植物 (静物)',
+  '体育, 野生动物 (动态)',
+  '天文, 风景 (广角)',
+ ],
+ isDataResetable: true,
+ isFullPromptAdditionalField: false,
  },
  referenceObjects: {
-  type: 'array',
-  isDataResetable: true,
+ type: 'array',
+ isDataResetable: true,
  },
 }
 
-// Reference utils for Few Shots Customization in Image Generation
-
 export const referenceTypeField = {
- label: 'Reference type',
+ label: '参考类型',
  options: ['Person', 'Animal', 'Product', 'Style', 'Default'],
 }
 export const referenceTypeMatching = {
  Person: {
-  referenceType: 'REFERENCE_TYPE_SUBJECT',
-  subjectType: 'SUBJECT_TYPE_PERSON',
+ referenceType: 'REFERENCE_TYPE_SUBJECT',
+ subjectType: 'SUBJECT_TYPE_PERSON',
  },
  Animal: {
-  referenceType: 'REFERENCE_TYPE_SUBJECT',
-  subjectType: 'SUBJECT_TYPE_ANIMAL',
+ referenceType: 'REFERENCE_TYPE_SUBJECT',
+ subjectType: 'SUBJECT_TYPE_ANIMAL',
  },
  Product: {
-  referenceType: 'REFERENCE_TYPE_SUBJECT',
-  subjectType: 'SUBJECT_TYPE_PRODUCT',
+ referenceType: 'REFERENCE_TYPE_SUBJECT',
+ subjectType: 'SUBJECT_TYPE_PRODUCT',
  },
  Style: {
-  referenceType: 'REFERENCE_TYPE_STYLE',
-  subjectType: '',
+ referenceType: 'REFERENCE_TYPE_STYLE',
+ subjectType: '',
  },
  Default: {
-  referenceType: 'REFERENCE_TYPE_SUBJECT',
-  subjectType: 'SUBJECT_TYPE_DEFAULT',
+ referenceType: 'REFERENCE_TYPE_SUBJECT',
+ subjectType: 'SUBJECT_TYPE_DEFAULT',
  },
 }
 
@@ -416,7 +361,6 @@ export const ReferenceObjectInit: ReferenceObjectI[] = [
 
 export const maxReferences = 4
 
-// Interface of Generate form fields
 export interface GenerateImageFormI {
  prompt: string
  modelVersion: string
@@ -425,7 +369,7 @@ export interface GenerateImageFormI {
  seedNumber: string
  aspectRatio: string
  personGeneration: string
- safetySetting: string // [MODIFIED] Interface property added
+ safetySetting: string
  outputOptions: string
  style: string
  secondary_style: string
@@ -438,14 +382,13 @@ export interface GenerateImageFormI {
  referenceObjects: ReferenceObjectI[]
 }
 
-// Set default values for Generate Form
+var formDataDefaults: any
 const generateFieldList: (keyof GenerateImageFormFieldsI)[] = Object.keys(GenerateImageFormFields) as (
  keyof GenerateImageFormFieldsI
 )[]
-var formDataDefaults: any
 generateFieldList.forEach((field) => {
  const fieldParams: GenerateFieldI1 | GenerateFieldStyleI | GenerateFieldSecondartStyleI =
-  GenerateImageFormFields[field]
+ GenerateImageFormFields[field]
  const defaultValue = 'default' in fieldParams ? fieldParams.default : ''
  formDataDefaults = { ...formDataDefaults, [field]: defaultValue }
 })
@@ -462,9 +405,9 @@ export interface selectFieldsI {
  label?: string
  default: string
  options: {
-  value: string
-  label: string
-  indication?: string
+ value: string
+ label: string
+ indication?: string
  }[]
 }
 
@@ -476,7 +419,7 @@ export interface generalSettingsI {
 }
 export interface advancedSettingsI {
  personGeneration: selectFieldsI
- safetySetting?: selectFieldsI // [MODIFIED] Interface property added
+ safetySetting?: selectFieldsI
  outputOptions?: selectFieldsI
 }
 
@@ -501,36 +444,34 @@ export interface ImageGenerationFieldsI {
  defaultValues: any
 }
 
-// Sort out Generate fields depending on purpose
 export const imageGenerationUtils: ImageGenerationFieldsI = {
  model: GenerateImageFormFields.modelVersion,
  settings: {
-  aspectRatio: GenerateImageFormFields.aspectRatio,
-  sampleCount: GenerateImageFormFields.sampleCount,
+ aspectRatio: GenerateImageFormFields.aspectRatio,
+ sampleCount: GenerateImageFormFields.sampleCount,
  },
  advancedSettings: {
-  personGeneration: GenerateImageFormFields.personGeneration,
-  safetySetting: GenerateImageFormFields.safetySetting, // [MODIFIED] Added to advanced settings
-  outputOptions: GenerateImageFormFields.outputOptions,
+ personGeneration: GenerateImageFormFields.personGeneration,
+ safetySetting: GenerateImageFormFields.safetySetting,
+ outputOptions: GenerateImageFormFields.outputOptions,
  },
  styleOptions: GenerateImageFormFields.style,
  subStyleOptions: GenerateImageFormFields.secondary_style,
  compositionOptions: {
-  light: GenerateImageFormFields.light,
-  perspective: GenerateImageFormFields.perspective,
-  image_colors: GenerateImageFormFields.image_colors,
-  use_case: GenerateImageFormFields.use_case,
-  light_coming_from: GenerateImageFormFields.light_coming_from,
-  shot_from: GenerateImageFormFields.shot_from,
+ light: GenerateImageFormFields.light,
+ perspective: GenerateImageFormFields.perspective,
+ image_colors: GenerateImageFormFields.image_colors,
+ use_case: GenerateImageFormFields.use_case,
+ light_coming_from: GenerateImageFormFields.light_coming_from,
+ shot_from: GenerateImageFormFields.shot_from,
  },
  resetableFields: generateFieldList.filter((field) => GenerateImageFormFields[field].isDataResetable == true),
  fullPromptFields: generateFieldList.filter(
-  (field) => GenerateImageFormFields[field].isFullPromptAdditionalField == true
+ (field) => GenerateImageFormFields[field].isFullPromptAdditionalField == true
  ),
  defaultValues: formDataDefaults,
 }
 
-// Interface of result sent back by Imagen within GCS or as base64
 export interface ImagenModelResultI {
  gcsUri?: string
  bytesBase64Encoded?: string
@@ -538,7 +479,6 @@ export interface ImagenModelResultI {
  prompt?: string
 }
 
-// Interface of Image object created after image generation
 export interface ImageI {
  src: string
  gcsUri: string
@@ -555,7 +495,6 @@ export interface ImageI {
  mode: string
 }
 
-// List of Imagen available ratio and their corresponding generation dimentions
 export const RatioToPixel = [
  { ratio: '1:1', width: 1024, height: 1024 },
  { ratio: '9:16', width: 768, height: 1408 },
@@ -564,7 +503,6 @@ export const RatioToPixel = [
  { ratio: '4:3', width: 1280, height: 896 },
 ]
 
-// Random prompt list the user can use if they lack prompt ideas
 export const ImageRandomPrompts = [
  'A woman hiking, close of her boots reflected in a puddle, large mountains in the background, in the style of an advertisement, dramatic angles',
  'Three women stand together laughing, with one woman slightly out of focus in the foreground. The sun is setting behind the women, creating a lens flare and a warm glow that highlights their hair and creates a bokeh effect in the background. The photography style is candid and captures a genuine moment of connection and happiness between friends. The warm light of golden hour lends a nostalgic and intimate feel to the image',
@@ -624,15 +562,13 @@ export const ImageRandomPrompts = [
  'A 35mm portrait for a movie poster, featuring a woman as the main character. The lighting is a dramatic blue and grey duotone, creating a serious and mysterious mood. She is looking slightly off-camera with a determined expression. The composition is a medium close-up, and the image has a distinct, high-quality film grain, shot on a 50mm lens to give a natural, compelling perspective.',
 ]
 
-// [MODIFIED] This was previously named "[新增] 为 Imagen 4 Ultra 定义特定的设置"
-// Specific settings for Imagen 4 Ultra
 export const imagenUltraSpecificSettings = {
  sampleCount: {
-  label: 'Quantity of outputs',
-  type: 'chip-group',
-  default: '1',
-  options: ['1'], // Only option '1' is allowed
-  isDataResetable: false,
-  isFullPromptAdditionalField: false,
+ label: 'Quantity of outputs',
+ type: 'chip-group',
+ default: '1',
+ options: ['1'],
+ isDataResetable: false,
+ isFullPromptAdditionalField: false,
  },
 }
