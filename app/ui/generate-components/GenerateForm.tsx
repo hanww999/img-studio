@@ -284,10 +284,8 @@ export default function GenerateForm({
       </Alert>
      )}
 
-      {/* [核心] 将 Prompt 输入框和其下方的图标行包裹在一个 Box 中 */}
       <Box sx={{ position: 'relative' }}>
       <FormInputText name="prompt" control={control} label={`${optionalVeoPrompt ? '(可选)' : ''} Prompt`} required={!optionalVeoPrompt} rows={7} promptIndication={`${promptIndication}${isAudioAvailable ? ', 音频 (对话/音效/音乐/环境声)' : ''}`} />
-        {/* [核心] 将图标行绝对定位于输入框的右下角 */}
         <Stack direction="row" alignItems="center" sx={{ position: 'absolute', bottom: 12, right: 8 }}>
         {generationType === 'Video' && (
           <CustomTooltip title="视频生成提示词" size="small"><IconButton onClick={() => setVideoToPromptOpen(true)}><MovieIcon /></IconButton></CustomTooltip>
@@ -301,7 +299,6 @@ export default function GenerateForm({
         </Stack>
       </Box>
       
-      {/* [核心] 将下面的组件用一个 Stack 包裹，并设置间距和上边距 */}
      <Stack direction="column" spacing={2} sx={{ mt: 2 }}>
       {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
        <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')}>
