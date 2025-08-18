@@ -25,7 +25,7 @@ export const pages = {
   },
   Library: {
     name: 'Browse',
-    description: "Explore shared creations from your team's Library",
+    description: "Browse and manage your personal creations",
     href: '/library',
     status: 'true',
   },
