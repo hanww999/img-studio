@@ -1,72 +1,66 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// 文件路径: app/ui/ux-components/InputInterface.tsx (最终精确修复版)
 
-import { advancedSettingsI, chipGroupFieldsI, generalSettingsI, selectFieldsI } from '../../api/generate-image-utils'
+import { advancedSettingsI, chipGroupFieldsI as ApiChipGroupFieldsI, generalSettingsI, selectFieldsI } from '../../api/generate-image-utils'
+
+// [核心修复] 创建一个新的、更灵活的 chipGroupFieldsI 接口
+export interface chipGroupFieldsI extends Omit<ApiChipGroupFieldsI, 'options'> {
+  options: string[] | { value: string; label: string }[];
+}
 
 export interface FormTextInputI {
-  name: string
-  label: string
-  control: any
-  required: boolean
-  rows: number
-  promptIndication?: string
+ name: string
+ label: string
+ control: any
+ required: boolean
+ rows: number
+ promptIndication?: string
 }
 
 export interface FormDropdownInputI {
-  name: string
-  label: string
-  control: any
-  styleSize: string
-  width: string
-  setValue?: any
-  field: selectFieldsI
-  required: boolean
+ name: string
+ label: string
+ control: any
+ styleSize: string
+ width: string
+ setValue?: any
+ field: selectFieldsI
+ required: boolean
 }
 
 export interface FormChipGroupInputI {
-  name: string
-  label: string
-  control: any
-  width: string
-  setValue?: any
-  field?: chipGroupFieldsI
-  required: boolean
-  disabled?: boolean
+ name: string
+ label: string
+ control: any
+ width: string
+ setValue?: any
+  // [核心修复] 使用我们新定义的、更灵活的接口
+ field?: chipGroupFieldsI
+ required: boolean
+ disabled?: boolean
 }
 
 export interface FormChipGroupMultipleInputI {
-  name: string
-  label: string
-  control: any
-  width: string
-  setValue?: any
-  options?: { value: string; label: string }[]
-  required: boolean
+ name: string
+ label: string
+ control: any
+ width: string
+ setValue?: any
+ options?: { value: string; label: string }[]
+ required: boolean
 }
 
 export interface GenerateSettingsI {
-  control: any
-  setValue?: any
-  generalSettingsFields: generalSettingsI
-  advancedSettingsFields: advancedSettingsI
-  warningMessage?: string
+ control: any
+ setValue?: any
+ generalSettingsFields: generalSettingsI
+ advancedSettingsFields: advancedSettingsI
+ warningMessage?: string
 }
 
 export interface FormInputRadioButtonI {
-  label: string
-  subLabel: string
-  value: string
-  currentSelectedValue: string
-  enabled: boolean
+ label: string
+ subLabel: string
+ value: string
+ currentSelectedValue: string
+ enabled: boolean
 }
