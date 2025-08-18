@@ -4,31 +4,31 @@ export const pages = {
  GenerateImage: {
   name: 'AI 图像创作',
   description: '从文本或参考图出发，生成全新图像',
-  href: '/studio/generate?mode=image', // [修正] 确保 href 指向正确的页面
+  href: '/generate?mode=image', // [修正] 确保 href 指向正确的页面
   status: 'true',
  },
  VirtualTryOn: {
   name: '虚拟试穿',
   description: '上传模特与服装，生成逼真试穿效果',
-  href: '/studio/try-on', // [修正] 确保 href 指向正确的页面
+  href: '/try-on', // [修正] 确保 href 指向正确的页面
   status: process.env.NEXT_PUBLIC_VTO_ENABLED,
  },
  Edit: {
   name: '生成式编辑',
   description: '对现有图像进行智能编辑、替换与变换',
-  href: '/studio/edit', // [修正] 确保 href 指向正确的页面
+  href: '/edit', // [修正] 确保 href 指向正确的页面
   status: process.env.NEXT_PUBLIC_EDIT_ENABLED,
  },
  GenerateVideo: {
   name: 'AI 视频生成',
   description: '根据文本或图像，创作生动的动态视频',
-  href: '/studio/generate?mode=video', // [修正] 确保 href 指向正确的页面
+  href: '/generate?mode=video', // [修正] 确保 href 指向正确的页面
   status: process.env.NEXT_PUBLIC_VEO_ENABLED,
  },
  Library: {
   name: '我的素材库',
   description: "浏览、管理并分享您的所有 AI 创作",
-  href: '/studio/library', // [修正] 确保 href 指向正确的页面
+  href: '/library', // [修正] 确保 href 指向正确的页面
   status: 'true',
  },
 };
