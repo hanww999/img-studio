@@ -1,4 +1,4 @@
-// 文件路径: app/ui/generate-components/GenerateForm.tsx (真正完整版)
+// 文件路径: app/ui/generate-components/GenerateForm.tsx (最终完整版)
 
 'use client';
 
@@ -286,10 +286,8 @@ export default function GenerateForm({
 
      <FormInputText name="prompt" control={control} label={`${optionalVeoPrompt ? '(可选)' : ''} Prompt`} required={!optionalVeoPrompt} rows={7} promptIndication={`${promptIndication}${isAudioAvailable ? ', 音频 (对话/音效/音乐/环境声)' : ''}`} />
       
-      {/* [对齐修复] 使用 justifyContent="space-between" 来确保左右对齐 */}
-     <Stack direction="row" gap={1} alignItems="center" justifyContent="space-between" sx={{ mt: -2, mb: 2 }}>
-        {/* 左侧图标组 */}
-      <Box>
+     <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: -2, mb: 2 }}>
+      <Stack direction="row" alignItems="center">
        {generationType === 'Video' && (
         <CustomTooltip title="视频生成提示词" size="small"><IconButton onClick={() => setVideoToPromptOpen(true)}><MovieIcon /></IconButton></CustomTooltip>
        )}
@@ -297,15 +295,13 @@ export default function GenerateForm({
        <CustomTooltip title="获取提示词灵感" size="small"><IconButton onClick={() => setValue('prompt', getRandomPrompt())}><Lightbulb /></IconButton></CustomTooltip>
        <CustomTooltip title="重置所有字段" size="small"><IconButton disabled={isLoading} onClick={() => onReset()}><Autorenew /></IconButton></CustomTooltip>
        <GenerateSettings control={control} setValue={setValue} generalSettingsFields={currentModel === 'imagen-4.0-ultra-generate-001' ? { ...generationFields.settings, ...imagenUltraSpecificSettings } : currentModel.includes('veo-3.0') ? tempVeo3specificSettings : generationFields.settings} advancedSettingsFields={generationFields.advancedSettings} warningMessage={currentModel.includes('veo-3.0') ? '注意: Veo 3 目前的设置选项比 Veo 2 少！' : ''} />
-      </Box>
-        {/* 右侧图标组 */}
-      <Box>
+        </Stack>
+      <Stack direction="row" alignItems="center">
        {isAudioAvailable && (<CustomTooltip title="为视频添加音频" size="small"><AudioSwitch checked={isVideoWithAudio} onChange={handleVideoAudioCheck} /></CustomTooltip>)}
        {currentModel.includes('imagen') && !hasReferences && (<CustomTooltip title="使用 Gemini 优化提示词" size="small"><GeminiSwitch checked={isGeminiRewrite} onChange={handleGeminiRewrite} /></CustomTooltip>)}
-      </Box>
+        </Stack>
      </Stack>
 
-      {/* [对齐修复] 将 Accordion 和 Button 放入一个 Stack 中以保证对齐 */}
      <Stack direction="column" spacing={2}>
       {generationType === 'Image' && process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
        <Accordion disableGutters expanded={expanded === 'references'} onChange={handleChange('references')}>
