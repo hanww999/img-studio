@@ -131,7 +131,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
         <Grid item xs={12} md={4}>
           <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
             <Stack spacing={2.5}>
-              <Typography variant="h6">Core Components (核心组件)</Typography>
+              <Typography variant="h6">核心组件</Typography>
               {renderSelect('styleMedium', 'Style / Medium')}
               {renderTextField('subject', 'Subject', 4)}
               {renderTextField('detailedDescription', 'Detailed Description', 4)}
@@ -142,7 +142,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
         <Grid item xs={12} md={4}>
           <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
             <Stack spacing={2.5}>
-              <Typography variant="h6">Photographic Style (摄影风格)</Typography>
+              <Typography variant="h6">摄影风格</Typography>
               {renderSelect('composition', 'Composition / View')}
               {renderSelect('lighting', 'Lighting')}
               {renderSelect('colorScheme', 'Color Scheme')}
@@ -156,7 +156,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
         <Grid item xs={12} md={4}>
           <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
             <Stack spacing={2}>
-              <Typography variant="h6">Exclusions (Negative Prompt)</Typography>
+              <Typography variant="h6">负面提示词 (需要避免的内容)</Typography>
               {renderTextField('negativePrompt', 'Negative Prompt', 10)}
             </Stack>
           </Paper>
@@ -165,14 +165,14 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
       <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center" sx={{ mt: 2, p: 1 }}>
         <Box>
           <Button variant="outlined" onClick={handlePreview} startIcon={<Visibility />}>
-            预览生成的 Prompt (Preview)
+            预览生成的 
           </Button>
           <Button variant="text" onClick={handleReset} startIcon={<Refresh />} sx={{ ml: 2 }}>
-            全部重置 (Reset All)
+            全部重置 
           </Button>
         </Box>
         <Button variant="contained" onClick={handleApply} startIcon={<Check />}>
-          应用到表单 (Apply to Form)
+          应用到表单
         </Button>
       </Stack>
 
@@ -221,9 +221,9 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCopy} startIcon={<ContentCopy />}>
-            {copySuccess || '复制全部 (Copy All)'}
+            {copySuccess || '复制全部 '}
           </Button>
-          <Button onClick={() => setPreviewOpen(false)}>关闭 (Close)</Button>
+          <Button onClick={() => setPreviewOpen(false)}>关闭 </Button>
         </DialogActions>
       </Dialog>
     </Box>
