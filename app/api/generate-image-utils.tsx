@@ -73,17 +73,17 @@ export const GenerateImageFormFields = {
  options: [
   {
   value: 'imagen-4.0-generate-001',
-  label: '标准模型版本',
+  label: 'imagen-4',
   indication: '标准模型版本',
   },
   {
   value: 'imagen-4.0-ultra-generate-001',
-  label: '超高性能模型版本',
+  label: 'imagen-4 Ultra',
   indication: '超高性能模型版本',
   },
   {
   value: 'imagen-4.0-fast-generate-001',
-  label: '低延迟模型版本',
+  label: 'imagen-4. Fast',
   indication: '低延迟模型版本',
   },
  ],
