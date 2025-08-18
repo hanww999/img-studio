@@ -11,16 +11,6 @@ import { Settings } from '@mui/icons-material'
 import CustomTooltip from '../ux-components/Tooltip'
 import { FormInputNumberSmall } from '../ux-components/FormInputNumberSmall'
 
-// [核心] 汉化标签的映射
-const labelTranslations: { [key: string]: string } = {
-    'Aspect ratio': '纵横比',
-    'Quantity of outputs': '输出数量',
-    'People generation': '人物生成',
-    'Safety Filter Level': '安全过滤级别',
-    'Output format': '输出格式', 
-    'Video duration (seconds)': '视频时长（秒）',
-    'Resolution': '分辨率',
-};
 
 export default function GenerateSettings({
  control,
