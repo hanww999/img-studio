@@ -1,50 +1,64 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// 文件路径: app/ui/transverse-components/ImagenOutputImagesDisplay.tsx (完整版)
 
 'use client';
 
 import * as React from 'react';
 import { useState } from 'react';
-
-import { AutoAwesome, CreateNewFolderRounded, Download, Edit, Favorite, VideocamRounded } from '@mui/icons-material';
-
+import { CreateNewFolderRounded, Download, Edit, Favorite, VideocamRounded } from '@mui/icons-material';
 import Image from 'next/image';
 import {
-  Avatar,
-  Box,
-  IconButton,
-  Modal,
-  Skeleton,
-  ImageListItem,
-  ImageList,
-  ImageListItemBar,
-  Typography,
-  Stack,
+  Box, IconButton, Modal, Skeleton, ImageListItem, ImageList,
+  ImageListItemBar, Typography, Stack, Paper, Grid, Tooltip,
 } from '@mui/material';
-
 import { ImageI } from '../../api/generate-image-utils';
-import { CustomizedAvatarButton, CustomizedIconButton } from '../ux-components/Button-SX';
 import ExportStepper, { downloadBase64Media } from './ExportDialog';
 import DownloadDialog from './DownloadDialog';
-
-import theme from '../../theme';
 import { blurDataURL } from '../ux-components/BlurImage';
-import { CustomWhiteTooltip } from '../ux-components/Tooltip';
-import { appContextDataDefault, useAppContext } from '../../context/app-context';
+import { useAppContext } from '../../context/app-context';
 import { useRouter } from 'next/navigation';
 import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action';
-const { palette } = theme;
+
+const EmptyState = () => {
+  const examplePrompts = [
+    { image: '/examples/dog-astronaut.png', prompt: 'A Corgi dog in an astronaut suit, digital art style' },
+    { image: '/examples/mountain-reflection.png', prompt: 'A woman hiking, reflected in a puddle, dramatic mountains in the background' },
+  ];
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', p: 3 }}>
+      <Image src="/cloudpuppy-illustration.svg" alt="CloudPuppy" width={150} height={150} />
+      <Typography variant="h5" component="h2" sx={{ mt: 3, fontWeight: 'bold' }}>
+        Your Creative Gallery
+      </Typography>
+      <Typography color="text.secondary" sx={{ mt: 1, mb: 4, maxWidth: '450px' }}>
+        Your masterpieces will appear here. Type your wildest ideas on the left and let CloudPuppy bring them to life!
+      </Typography>
+      <Grid container spacing={2} justifyContent="center">
+        {examplePrompts.map((ex, index) => (
+          <Grid item key={index}>
+            <Tooltip title={ex.prompt} placement="top" arrow>
+              <Paper
+                elevation={3}
+                sx={{
+                  width: 200,
+                  height: 200,
+                  overflow: 'hidden',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  borderRadius: 3,
+                  transition: 'transform 0.2s ease-in-out',
+                  '&:hover': { transform: 'scale(1.05)' },
+                }}
+              >
+                <Image src={ex.image} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
+              </Paper>
+            </Tooltip>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  );
+};
 
 export default function OutputImagesDisplay({
   isLoading,
@@ -59,33 +73,21 @@ export default function OutputImagesDisplay({
   isPromptReplayAvailable: boolean;
   isUpscaledDLAvailable?: boolean;
 }) {
-  // Full screen, Export & Download states
   const [imageFullScreen, setImageFullScreen] = useState<ImageI | undefined>();
   const [imageToExport, setImageToExport] = useState<ImageI | undefined>();
   const [imageToDL, setImageToDL] = useState<ImageI | undefined>();
-
   const { setAppContext } = useAppContext();
   const router = useRouter();
 
   const handleMoreLikeThisClick = (prompt: string) => {
-    setAppContext((prevContext) => {
-      if (prevContext) return { ...prevContext, promptToGenerateImage: prompt, promptToGenerateVideo: '' };
-      else return { ...appContextDataDefault, promptToGenerateImage: prompt, promptToGenerateVideo: '' };
-    });
+    setAppContext((prevContext) => ({ ...prevContext, promptToGenerateImage: prompt, promptToGenerateVideo: '' }));
   };
   const handleEditClick = (imageGcsURI: string) => {
-    setAppContext((prevContext) => {
-      if (prevContext) return { ...prevContext, imageToEdit: imageGcsURI };
-      else return { ...appContextDataDefault, imageToEdit: imageGcsURI };
-    });
+    setAppContext((prevContext) => ({ ...prevContext, imageToEdit: imageGcsURI }));
     router.push('/edit');
   };
   const handleITVClick = (imageGcsURI: string) => {
-    setAppContext((prevContext) => {
-      if (prevContext) return { ...prevContext, imageToVideo: imageGcsURI };
-      else return { ...appContextDataDefault, imageToVideo: imageGcsURI };
-    });
-    // [修改] 导航到带有正确查询参数的视频生成页面
+    setAppContext((prevContext) => ({ ...prevContext, imageToVideo: imageGcsURI }));
     router.push('/generate?mode=video');
   };
   const handleDLimage = async (image: ImageI) => {
@@ -93,207 +95,88 @@ export default function OutputImagesDisplay({
       const res = await downloadMediaFromGcs(image.gcsUri);
       const name = `${image.key}.${image.format.toLowerCase()}`;
       downloadBase64Media(res.data, name, image.format);
-
       if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''));
     } catch (error: any) {
       throw Error(error);
     }
   };
 
+  if (isLoading) {
+    return (
+      <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16}>
+        {Array.from(new Array(generatedCount > 1 ? generatedCount : 2)).map((_, index) => (
+          <ImageListItem key={index}>
+            <Skeleton variant="rounded" sx={{ width: '100%', paddingTop: '100%', height: 0, borderRadius: 3 }} />
+          </ImageListItem>
+        ))}
+      </ImageList>
+    );
+  }
+
+  if (!isLoading && generatedImagesInGCS.length === 0) {
+    return <EmptyState />;
+  }
+
   return (
     <>
-      <Box sx={{ height: '79vh', maxHeight: 650, width: '90%' }}>
-        {isLoading ? (
-          <Skeleton variant="rounded" width={450} height={450} sx={{ mt: 2, bgcolor: palette.primary.light }} />
-        ) : (
-          <ImageList
-            cols={generatedCount > 1 ? 2 : 1}
-            gap={8}
-            sx={{ cursor: 'pointer', '&.MuiImageList-root': { pb: 5, px: 1 } }}
-          >
-            {generatedImagesInGCS.map((image) =>
-              image.src ? (
-                <ImageListItem
-                  key={image.key}
-                  sx={{
-                    boxShadow: '0px 5px 10px -1px rgb(0 0 0 / 70%)',
-                    transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
-                  }}
-                >
-                  <Image
-                    key={image.src}
-                    src={image.src}
-                    alt={image.altText}
-                    style={{ width: '100%', height: 'auto' }}
-                    width={image.width}
-                    height={image.height}
-                    placeholder="blur"
-                    blurDataURL={blurDataURL}
-                    loading="lazy"
-                    quality={80}
-                    onContextMenu={(event: React.MouseEvent<HTMLImageElement>) => {
-                      event.preventDefault();
-                    }}
-                  />
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                      color: 'white',
-                      opacity: 0,
-                      transition: 'opacity 0.3s ease',
-                      '&:hover': {
-                        opacity: 1,
-                      },
-                    }}
-                    onClick={() => setImageFullScreen(image)}
-                  >
-                    <Typography variant="body1" sx={{ textAlign: 'center' }}>
-                      Click to see full screen
-                    </Typography>
-                  </Box>
-                  <ImageListItemBar
-                    sx={{
-                      height: 10,
-                      display: 'flex',
-                      backgroundColor: 'transparent',
-                      flexWrap: 'wrap',
-                      '&:hover': {
-                        backgroundColor: 'transparent',
-                        border: 0,
-                        boxShadow: 0,
-                      },
-                    }}
-                    position="top"
-                    actionIcon={
-                      <Stack direction="row" gap={0} pb={3}>
-                        {
-                          // If there is a replayable prompt, display the "More like this" button
-                          isPromptReplayAvailable && !image.prompt.includes('[1]') && (
-                            <CustomWhiteTooltip title="More like this!" size="small">
-                              <IconButton
-                                onClick={() => handleMoreLikeThisClick(image.prompt)}
-                                aria-label="More like this!"
-                                sx={{ pr: 0.2, zIndex: 10 }}
-                                disableRipple
-                              >
-                                <Avatar sx={CustomizedAvatarButton}>
-                                  <Favorite sx={CustomizedIconButton} />
-                                </Avatar>
-                              </IconButton>
-                            </CustomWhiteTooltip>
-                          )
-                        }
-                        {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
-                          <CustomWhiteTooltip title="Edit this image" size="small">
-                            <IconButton
-                              onClick={() => handleEditClick(image.gcsUri)}
-                              aria-label="Edit image"
-                              sx={{ px: 0.2, zIndex: 10 }}
-                              disableRipple
-                            >
-                              <Avatar sx={CustomizedAvatarButton}>
-                                <Edit sx={CustomizedIconButton} />
-                              </Avatar>
-                            </IconButton>
-                          </CustomWhiteTooltip>
-                        )}
-                        {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' &&
-                          process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true' && (
-                            <CustomWhiteTooltip title="Image to video" size="small">
-                              <IconButton
-                                onClick={() => handleITVClick(image.gcsUri)}
-                                aria-label="Image to video"
-                                sx={{ px: 0.2, zIndex: 10 }}
-                                disableRipple
-                              >
-                                <Avatar sx={CustomizedAvatarButton}>
-                                  <VideocamRounded sx={CustomizedIconButton} />
-                                </Avatar>
-                              </IconButton>
-                            </CustomWhiteTooltip>
-                          )}
-                        <CustomWhiteTooltip title="Export to library" size="small">
-                          <IconButton
-                            onClick={() => setImageToExport(image)}
-                            aria-label="Export image"
-                            sx={{ px: 0.2, zIndex: 10 }}
-                            disableRipple
-                          >
-                            <Avatar sx={CustomizedAvatarButton}>
-                              <CreateNewFolderRounded sx={CustomizedIconButton} />
-                            </Avatar>
-                          </IconButton>
-                        </CustomWhiteTooltip>
-                        <CustomWhiteTooltip title="Download locally" size="small">
-                          <IconButton
-                            onClick={isUpscaledDLAvailable ? () => setImageToDL(image) : () => handleDLimage(image)}
-                            aria-label="Download image"
-                            sx={{ pr: 1, pl: 0.2, zIndex: 10 }}
-                            disableRipple
-                          >
-                            <Avatar sx={CustomizedAvatarButton}>
-                              <Download sx={CustomizedIconButton} />
-                            </Avatar>
-                          </IconButton>
-                        </CustomWhiteTooltip>
-                      </Stack>
-                    }
-                  />
-                </ImageListItem>
-              ) : null
-            )}
-          </ImageList>
-        )}
-      </Box>
+      <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16} sx={{ m: 0 }}>
+        {generatedImagesInGCS.map((image) => (
+          <ImageListItem key={image.key} sx={{ '&:hover .actions-bar': { opacity: 1 }, borderRadius: 3, overflow: 'hidden', position: 'relative' }}>
+            <Image
+              src={image.src}
+              alt={image.altText}
+              width={image.width}
+              height={image.height}
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+              placeholder="blur"
+              blurDataURL={blurDataURL}
+              quality={80}
+              onClick={() => setImageFullScreen(image)}
+            />
+            <ImageListItemBar
+              className="actions-bar"
+              sx={{
+                background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
+                opacity: 0,
+                transition: 'opacity 0.3s ease',
+              }}
+              position="bottom"
+              actionIcon={
+                <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
+                  {isPromptReplayAvailable && !image.prompt.includes('[1]') && (
+                    <Tooltip title="More like this!"><IconButton size="small" sx={{ color: 'white' }} onClick={() => handleMoreLikeThisClick(image.prompt)}><Favorite /></IconButton></Tooltip>
+                  )}
+                  {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
+                    <Tooltip title="Edit this image"><IconButton size="small" sx={{ color: 'white' }} onClick={() => handleEditClick(image.gcsUri)}><Edit /></IconButton></Tooltip>
+                  )}
+                  {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true' && (
+                    <Tooltip title="Image to video"><IconButton size="small" sx={{ color: 'white' }} onClick={() => handleITVClick(image.gcsUri)}><VideocamRounded /></IconButton></Tooltip>
+                  )}
+                  <Tooltip title="Export to library"><IconButton size="small" sx={{ color: 'white' }} onClick={() => setImageToExport(image)}><CreateNewFolderRounded /></IconButton></Tooltip>
+                  <Tooltip title="Download"><IconButton size="small" sx={{ color: 'white' }} onClick={isUpscaledDLAvailable ? () => setImageToDL(image) : () => handleDLimage(image)}><Download /></IconButton></Tooltip>
+                </Stack>
+              }
+            />
+          </ImageListItem>
+        ))}
+      </ImageList>
+      
       {imageFullScreen !== undefined && (
-        <Modal
-          open={imageFullScreen !== undefined}
-          onClose={() => setImageFullScreen(undefined)}
-          sx={{
-            display: 'flex',
-            alignContent: 'center',
-            justifyContent: 'center',
-            m: 5,
-            cursor: 'pointer',
-            maxHeight: '90vh',
-            maxWidth: '90vw',
-          }}
-          disableAutoFocus={true}
-        >
-          <Image
-            key={'displayed-image'}
-            src={imageFullScreen.src}
-            alt={'displayed-image'}
-            width={imageFullScreen.width}
-            height={imageFullScreen.height}
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-            quality={100}
-            onClick={() => setImageFullScreen(undefined)}
-            onContextMenu={(event: React.MouseEvent<HTMLImageElement>) => {
-              event.preventDefault();
-            }}
-          />
+        <Modal open={imageFullScreen !== undefined} onClose={() => setImageFullScreen(undefined)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}>
+            <Image
+              src={imageFullScreen.src}
+              alt={'displayed-image'}
+              width={imageFullScreen.width}
+              height={imageFullScreen.height}
+              style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }}
+              quality={100}
+            />
+          </Box>
         </Modal>
       )}
-      <ExportStepper
-        open={imageToExport !== undefined}
-        upscaleAvailable={true}
-        mediaToExport={imageToExport}
-        handleMediaExportClose={() => setImageToExport(undefined)}
-      />
-      <DownloadDialog
-        open={imageToDL !== undefined}
-        mediaToDL={imageToDL}
-        handleMediaDLClose={() => setImageToDL(undefined)}
-      />
+      <ExportStepper open={imageToExport !== undefined} upscaleAvailable={true} mediaToExport={imageToExport} handleMediaExportClose={() => setImageToExport(undefined)} />
+      <DownloadDialog open={imageToDL !== undefined} mediaToDL={imageToDL} handleMediaDLClose={() => setImageToDL(undefined)} />
     </>
   );
 }
