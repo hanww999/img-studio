@@ -1,21 +1,17 @@
+// 文件路径: app/ui/transverse-components/SideNavigation.tsx (最终完整版)
+
 'use client';
 
 import * as React from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Drawer, List, ListItem, Typography, ListItemButton, Stack, IconButton, Box } from '@mui/material';
+import { Drawer, List, ListItem, Typography, ListItemButton, Box } from '@mui/material';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { pages } from '../../routes'; 
 
-export const drawerWidth = 265;
-export const drawerWidthClosed = 75;
+// [最终修复] 宽度是固定的
+const drawerWidth = 265;
 
-interface SideNavProps {
- open: boolean;
- setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-export default function SideNav({ open, setOpen }: SideNavProps) {
+export default function SideNav() {
  const router = useRouter();
  const pathname = usePathname();
  const searchParams = useSearchParams();
@@ -23,35 +19,27 @@ export default function SideNav({ open, setOpen }: SideNavProps) {
  const fullPath = currentQuery ? `${pathname}?mode=${currentQuery}` : pathname;
 
  const CustomizedDrawer = {
+  width: drawerWidth,
+  flexShrink: 0, // 固定宽度，不收缩
   '& .MuiDrawer-paper': {
-   width: open ? drawerWidth : drawerWidthClosed,
+   width: drawerWidth,
    boxSizing: 'border-box',
    bgcolor: 'background.paper',
    borderRight: '1px solid rgba(255, 255, 255, 0.12)',
-   transition: (theme: { transitions: { create: (arg0: string, arg1: { easing: any; duration: any; }) => any; easing: { sharp: any; }; duration: { enteringScreen: any; }; }; }) => theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-   }),
-   overflowX: 'hidden',
   },
  };
 
  return (
   <Drawer variant="permanent" anchor="left" sx={CustomizedDrawer}>
    <List sx={{ p: 0 }}>
-    <ListItem sx={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: open ? 'space-between' : 'center', px: open ? 2 : 0 }}>
-     {open && (
-      <Image
+    <ListItem sx={{ height: 80, display: 'flex', alignItems: 'center', px: 2 }}>
+     <Image
        priority
        src="/CloudPuppy.svg"
        width={180}
        height={50}
        alt="CloudPuppy 标志"
       />
-     )}
-     <IconButton onClick={() => setOpen(!open)}>
-      {open ? <ChevronLeft /> : <ChevronRight />}
-     </IconButton>
     </ListItem>
 
     {Object.values(pages).map(({ name, description, href, status }) => {
@@ -69,9 +57,8 @@ export default function SideNav({ open, setOpen }: SideNavProps) {
         mx: 2,
         borderRadius: 2,
         display: 'flex',
-        flexDirection: open ? 'column' : 'row',
-        alignItems: open ? 'flex-start' : 'center',
-        justifyContent: 'center',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
         '&.Mui-selected': {
          backgroundColor: 'primary.main',
          color: 'white',
@@ -87,26 +74,22 @@ export default function SideNav({ open, setOpen }: SideNavProps) {
        <Typography variant="body1" fontWeight={600} color={isSelected ? 'white' : 'text.primary'}>
         {name}
        </Typography>
-       {open && (
-        <Typography variant="body2" color={isSelected ? 'rgba(255,255,255,0.8)' : 'text.secondary'} sx={{ fontSize: '0.8rem' }}>
-         {description}
-        </Typography>
-       )}
+       <Typography variant="body2" color={isSelected ? 'rgba(255,255,255,0.8)' : 'text.secondary'} sx={{ fontSize: '0.8rem' }}>
+        {description}
+       </Typography>
       </ListItemButton>
      );
     })}
    </List>
 
-   {open && (
-    <Box sx={{ position: 'absolute', bottom: 15, left: 24, width: 'calc(100% - 48px)' }}>
+   <Box sx={{ position: 'absolute', bottom: 15, left: 24, width: 'calc(100% - 48px)' }}>
      <Typography variant="caption" color="text.secondary">
       / 欢迎合作 <span style={{ margin: 1 }}>❤</span>{' '}
       <a href="https://cloudpuppy.ai/" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 700, textDecoration: 'none' }}>
        @CloudPuppy
       </a>
      </Typography>
-    </Box>
-   )}
+   </Box>
   </Drawer>
  );
 }
