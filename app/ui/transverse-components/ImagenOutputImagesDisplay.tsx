@@ -19,12 +19,11 @@ import { CustomDarkTooltip } from '../ux-components/Tooltip';
 
 interface ExampleImage { image: string; prompt: string; }
 
-// [最终修复] 修改 PromptDisplay 组件，让它接收一个 onCopy 回调函数，而不是自己管理 Snackbar 状态
 const PromptDisplay = ({ prompt, onCopy }: { prompt: string, onCopy: () => void }) => {
   const handleCopy = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 防止触发卡片的点击事件
+    e.stopPropagation();
     navigator.clipboard.writeText(prompt);
-    onCopy(); // 调用父组件传递过来的函数来显示 Snackbar
+    onCopy();
   };
 
   return (
@@ -64,69 +63,27 @@ const EmptyState = () => {
         <Typography variant="h5" component="h2" sx={{ mt: 3, fontWeight: 'bold' }}>您的创意画廊</Typography>
         <Typography color="text.secondary" sx={{ mt: 1, mb: 4, maxWidth: '450px' }}>生成的作品将会出现在这里。看看这些例子获取灵感吧！</Typography>
         <Box sx={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <IconButton onClick={() => handleScroll('left')} sx={{ position: 'absolute', left: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}>
-            <ChevronLeft />
-          </IconButton>
+          <IconButton onClick={() => handleScroll('left')} sx={{ position: 'absolute', left: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronLeft /></IconButton>
           <Box ref={scrollContainerRef} sx={{ width: '100%', overflowX: 'auto', pb: 1, scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
             <Stack direction="row" spacing={2} justifyContent="flex-start" sx={{ display: 'inline-flex', p: 1 }}>
               {examplePrompts.map((ex, index) => (
                 <Tooltip title={ex.prompt} placement="top" arrow key={index}>
-                  <Paper
-                    elevation={3}
-                    onClick={() => setImageFullScreen(ex)}
-                    sx={{
-                      width: 200,
-                      height: 200,
-                      overflow: 'hidden',
-                      position: 'relative',
-                      cursor: 'pointer',
-                      borderRadius: 3,
-                      transition: 'transform 0.2s ease-in-out',
-                      flexShrink: 0,
-                      '&:hover': { transform: 'scale(1.05)' }
-                    }}
-                  >
+                  <Paper elevation={3} onClick={() => setImageFullScreen(ex)} sx={{ width: 200, height: 200, overflow: 'hidden', position: 'relative', cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out', flexShrink: 0, '&:hover': { transform: 'scale(1.05)' } }}>
                     <Image src={ex.image} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
                   </Paper>
                 </Tooltip>
               ))}
             </Stack>
           </Box>
-          <IconButton onClick={() => handleScroll('right')} sx={{ position: 'absolute', right: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}>
-            <ChevronRight />
-          </IconButton>
+          <IconButton onClick={() => handleScroll('right')} sx={{ position: 'absolute', right: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronRight /></IconButton>
         </Box>
       </Box>
-      {imageFullScreen && (
-        <Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}>
-            <Image
-              src={imageFullScreen.image}
-              alt={imageFullScreen.prompt}
-              width={800}
-              height={800}
-              style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }}
-            />
-          </Box>
-        </Modal>
-      )}
+      {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}><Image src={imageFullScreen.image} alt={imageFullScreen.prompt} width={800} height={800} style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} /></Box></Modal>)}
     </>
   );
 };
 
-export default function OutputImagesDisplay({
-  isLoading,
-  generatedImagesInGCS,
-  generatedCount,
-  isPromptReplayAvailable,
-  isUpscaledDLAvailable = true
-}: {
-  isLoading: boolean;
-  generatedImagesInGCS: ImageI[];
-  generatedCount: number;
-  isPromptReplayAvailable: boolean;
-  isUpscaledDLAvailable?: boolean;
-}) {
+export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, generatedCount, isPromptReplayAvailable, isUpscaledDLAvailable = true }: { isLoading: boolean; generatedImagesInGCS: ImageI[]; generatedCount: number; isPromptReplayAvailable: boolean; isUpscaledDLAvailable?: boolean; }) {
   const [imageFullScreen, setImageFullScreen] = useState<ImageI | undefined>();
   const [imageToExport, setImageToExport] = useState<ImageI | undefined>();
   const [imageToDL, setImageToDL] = useState<ImageI | undefined>();
@@ -134,37 +91,16 @@ export default function OutputImagesDisplay({
   const router = useRouter();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const handleMoreLikeThisClick = (prompt: string) => {
-    setAppContext((prev) => ({ ...(prev ?? appContextDataDefault), promptToGenerateImage: prompt, promptToGenerateVideo: '' }));
-  };
-
-  const handleEditClick = (imageGcsURI: string) => {
-    setAppContext((prev) => ({ ...(prev ?? appContextDataDefault), imageToEdit: imageGcsURI }));
-    router.push('/edit');
-  };
-
-  const handleITVClick = (imageGcsURI: string) => {
-    setAppContext((prev) => ({ ...(prev ?? appContextDataDefault), imageToVideo: imageGcsURI }));
-    router.push('/generate?mode=video');
-  };
-
-  const handleDLimage = async (image: ImageI) => {
-    try {
-      const res = await downloadMediaFromGcs(image.gcsUri);
-      downloadBase64Media(res.data, `${image.key}.${image.format.toLowerCase()}`, image.format);
-      if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''));
-    } catch (error: any) {
-      throw Error(error);
-    }
-  };
+  const handleMoreLikeThisClick = (prompt: string) => { setAppContext((prev) => ({ ...(prev ?? appContextDataDefault), promptToGenerateImage: prompt, promptToGenerateVideo: '' })); };
+  const handleEditClick = (imageGcsURI: string) => { setAppContext((prev) => ({ ...(prev ?? appContextDataDefault), imageToEdit: imageGcsURI })); router.push('/edit'); };
+  const handleITVClick = (imageGcsURI: string) => { setAppContext((prev) => ({ ...(prev ?? appContextDataDefault), imageToVideo: imageGcsURI })); router.push('/generate?mode=video'); };
+  const handleDLimage = async (image: ImageI) => { try { const res = await downloadMediaFromGcs(image.gcsUri); downloadBase64Media(res.data, `${image.key}.${image.format.toLowerCase()}`, image.format); if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', '')); } catch (error: any) { throw Error(error); } };
 
   if (isLoading) {
     return (
       <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16}>
         {Array.from(new Array(generatedCount > 1 ? generatedCount : 2)).map((_, index) => (
-          <ImageListItem key={index}>
-            <Skeleton variant="rounded" sx={{ width: '100%', paddingTop: '100%', height: 0, borderRadius: 3 }} />
-          </ImageListItem>
+          <ImageListItem key={index}><Skeleton variant="rounded" sx={{ width: '100%', paddingTop: '100%', height: 0, borderRadius: 3 }} /></ImageListItem>
         ))}
       </ImageList>
     );
@@ -189,52 +125,33 @@ export default function OutputImagesDisplay({
                   cursor: 'pointer',
                 }}
               >
-                <Image
-                  src={image.src}
-                  alt={image.altText}
-                  width={image.width}
-                  height={image.height}
-                  style={{ width: '100%', height: 'auto', display: 'block' }}
-                  placeholder="blur"
-                  blurDataURL={blurDataURL}
-                  quality={80}
-                />
+                <Image src={image.src} alt={image.altText} width={image.width} height={image.height} style={{ width: '100%', height: 'auto', display: 'block' }} placeholder="blur" blurDataURL={blurDataURL} quality={80} />
                 <ImageListItemBar
                   className="actions-bar"
                   sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }}
                   position="bottom"
-                  actionIcon JESUS
+                  actionIcon={
                     <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
                       {isPromptReplayAvailable && !image.prompt.includes('[1]') && (
                         <CustomDarkTooltip title="生成同款！">
-                          <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleMoreLikeThisClick(image.prompt); }}>
-                            <Favorite />
-                          </IconButton>
+                          <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleMoreLikeThisClick(image.prompt); }}><Favorite /></IconButton>
                         </CustomDarkTooltip>
                       )}
                       {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
                         <CustomDarkTooltip title="编辑此图">
-                          <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleEditClick(image.gcsUri); }}>
-                            <Edit />
-                          </IconButton>
+                          <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleEditClick(image.gcsUri); }}><Edit /></IconButton>
                         </CustomDarkTooltip>
                       )}
                       {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true' && (
                         <CustomDarkTooltip title="图生视频">
-                          <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleITVClick(image.gcsUri); }}>
-                            <VideocamRounded />
-                          </IconButton>
+                          <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleITVClick(image.gcsUri); }}><VideocamRounded /></IconButton>
                         </CustomDarkTooltip>
                       )}
                       <CustomDarkTooltip title="导出到媒体库">
-                        <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setImageToExport(image); }}>
-                          <CreateNewFolderRounded />
-                        </IconButton>
+                        <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setImageToExport(image); }}><CreateNewFolderRounded /></IconButton>
                       </CustomDarkTooltip>
                       <CustomDarkTooltip title="下载">
-                        <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); isUpscaledDLAvailable ? setImageToDL(image) : handleDLimage(image); }}>
-                          <Download />
-                        </IconButton>
+                        <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); isUpscaledDLAvailable ? setImageToDL(image) : handleDLimage(image); }}><Download /></IconButton>
                       </CustomDarkTooltip>
                     </Stack>
                   }
@@ -247,20 +164,7 @@ export default function OutputImagesDisplay({
           ))}
         </ImageList>
       </Box>
-      {imageFullScreen && (
-        <Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(undefined)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}>
-            <Image
-              src={imageFullScreen.src}
-              alt={'displayed-image'}
-              width={imageFullScreen.width}
-              height={imageFullScreen.height}
-              style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }}
-              quality={100}
-            />
-          </Box>
-        </Modal>
-      )}
+      {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(undefined)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}><Image src={imageFullScreen.src} alt={'displayed-image'} width={imageFullScreen.width} height={imageFullScreen.height} style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} quality={100} /></Box></Modal>)}
       <ExportStepper open={!!imageToExport} upscaleAvailable={true} mediaToExport={imageToExport} handleMediaExportClose={() => setImageToExport(undefined)} />
       <DownloadDialog open={!!imageToDL} mediaToDL={imageToDL} handleMediaDLClose={() => setImageToDL(undefined)} />
       <Snackbar open={snackbarOpen} autoHideDuration={2000} onClose={() => setSnackbarOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
