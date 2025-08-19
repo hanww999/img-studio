@@ -1,3 +1,5 @@
+// 文件路径: app/ui/try-on-components/TryOnResultDisplay.tsx
+
 'use client';
 
 import * as React from 'react';
@@ -15,9 +17,7 @@ import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action';
 import { blurDataURL } from '../ux-components/BlurImage';
 import { CustomDarkTooltip } from '../ux-components/Tooltip';
 import { CustomizedAvatarButton, CustomizedIconButton } from '../ux-components/Button-SX';
-// ==================== 新增内容 ====================
 import TryOnCreativeCanvas from './TryOnCreativeCanvas';
-// ===============================================
 
 interface TryOnResultDisplayProps {
   isLoading: boolean;
@@ -82,11 +82,9 @@ export default function TryOnResultDisplay({ isLoading, errorMsg, generatedImage
           <Alert severity="error" sx={{ m: 2, width: '90%' }}>{errorMsg}</Alert>
         )}
 
-        {/* ==================== 修改内容 ==================== */}
         {!isLoading && !errorMsg && !generatedImage && (
           <TryOnCreativeCanvas />
         )}
-        {/* =============================================== */}
 
         {!isLoading && generatedImage && (
           <ImageListItem
