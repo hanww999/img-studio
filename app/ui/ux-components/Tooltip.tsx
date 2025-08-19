@@ -1,23 +1,9 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import React from 'react'
 import { Box, Fade, Tooltip } from '@mui/material'
 import theme from '../../theme'
-import zIndex from '@mui/material/styles/zIndex'
 const { palette } = theme
 
+// [保持不变] 这个组件用于不需要背景的 Tooltip
 const CustomizedSmallTooltip = {
   sx: {
     '& .MuiTooltip-tooltip': {
@@ -39,6 +25,17 @@ const CustomizedSmallTooltip = {
   ],
 }
 
+// [保持不变] 这个组件用于不需要背景的 Tooltip
+const CustomizedBigTooltip = {
+  sx: {
+    '& .MuiTooltip-tooltip': {
+      backgroundColor: 'transparent',
+      color: palette.text.primary,
+    },
+  },
+}
+
+// [保持不变] 这个组件强制使用白色背景
 const CustomizedSmallWhiteTooltip = {
   sx: {
     '& .MuiTooltip-tooltip': {
@@ -59,15 +56,20 @@ const CustomizedSmallWhiteTooltip = {
   ],
 }
 
-const CustomizedBigTooltip = {
+// [最终修复] 新增一个专门用于暗色主题画廊的 Tooltip 样式
+const CustomizedDarkTooltipStyle = {
   sx: {
     '& .MuiTooltip-tooltip': {
-      backgroundColor: 'transparent',
-      color: palette.text.primary,
+      backgroundColor: palette.background.paper, // 使用主题中的 paper 背景色
+      color: palette.text.primary,             // 使用主题中的主要文字颜色
+      border: `1px solid ${palette.primary.main}`, // 添加一个主色调的边框
+      fontSize: 12,
+      fontWeight: 500,
     },
   },
 }
 
+// [保持不变] 原始的 CustomTooltip
 export default function CustomTooltip({
   children,
   title,
@@ -78,14 +80,8 @@ export default function CustomTooltip({
   size: string
 }) {
   const [open, setOpen] = React.useState(false)
-
-  const handleTooltipOpen = () => {
-    setOpen(true)
-  }
-
-  const handleTooltipClose = () => {
-    setOpen(false)
-  }
+  const handleTooltipOpen = () => { setOpen(true) }
+  const handleTooltipClose = () => { setOpen(false) }
 
   return (
     <Tooltip
@@ -111,6 +107,7 @@ export default function CustomTooltip({
   )
 }
 
+// [保持不变] 原始的 CustomWhiteTooltip
 export function CustomWhiteTooltip({
   children,
   title,
@@ -121,14 +118,8 @@ export function CustomWhiteTooltip({
   size: string
 }) {
   const [open, setOpen] = React.useState(false)
-
-  const handleTooltipOpen = () => {
-    setOpen(true)
-  }
-
-  const handleTooltipClose = () => {
-    setOpen(false)
-  }
+  const handleTooltipOpen = () => { setOpen(true) }
+  const handleTooltipClose = () => { setOpen(false) }
 
   return (
     <Tooltip
@@ -140,6 +131,42 @@ export function CustomWhiteTooltip({
       TransitionProps={{ timeout: 600 }}
       slotProps={{
         popper: { ...CustomizedSmallWhiteTooltip },
+      }}
+    >
+      <Box
+        onMouseEnter={handleTooltipOpen}
+        onMouseLeave={handleTooltipClose}
+        onClick={handleTooltipClose}
+        sx={{ display: 'flex' }}
+      >
+        {children ? children : null}
+      </Box>
+    </Tooltip>
+  )
+}
+
+// [最终修复] 新增一个专门用于暗色主题画廊的 Tooltip 组件
+export function CustomDarkTooltip({
+  children,
+  title,
+}: {
+  children: React.ReactElement
+  title: string
+}) {
+  const [open, setOpen] = React.useState(false)
+  const handleTooltipOpen = () => { setOpen(true) }
+  const handleTooltipClose = () => { setOpen(false) }
+
+  return (
+    <Tooltip
+      title={title}
+      open={open}
+      placement={'top'} // 默认放在顶部
+      disableInteractive
+      TransitionComponent={Fade}
+      TransitionProps={{ timeout: 200 }}
+      slotProps={{
+        popper: { ...CustomizedDarkTooltipStyle }, // 使用我们新的暗色样式
       }}
     >
       <Box
