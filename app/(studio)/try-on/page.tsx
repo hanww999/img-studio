@@ -1,3 +1,5 @@
+// 文件路径: app/(studio)/try-on/page.tsx (完整布局修复版)
+
 'use client';
 
 import { useState } from 'react';
@@ -33,14 +35,15 @@ export default function TryOnPage() {
  };
 
  return (
-    // [布局修改] 使用 Flexbox 替换原有的 Stack 和 Box 布局
+    // [布局修复] 使用 Flexbox 替换原有的布局
   <Box sx={{
       display: 'flex',
       flexDirection: 'row',
       gap: 3,
       height: 'calc(100vh - 48px)',
+      p: 3, // 保持与 generate 页面一致的内边距
     }}>
-      {/* [布局修改] 左侧表单区域 */}
+      {/* 左侧表单区域 */}
     <Box sx={{
         flex: '0 1 40%',
         minWidth: '450px',
@@ -61,7 +64,7 @@ export default function TryOnPage() {
           />
         </Paper>
     </Box>
-      {/* [布局修改] 右侧创意画布区域 */}
+      {/* 右侧创意画布区域 */}
     <Box sx={{
         flex: '1 1 60%',
         minWidth: '400px',
