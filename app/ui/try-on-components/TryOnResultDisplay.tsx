@@ -13,9 +13,11 @@ import DownloadDialog from '../transverse-components/DownloadDialog';
 import { appContextDataDefault, useAppContext } from '../../context/app-context';
 import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action';
 import { blurDataURL } from '../ux-components/BlurImage';
-// [最终修复] 导入我们新的 CustomDarkTooltip 组件
 import { CustomDarkTooltip } from '../ux-components/Tooltip';
 import { CustomizedAvatarButton, CustomizedIconButton } from '../ux-components/Button-SX';
+// ==================== 新增内容 ====================
+import TryOnCreativeCanvas from './TryOnCreativeCanvas';
+// ===============================================
 
 interface TryOnResultDisplayProps {
   isLoading: boolean;
@@ -80,9 +82,11 @@ export default function TryOnResultDisplay({ isLoading, errorMsg, generatedImage
           <Alert severity="error" sx={{ m: 2, width: '90%' }}>{errorMsg}</Alert>
         )}
 
+        {/* ==================== 修改内容 ==================== */}
         {!isLoading && !errorMsg && !generatedImage && (
-          <Typography variant="h6" color="text.secondary">您生成的图片将显示在这里</Typography>
+          <TryOnCreativeCanvas />
         )}
+        {/* =============================================== */}
 
         {!isLoading && generatedImage && (
           <ImageListItem
@@ -90,7 +94,6 @@ export default function TryOnResultDisplay({ isLoading, errorMsg, generatedImage
             sx={{
               width: '100%', height: '100%', display: 'flex',
               justifyContent: 'center', alignItems: 'center',
-              // [最终修复] 让图标栏在鼠标悬停时显示
               '&:hover .actions-bar': { opacity: 1 },
             }}
           >
@@ -111,17 +114,15 @@ export default function TryOnResultDisplay({ isLoading, errorMsg, generatedImage
               <Typography variant="body1" sx={{ textAlign: 'center' }}>点击查看全屏</Typography>
             </Box>
             <ImageListItemBar
-              className="actions-bar" // [最终修复] 添加 className 以便 hover 生效
-              sx={{ 
+              className="actions-bar"
+              sx={{
                 backgroundColor: 'transparent',
-                // [最终修复] 默认隐藏，悬停时显示
-                opacity: 0, 
+                opacity: 0,
                 transition: 'opacity 0.3s ease',
               }}
               position="top"
               actionIcon={
                 <Stack direction="row" gap={0} pb={3}>
-                  {/* [最终修复] 将所有 CustomWhiteTooltip 替换为 CustomDarkTooltip 并汉化 */}
                   {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
                     <CustomDarkTooltip title="编辑此图">
                       <IconButton onClick={(e) => { e.stopPropagation(); handleEditClick(generatedImage.gcsUri); }} sx={{ px: 0.2, zIndex: 10 }} disableRipple>
