@@ -1,4 +1,4 @@
-// app/ui/try-on-components/VirtualTryOnForm.tsx
+// 文件路径: app/ui/try-on-components/VirtualTryOnForm.tsx (完整汉化版)
 
 'use client';
 
@@ -34,125 +34,129 @@ export default function VirtualTryOnForm({
 }: VirtualTryOnFormProps) {
  const { appContext } = useAppContext();
  const { handleSubmit, control, setValue, reset } = useForm<VirtualTryOnFormI>({
-  defaultValues: generationFields.defaultValues,
+ defaultValues: generationFields.defaultValues,
  });
 
  const onReset = () => {
-  reset(generationFields.defaultValues);
-  onNewErrorMsg('');
+ reset(generationFields.defaultValues);
+ onNewErrorMsg('');
  };
 
  const onSubmit: SubmitHandler<VirtualTryOnFormI> = async (formData) => {
-  if (!appContext) {
-   onNewErrorMsg("Application context is not available. Please try refreshing the page.");
-   return;
-  }
-  if (!formData.humanImage.base64Image) {
-   onNewErrorMsg('Please upload a human model image.');
-   return;
-  }
-  if (!formData.garmentImages[0].base64Image) {
-   onNewErrorMsg('Please upload a garment image.');
-   return;
-  }
+ if (!appContext) {
+  onNewErrorMsg("应用程序上下文不可用。请尝试刷新页面。");
+  return;
+ }
+ if (!formData.humanImage.base64Image) {
+  onNewErrorMsg('请上传模特图片。');
+  return;
+ }
+ if (!formData.garmentImages[0].base64Image) {
+  onNewErrorMsg('请上传服装图片。');
+  return;
+ }
 
-  onRequestSent(true);
-  try {
-   const result = await generateVtoImage(formData, appContext);
-   if ('error' in result) {
-    throw new Error(result.error);
-   }
-   onImageGeneration(result as ImageI);
-  } catch (error: any) {
-   onNewErrorMsg(error.message || 'An unknown error occurred.');
+ onRequestSent(true);
+ try {
+  const result = await generateVtoImage(formData, appContext);
+  if ('error' in result) {
+  throw new Error(result.error);
   }
+  onImageGeneration(result as ImageI);
+ } catch (error: any) {
+  onNewErrorMsg(error.message || '发生未知错误。');
+ }
  };
 
  return (
-  <form onSubmit={handleSubmit(onSubmit)}>
-   <Stack spacing={3}>
-    {errorMsg && (
-     <Alert severity="error" action={<IconButton size="small" onClick={() => onNewErrorMsg('')}><CloseIcon fontSize="inherit" /></IconButton>}>
-      {errorMsg}
-     </Alert>
-    )}
+ <form onSubmit={handleSubmit(onSubmit)}>
+  <Stack spacing={3}>
+  {errorMsg && (
+   <Alert severity="error" action={<IconButton size="small" onClick={() => onNewErrorMsg('')}><CloseIcon fontSize="inherit" /></IconButton>}>
+   {errorMsg}
+   </Alert>
+  )}
 
-    <Stack direction="row" spacing={2}>
-     <Box sx={{ flex: 1 }}>
-      <ImageDropzone name="humanImage" label="Human Model Image" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
-     </Box>
-     <Box sx={{ flex: 1 }}>
-      <ImageDropzone name={`garmentImages.0`} label="Garment Image" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
-     </Box>
-    </Stack>
+  <Stack direction="row" spacing={2}>
+   <Box sx={{ flex: 1 }}>
+      {/* [汉化] */}
+   <ImageDropzone name="humanImage" label="模特图片" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
+   </Box>
+   <Box sx={{ flex: 1 }}>
+      {/* [汉化] */}
+   <ImageDropzone name={`garmentImages.0`} label="服装图片" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
+   </Box>
+  </Stack>
 
-    <Accordion sx={CustomizedAccordion}>
-     <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} sx={CustomizedAccordionSummary}>
-      <Typography variant="body1" sx={{ fontWeight: 500 }}>Advanced Settings</Typography>
-     </AccordionSummary>
-     <AccordionDetails>
-      <Stack spacing={2} sx={{ pt: 1 }}>
-       <FormInputChipGroup
-        name="sampleCount"
-        control={control}
-        setValue={setValue}
-        label={generationFields.fields.sampleCount.label}
-        field={generationFields.fields.sampleCount}
-        width="100%"
-        required={false}
-       />
-       <FormInputDropdown
-        name="personGeneration"
-        control={control}
-        label={generationFields.fields.personGeneration.label ?? ''}
-        field={generationFields.fields.personGeneration}
-        styleSize="small"
-        width="100%"
-        required={false}
-       />
-        {/* [MODIFIED] Add the Safety Filter dropdown here */}
-        <FormInputDropdown
-          name="safetySetting"
-          control={control}
-          label={generationFields.fields.safetySetting.label ?? ''}
-          field={generationFields.fields.safetySetting}
-          styleSize="small"
-          width="100%"
-          required={false}
-        />
-       <FormInputDropdown
-        name="outputFormat"
-        control={control}
-        label={generationFields.fields.outputFormat.label ?? ''}
-        field={generationFields.fields.outputFormat}
-        styleSize="small"
-        width="100%"
-        required={false}
-       />
-       <Box>
-        <Typography variant="caption" sx={{ color: palette.text.primary, fontSize: '0.75rem', fontWeight: 500, lineHeight: '1.3em', pb: 0.5 }}>
-         {generationFields.fields.seedNumber.label}
-        </Typography>
-        <FormInputNumberSmall
-         name="seedNumber"
-         control={control}
-         min={0}
-         max={4294967295}
-        />
-       </Box>
-      </Stack>
-     </AccordionDetails>
-    </Accordion>
-
-    <Stack direction="row" justifyContent="flex-end" spacing={2}>
-     <Button variant="text" onClick={onReset} disabled={isLoading} startIcon={<Autorenew />}>
-      Reset
-     </Button>
-     <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>
-      Generate
-     </Button>
-    </Stack>
+  <Accordion sx={CustomizedAccordion}>
+   <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} sx={CustomizedAccordionSummary}>
+      {/* [汉化] */}
+   <Typography variant="body1" sx={{ fontWeight: 500 }}>高级设置</Typography>
+   </AccordionSummary>
+   <AccordionDetails>
+   <Stack spacing={2} sx={{ pt: 1 }}>
+    <FormInputChipGroup
+    name="sampleCount"
+    control={control}
+    setValue={setValue}
+    label={generationFields.fields.sampleCount.label}
+    field={generationFields.fields.sampleCount}
+    width="100%"
+    required={false}
+    />
+    <FormInputDropdown
+    name="personGeneration"
+    control={control}
+    label={generationFields.fields.personGeneration.label ?? ''}
+    field={generationFields.fields.personGeneration}
+    styleSize="small"
+    width="100%"
+    required={false}
+    />
+    <FormInputDropdown
+     name="safetySetting"
+     control={control}
+     label={generationFields.fields.safetySetting.label ?? ''}
+     field={generationFields.fields.safetySetting}
+     styleSize="small"
+     width="100%"
+     required={false}
+    />
+    <FormInputDropdown
+    name="outputFormat"
+    control={control}
+    label={generationFields.fields.outputFormat.label ?? ''}
+    field={generationFields.fields.outputFormat}
+    styleSize="small"
+    width="100%"
+    required={false}
+    />
+    <Box>
+    <Typography variant="caption" sx={{ color: palette.text.primary, fontSize: '0.75rem', fontWeight: 500, lineHeight: '1.3em', pb: 0.5 }}>
+     {generationFields.fields.seedNumber.label}
+    </Typography>
+    <FormInputNumberSmall
+     name="seedNumber"
+     control={control}
+     min={0}
+     max={4294967295}
+    />
+    </Box>
    </Stack>
-  </form>
+   </AccordionDetails>
+  </Accordion>
+
+  <Stack direction="row" justifyContent="flex-end" spacing={2}>
+    {/* [汉化] */}
+   <Button variant="text" onClick={onReset} disabled={isLoading} startIcon={<Autorenew />}>
+   重置
+   </Button>
+    {/* [汉化] */}
+   <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>
+   生成
+   </Button>
+  </Stack>
+  </Stack>
+ </form>
  );
 }
