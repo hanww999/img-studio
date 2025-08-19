@@ -1,3 +1,4 @@
+// 文件路径: app/(studio)/edit/page.tsx (完整布局修改版)
 'use client'
 
 import * as React from 'react'
@@ -44,8 +45,8 @@ export default function Page() {
      sx={{ fontWeight: 400, color: error === null ? palette.primary.main : palette.error.main }}
     >
      {error === null
-      ? '正在加载您的个人资料...' // [汉化]
-      : '加载个人资料时出错！请重试或联系您的IT管理员。'} // [汉化]
+      ? '正在加载您的个人资料...'
+      : '加载个人资料时出错！请重试或联系您的IT管理员。'}
     </Typography>
    </Box>
   )
@@ -53,14 +54,15 @@ export default function Page() {
   redirect('/generate')
  } else {
   return (
-    // [布局修改] 使用 Flexbox 替换 Grid
+    // [布局修复] 使用 Flexbox 替换 Grid，确保布局统一
    <Box sx={{
       display: 'flex',
       flexDirection: 'row',
       gap: 3,
       height: 'calc(100vh - 48px)',
+      p: 3, // 保持与 generate 页面一致的内边距
     }}>
-      {/* [布局修改] 左侧表单区域 */}
+      {/* 左侧表单区域 */}
      <Box sx={{
         flex: '0 1 40%',
         minWidth: '450px',
@@ -77,7 +79,7 @@ export default function Page() {
           />
         </Paper>
      </Box>
-      {/* [布局修改] 右侧创意画布区域 */}
+      {/* 右侧创意画布区域 */}
      <Box sx={{
         flex: '1 1 60%',
         minWidth: '400px',
