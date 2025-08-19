@@ -1,6 +1,4 @@
-
-  
-'use client'
+ 'use client'
 
 import * as React from 'react'
 import { useRef, useState } from 'react'
@@ -20,6 +18,7 @@ interface ExampleVideo { thumbnail: string; videoSrc: string; prompt: string; }
  Note:
  - If your Next version uses the new Image API, replace `layout="fill"` with `fill` and use style prop:
    <Image src={...} alt={...} fill style={{ objectFit: 'cover' }} />
+ - For generated videos we render a small <video> element as thumbnail (safe and avoids needing a `thumbnail` field).
 */
 
 const PromptDisplay = ({ prompt }: { prompt: string }) => {
@@ -135,11 +134,15 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
               transition: 'border-color 0.2s ease-in-out',
             }}
           >
-         {/* 缩略图 + 黄色 prompt overlay */}
+         {/* —— 修复点 ——  
+              这里使用 <Box> + 内嵌 <video> 作为缩略显示（类型安全，不依赖 VideoI.thumbnail 字段）。
+              当视频没有可用缩略图时，这能正确展示一个可播放的小片段。
+         */}
          <Box onClick={() => setVideoFullScreen(video)} sx={{ position: 'relative', width: '100%', pt: `${(video.height && video.width) ? Math.max(1, (video.height / video.width) * 100) : 56.25}%`, bgcolor: 'background.default', cursor: 'pointer' }}>
-           <Image src={video.thumbnail ?? '/examples/video_1.jpg'} alt={video.key} layout="fill" objectFit="cover" />
+           {/* 绝对定位填充父容器 */}
+           <Box component="video" src={video.src} sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} playsInline muted preload="metadata" />
            <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
-           <Box sx={{ position: 'absolute', left: 0, right: 0, bottom: 0, bgcolor: '#f1c40f', color: 'black', py: 0.5, px: 1, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{video.prompt ?? ''}</Box>
+           <Box sx={{ position: 'absolute', left: 0, right: 0, bottom: 0, bgcolor: '#f1c40f', color: 'black', py: 0.5, px: 1, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{(video as any).prompt ?? ''}</Box>
          </Box>
 
          <ImageListItemBar className="actions-bar" sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }} position="bottom"
@@ -150,6 +153,7 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
            </Stack>
           }
          />
+         <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none', opacity: 0 }} />
        </ImageListItem>
       ) : null)}
      </ImageList>
@@ -157,7 +161,7 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
      {/* footer prompt 区（保留） */}
      <Box sx={{ flexShrink: 0, mt: 2, minHeight: '110px', maxHeight: '220px', overflowY: 'auto', px: 0 }}>
       {selectedMedia ? (
-        <Box sx={{ p: 1 }}><PromptDisplay prompt={selectedMedia.prompt} /></Box>
+        <Box sx={{ p: 1 }}><PromptDisplay prompt={(selectedMedia as any).prompt} /></Box>
       ) : (
         <Box sx={{ p: 1, color: 'text.secondary' }}><Typography variant="body2">请选择一个视频（点击缩略图），它的提示词会显示在缩略图底部及此处。</Typography></Box>
       )}
@@ -167,7 +171,7 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
    {videoFullScreen && (
     <Modal open={!!videoFullScreen} onClose={handleCloseVideoFullScreen} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}>
-       <video ref={fullScreenVideoRef} src={videoFullScreen.src ?? videoFullScreen.videoSrc} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} />
+       <video ref={fullScreenVideoRef} src={(videoFullScreen as any).src ?? (videoFullScreen as any).videoSrc} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} />
       </Box>
     </Modal>
    )}
@@ -176,5 +180,3 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
   </>
  )
 }
-
-
