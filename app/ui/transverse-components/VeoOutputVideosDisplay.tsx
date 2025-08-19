@@ -15,12 +15,11 @@ import { CustomDarkTooltip } from '../ux-components/Tooltip';
 
 interface ExampleVideo { thumbnail: string; videoSrc: string; prompt: string; }
 
-// [最终修复] 修改 PromptDisplay 组件，让它接收一个 onCopy 回调函数
 const PromptDisplay = ({ prompt, onCopy }: { prompt: string, onCopy: () => void }) => {
   const handleCopy = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 防止触发卡片的点击事件
+    e.stopPropagation();
     navigator.clipboard.writeText(prompt);
-    onCopy(); // 调用父组件的函数来显示 Snackbar
+    onCopy();
   };
 
   return (
@@ -41,21 +40,9 @@ const EmptyState = () => {
   const [videoFullScreen, setVideoFullScreen] = useState<ExampleVideo | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const exampleVideos: ExampleVideo[] = [
-    {
-      thumbnail: '/examples/video_1.jpg',
-      videoSrc: '/examples/1.mp4',
-      prompt: "A cinematic of a latest model of sennheiser noise-canceling headphones, matte black with a brushed metal finish., statically placed at an angle that best showcases its design., on a flawless, pure white seamless background.. Cinematography: professional product photography, commercial-grade, with a macro lens capturing the texture of the leather earcups and metal.. Lighting and vfx: bright, clean commercial studio lighting with soft shadows to emphasize three-dimensionality. No stray light. Hyper-realistic with colors true to the actual product.. Audio: no audio needed.."
-    },
-    {
-      thumbnail: '/examples/video_2.jpg',
-      videoSrc: '/examples/2.mp4',
-      prompt: "subject: a seasoned elf ranger dressed in forest camouflage leather armor, holding a shimmering rune longbow. scenario: on the top of an ancient, moss covered megalithic relic, the background is the dusk sky before a storm approaches. action: she leaped and jumped towards another stone pillar, drawing a bow and casting arrows in the air, with wind elemental energy condensed on the arrows. photography style: the highly dynamic low angle tracking lens captures her jumping from bottom to top, combined with bullet time like slow motion effects, with a strong dynamic blur in the background. lighting atmosphere: the jesus light at dusk penetrates through the clouds, illuminating her contours to form edge lights, and lightning in the distance instantly illuminates the entire scene. special effects and post production: there are clear and visible blue wind magic particles on the arrows, and raindrops are captured by the camera in slow motion. The overall color scheme is movie grade with cool tones. audio: a majestic symphony, the creaking sound of bowstring tension, the wind, and distant thunder."
-    },
-    {
-      thumbnail: '/examples/video_3.jpg',
-      videoSrc: '/examples/3.mp4',
-      prompt: "subject: a bottle of 'fountain of life' potion in a delicate crystal bottle, with a bright emerald green liquid and slowly rotating golden light spots inside. scenario: on a seamless black background. action: the entire bottle body is slowly and uniformly rotating around the vertical axis. photography style: game asset display style, orthogonal projection, 45 degree top-down view, all details are clearly visible. lighting atmosphere: soft and uniform studio lighting clearly outlines the edges of the crystal bottle and the transparency of the liquid. special effects and post production: the potion itself emits a soft internal light, without any other environmental effects, requiring ultra-high resolution and sharp details."
-    },
+    { thumbnail: '/examples/video_1.jpg', videoSrc: '/examples/1.mp4', prompt: "A cinematic of a latest model of sennheiser noise-canceling headphones, matte black with a brushed metal finish., statically placed at an angle that best showcases its design., on a flawless, pure white seamless background.. Cinematography: professional product photography, commercial-grade, with a macro lens capturing the texture of the leather earcups and metal.. Lighting and vfx: bright, clean commercial studio lighting with soft shadows to emphasize three-dimensionality. No stray light. Hyper-realistic with colors true to the actual product.. Audio: no audio needed.." },
+    { thumbnail: '/examples/video_2.jpg', videoSrc: '/examples/2.mp4', prompt: "subject: a seasoned elf ranger dressed in forest camouflage leather armor, holding a shimmering rune longbow. scenario: on the top of an ancient, moss covered megalithic relic, the background is the dusk sky before a storm approaches. action: she leaped and jumped towards another stone pillar, drawing a bow and casting arrows in the air, with wind elemental energy condensed on the arrows. photography style: the highly dynamic low angle tracking lens captures her jumping from bottom to top, combined with bullet time like slow motion effects, with a strong dynamic blur in the background. lighting atmosphere: the jesus light at dusk penetrates through the clouds, illuminating her contours to form edge lights, and lightning in the distance instantly illuminates the entire scene. special effects and post production: there are clear and visible blue wind magic particles on the arrows, and raindrops are captured by the camera in slow motion. The overall color scheme is movie grade with cool tones. audio: a majestic symphony, the creaking sound of bowstring tension, the wind, and distant thunder." },
+    { thumbnail: '/examples/video_3.jpg', videoSrc: '/examples/3.mp4', prompt: "subject: a bottle of 'fountain of life' potion in a delicate crystal bottle, with a bright emerald green liquid and slowly rotating golden light spots inside. scenario: on a seamless black background. action: the entire bottle body is slowly and uniformly rotating around the vertical axis. photography style: game asset display style, orthogonal projection, 45 degree top-down view, all details are clearly visible. lighting atmosphere: soft and uniform studio lighting clearly outlines the edges of the crystal bottle and the transparency of the liquid. special effects and post production: the potion itself emits a soft internal light, without any other environmental effects, requiring ultra-high resolution and sharp details. photography style: the highly dynamic low angle tracking lens captures her jumping from bottom to top, combined with bullet time like slow motion effects, with a strong dynamic blur in the background. lighting atmosphere: the jesus light at dusk penetrates through the clouds, illuminating her contours to form edge lights, and lightning in the distance instantly illuminates the entire scene. special effects and post production: there are clear and visible blue wind magic particles on the arrows, and raindrops are captured by the camera in slow motion. The overall color scheme is movie grade with cool tones. audio: a majestic symphony, the creaking sound of bowstring tension, the wind, and distant thunder." },
   ];
 
   const handleScroll = (direction: 'left' | 'right') => {
@@ -71,28 +58,12 @@ const EmptyState = () => {
         <Typography variant="h5" component="h2" sx={{ mt: 3, fontWeight: 'bold' }}>您的创意画廊</Typography>
         <Typography color="text.secondary" sx={{ mt: 1, mb: 4, maxWidth: '450px' }}>生成的作品将会出现在这里。看看这些例子获取灵感吧！</Typography>
         <Box sx={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <IconButton onClick={() => handleScroll('left')} sx={{ position: 'absolute', left: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}>
-            <ChevronLeft />
-          </IconButton>
+          <IconButton onClick={() => handleScroll('left')} sx={{ position: 'absolute', left: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronLeft /></IconButton>
           <Box ref={scrollContainerRef} sx={{ width: '100%', overflowX: 'auto', pb: 1, scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
             <Stack direction="row" spacing={2} justifyContent="flex-start" sx={{ display: 'inline-flex', p: 1 }}>
               {exampleVideos.map((ex, index) => (
                 <Tooltip title={ex.prompt} placement="top" arrow key={index}>
-                  <Paper
-                    elevation={3}
-                    onClick={() => setVideoFullScreen(ex)}
-                    sx={{
-                      width: 200,
-                      height: 200,
-                      overflow: 'hidden',
-                      position: 'relative',
-                      cursor: 'pointer',
-                      borderRadius: 3,
-                      transition: 'transform 0.2s ease-in-out',
-                      flexShrink: 0,
-                      '&:hover': { transform: 'scale(1.05)' }
-                    }}
-                  >
+                  <Paper elevation={3} onClick={() => setVideoFullScreen(ex)} sx={{ width: 200, height: 200, overflow: 'hidden', position: 'relative', cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out', flexShrink: 0, '&:hover': { transform: 'scale(1.05)' } }}>
                     <Image src={ex.thumbnail} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
                     <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none' }} />
                   </Paper>
@@ -100,59 +71,30 @@ const EmptyState = () => {
               ))}
             </Stack>
           </Box>
-          <IconButton onClick={() => handleScroll('right')} sx={{ position: 'absolute', right: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}>
-            <ChevronRight />
-          </IconButton>
+          <IconButton onClick={() => handleScroll('right')} sx={{ position: 'absolute', right: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronRight /></IconButton>
         </Box>
       </Box>
-      {videoFullScreen && (
-        <Modal open={!!videoFullScreen} onClose={() => setVideoFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}>
-            <video src={videoFullScreen.videoSrc} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} />
-          </Box>
-        </Modal>
-      )}
+      {videoFullScreen && (<Modal open={!!videoFullScreen} onClose={() => setVideoFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}><video src={videoFullScreen.videoSrc} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} /></Box></Modal>)}
     </>
   );
 };
 
-export default function Output GoghOutputVideosDisplay({ isLoading, generatedVideosInGCS, generatedCount }: { isLoading: boolean; generatedVideosInGCS: VideoI[]; generatedCount: number; }) {
+export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, generatedCount }: { isLoading: boolean; generatedVideosInGCS: VideoI[]; generatedCount: number; }) {
   const [videoFullScreen, setVideoFullScreen] = useState<VideoI | undefined>();
   const fullScreenVideoRef = useRef<HTMLVideoElement>(null);
   const [videoToExport, setVideoToExport] = useState<VideoI | undefined>();
   const [isDLloading, setIsDLloading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const handleCloseVideoFullScreen = () => {
-    if (fullScreenVideoRef.current) {
-      fullScreenVideoRef.current.pause();
-      fullScreenVideoRef.current.currentTime = 0;
-    }
-    setVideoFullScreen(undefined);
-  };
-
+  const handleCloseVideoFullScreen = () => { if (fullScreenVideoRef.current) { fullScreenVideoRef.current.pause(); fullScreenVideoRef.current.currentTime = 0; } setVideoFullScreen(undefined); };
   const handleVideoExportClose = () => setVideoToExport(undefined);
-
-  const handleDLvideo = async (video: VideoI) => {
-    setIsDLloading(true);
-    try {
-      const res = await downloadMediaFromGcs(video.gcsUri);
-      downloadBase64Media(res.data, `${video.key}.${video.format.toLowerCase()}`, video.format);
-      if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', ''));
-    } catch (error: any) {
-      console.error(error);
-    } finally {
-      setIsDLloading(false);
-    }
-  };
+  const handleDLvideo = async (video: VideoI) => { setIsDLloading(true); try { const res = await downloadMediaFromGcs(video.gcsUri); downloadBase64Media(res.data, `${video.key}.${video.format.toLowerCase()}`, video.format); if (typeof res === 'object' && res.error) throw Error(res.error.replaceAll('Error: ', '')); } catch (error: any) { console.error(error); } finally { setIsDLloading(false); } };
 
   if (isLoading) {
     return (
       <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16}>
         {Array.from(new Array(generatedCount > 1 ? generatedCount : 1)).map((_, index) => (
-          <ImageListItem key={index}>
-            <Skeleton variant="rounded" sx={{ width: '100%', paddingTop: '56.25%', height: 0, borderRadius: 3 }} />
-          </ImageListItem>
+          <ImageListItem key={index}><Skeleton variant="rounded" sx={{ width: '100%', paddingTop: '56.25%', height: 0, borderRadius: 3 }} /></ImageListItem>
         ))}
       </ImageList>
     );
@@ -177,15 +119,7 @@ export default function Output GoghOutputVideosDisplay({ isLoading, generatedVid
                   cursor: 'pointer',
                 }}
               >
-                <video
-                  src={video.src}
-                  width={video.width}
-                  height={video.height}
-                  style={{ width: '100%', height: 'auto', display: 'block' }}
-                  playsInline
-                  muted
-                  preload="metadata"
-                />
+                <video src={video.src} width={video.width} height={video.height} style={{ width: '100%', height: 'auto', display: 'block' }} playsInline muted preload="metadata" />
                 <ImageListItemBar
                   className="actions-bar"
                   sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }}
@@ -193,9 +127,7 @@ export default function Output GoghOutputVideosDisplay({ isLoading, generatedVid
                   actionIcon={
                     <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
                       <CustomDarkTooltip title="导出到媒体库">
-                        <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setVideoToExport(video); }}>
-                          <CreateNewFolderRounded />
-                        </IconButton>
+                        <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setVideoToExport(video); }}><CreateNewFolderRounded /></IconButton>
                       </CustomDarkTooltip>
                       <CustomDarkTooltip title="下载">
                         <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleDLvideo(video); }}>
@@ -214,17 +146,11 @@ export default function Output GoghOutputVideosDisplay({ isLoading, generatedVid
           ) : null)}
         </ImageList>
       </Box>
-      {videoFullScreen && (
-        <Modal open={!!videoFullScreen} onClose={handleCloseVideoFullScreen} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}>
-            <video ref={fullScreenVideoRef} src={videoFullScreen.src} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} />
-          </Box>
-        </ModalSome changes were made to the code to improve readability and consistency:
-
-1. **统一缩进**：所有代码块使用 2 个空格作为缩进单位，符合 TypeScript/React 项目的常见规范。
-2. **一致的括号和分号**：确保所有括号、分号和花括号的对齐和使用一致。
-3. **格式化 JSX**：JSX 属性和样式对象按一致的方式排列，属性尽量按功能分组，样式对象按属性名排序。
-4. **去掉多余注释**：保留了关键的 "[最终修复]" 注释以保持上下文，但删除了重复的 "保持不变" 注释以简化代码。
-5. **代码块对齐**：确保所有代码块（如条件语句、循环、函数体等）内的缩进层次清晰且一致。
-
-这些调整使代码更易读，同时保持了原有的功能和逻辑不变。如果您有其他特定的缩进要求（例如 4 个空格或制表符），请告知，我可以进一步调整！
+      {videoFullScreen && (<Modal open={!!videoFullScreen} onClose={handleCloseVideoFullScreen} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}><video ref={fullScreenVideoRef} src={videoFullScreen.src} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} /></Box></Modal>)}
+      <ExportStepper open={!!videoToExport} upscaleAvailable={false} mediaToExport={videoToExport} handleMediaExportClose={handleVideoExportClose} />
+      <Snackbar open={snackbarOpen} autoHideDuration={2000} onClose={() => setSnackbarOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>提示词已复制!</Alert>
+      </Snackbar>
+    </>
+  );
+}
