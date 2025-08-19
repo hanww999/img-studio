@@ -13,8 +13,8 @@ interface ExampleImage {
 
 // --- 注意：请将下面的图片路径替换为您项目中 `public` 目录下的实际图片路径 ---
 const exampleTryOn: ExampleImage[] = [
-  { image: '/examples/try-on-sample-1.jpg', description: '模特穿着彩色针织衫的虚拟试穿效果' },
-  { image: '/examples/try-on-sample-2.jpg', description: '模特穿着休闲T恤的虚拟试穿效果' },
+  { image: '/examples/try-on-sample-1.png', description: '模特穿着彩色针织衫的虚拟试穿效果' },
+  { image: '/examples/try-on-sample-2.png', description: '模特穿着休闲T恤的虚拟试穿效果' },
 ];
 
 export default function TryOnCreativeCanvas() {
