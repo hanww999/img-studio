@@ -1,12 +1,20 @@
+// 文件路径: app/ui/transverse-components/VeoOutputVideosDisplay.tsx
+
 'use client';
 
 import * as React from 'react';
 import { useRef, useState } from 'react';
 import Image from 'next/image';
-import { CreateNewFolderRounded, Download, PlayArrowRounded, ChevronLeft, ChevronRight, ContentCopy } from '@mui/icons-material';
+// ==================== 新增导入 ====================
+import {
+  CreateNewFolderRounded, Download, PlayArrowRounded, ChevronLeft,
+  ChevronRight, ContentCopy, InfoOutlined as InfoOutlinedIcon
+} from '@mui/icons-material';
+// =================================================
+
 import {
   Box, IconButton, Modal, Skeleton, ImageListItem, ImageList,
-  ImageListItemBar, Stack, CircularProgress, Typography, Paper, Tooltip, Snackbar, Alert
+  ImageListItemBar, Stack, CircularProgress, Typography, Paper, Tooltip, Snackbar, Alert, Grid
 } from '@mui/material';
 import { VideoI } from '../../api/generate-video-utils';
 import ExportStepper, { downloadBase64Media } from './ExportDialog';
@@ -36,9 +44,15 @@ const PromptDisplay = ({ prompt, onCopy }: { prompt: string, onCopy: () => void 
   );
 };
 
+// ==================== 修改 EmptyState 组件 ====================
 const EmptyState = () => {
   const [videoFullScreen, setVideoFullScreen] = useState<ExampleVideo | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // 新增状态：用于追踪哪个提示词是激活状态
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
   const exampleVideos: ExampleVideo[] = [
     { thumbnail: '/examples/video_1.jpg', videoSrc: '/examples/1.mp4', prompt: "A cinematic of a latest model of sennheiser noise-canceling headphones, matte black with a brushed metal finish., statically placed at an angle that best showcases its design., on a flawless, pure white seamless background.. Cinematography: professional product photography, commercial-grade, with a macro lens capturing the texture of the leather earcups and metal.. Lighting and vfx: bright, clean commercial studio lighting with soft shadows to emphasize three-dimensionality. No stray light. Hyper-realistic with colors true to the actual product.. Audio: no audio needed.." },
     { thumbnail: '/examples/video_2.jpg', videoSrc: '/examples/2.mp4', prompt: "subject: a seasoned elf ranger dressed in forest camouflage leather armor, holding a shimmering rune longbow. scenario: on the top of an ancient, moss covered megalithic relic, the background is the dusk sky before a storm approaches. action: she leaped and jumped towards another stone pillar, drawing a bow and casting arrows in the air, with wind elemental energy condensed on the arrows. photography style: the highly dynamic low angle tracking lens captures her jumping from bottom to top, combined with bullet time like slow motion effects, with a strong dynamic blur in the background. lighting atmosphere: the jesus light at dusk penetrates through the clouds, illuminating her contours to form edge lights, and lightning in the distance instantly illuminates the entire scene. special effects and post production: there are clear and visible blue wind magic particles on the arrows, and raindrops are captured by the camera in slow motion. The overall color scheme is movie grade with cool tones. audio: a majestic symphony, the creaking sound of bowstring tension, the wind, and distant thunder." },
@@ -51,6 +65,12 @@ const EmptyState = () => {
     }
   };
 
+  // 新增点击处理函数：用于切换提示词的显示/隐藏
+  const handleTogglePrompt = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation(); // 关键：阻止事件冒泡
+    setActiveIndex(prevIndex => (prevIndex === index ? null : index));
+  };
+
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', p: 3 }}>
@@ -60,24 +80,60 @@ const EmptyState = () => {
         <Box sx={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'center' }}>
           <IconButton onClick={() => handleScroll('left')} sx={{ position: 'absolute', left: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronLeft /></IconButton>
           <Box ref={scrollContainerRef} sx={{ width: '100%', overflowX: 'auto', pb: 1, scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
-            <Stack direction="row" spacing={2} justifyContent="flex-start" sx={{ display: 'inline-flex', p: 1 }}>
+            <Grid container spacing={2} wrap="nowrap" sx={{ p: 1, display: 'inline-flex' }}>
               {exampleVideos.map((ex, index) => (
-                <Tooltip title={ex.prompt} placement="top" arrow key={index}>
-                  <Paper elevation={3} onClick={() => setVideoFullScreen(ex)} sx={{ width: 200, height: 200, overflow: 'hidden', position: 'relative', cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out', flexShrink: 0, '&:hover': { transform: 'scale(1.05)' } }}>
-                    <Image src={ex.thumbnail} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
-                    <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none' }} />
-                  </Paper>
-                </Tooltip>
+                <Grid item key={index} sx={{ minWidth: 200, display: 'flex' }}>
+                  <Stack direction="column" spacing={1}>
+                    <Paper 
+                      elevation={3} 
+                      onClick={() => setVideoFullScreen(ex)} 
+                      sx={{ 
+                        width: 200, height: 200, overflow: 'hidden', position: 'relative', 
+                        cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out', 
+                        flexShrink: 0, '&:hover': { transform: 'scale(1.05)' } 
+                      }}
+                    >
+                      <Image src={ex.thumbnail} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
+                      <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none' }} />
+                      {/* 新增的信息图标按钮 */}
+                      <Tooltip title="显示/隐藏提示词">
+                        <IconButton
+                          onClick={(e) => handleTogglePrompt(e, index)}
+                          sx={{
+                            position: 'absolute',
+                            bottom: 8,
+                            right: 8,
+                            color: 'white',
+                            backgroundColor: activeIndex === index ? 'primary.main' : 'rgba(0, 0, 0, 0.5)',
+                            '&:hover': { backgroundColor: activeIndex === index ? 'primary.dark' : 'rgba(0, 0, 0, 0.8)' }
+                          }}
+                        >
+                          <InfoOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Paper>
+                    {/* 条件渲染提示词，并用Box占位防止布局跳动 */}
+                    <Box sx={{ minHeight: { xs: '140px', md: '120px' } }}>
+                      {activeIndex === index && (
+                        <PromptDisplay prompt={ex.prompt} onCopy={() => setSnackbarOpen(true)} />
+                      )}
+                    </Box>
+                  </Stack>
+                </Grid>
               ))}
-            </Stack>
+            </Grid>
           </Box>
           <IconButton onClick={() => handleScroll('right')} sx={{ position: 'absolute', right: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronRight /></IconButton>
         </Box>
       </Box>
       {videoFullScreen && (<Modal open={!!videoFullScreen} onClose={() => setVideoFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}><video src={videoFullScreen.videoSrc} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} /></Box></Modal>)}
+      <Snackbar open={snackbarOpen} autoHideDuration={2000} onClose={() => setSnackbarOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>提示词已复制!</Alert>
+      </Snackbar>
     </>
   );
 };
+// ============================================================
 
 export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, generatedCount }: { isLoading: boolean; generatedVideosInGCS: VideoI[]; generatedCount: number; }) {
   const [videoFullScreen, setVideoFullScreen] = useState<VideoI | undefined>();
@@ -139,9 +195,6 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
                 />
                 <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none' }} />
               </ImageListItem>
-              <Box sx={{ p: 1, pt: 0 }}>
-                <PromptDisplay prompt={video.prompt} onCopy={() => setSnackbarOpen(true)} />
-              </Box>
             </Paper>
           ) : null)}
         </ImageList>
