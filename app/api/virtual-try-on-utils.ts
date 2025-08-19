@@ -1,19 +1,23 @@
+import { chipGroupFieldsI, selectFieldsI } from './generate-image-utils';
 
-import { chipGroupFieldsI, selectFieldsI, ImageI } from './generate-image-utils'; // 确保导入 ImageI
+// 保持您原有的接口定义
+export interface VtoImageObjectI {
+  base64Image: string;
+  format: string;
+  width: number;
+  height: number;
+  key: string;
+}
 
-// ==================== 修改内容 ====================
-// 您的接口定义是正确的，但为了与 ImageDropzone 兼容，我们最好统一使用 ImageI
-// 如果 VtoImageObjectI 和 ImageI 结构不同，请保留 VtoImageObjectI
-// 这里假设 VtoImageObjectI 可以被 ImageI 替代或扩展
 export interface VirtualTryOnFormI {
-  model: string; // 确保 model 字段存在
-  humanImage: ImageI;
-  garmentImages: ImageI[];
-  sampleCount: number;
+  humanImage: VtoImageObjectI;
+  garmentImages: VtoImageObjectI[];
+  sampleCount: string;
   personGeneration: string;
   safetySetting: string;
+  seedNumber: string;
   outputFormat: string;
-  seedNumber: number;
+  modelVersion: string;
 }
 
 const virtualTryOnFormFields: {
@@ -21,77 +25,75 @@ const virtualTryOnFormFields: {
   personGeneration: selectFieldsI;
   safetySetting: selectFieldsI;
   outputFormat: selectFieldsI;
-  seedNumber: { label?: string; type: string; default: number; isDataResetable: boolean; };
-  modelVersion: selectFieldsI; // 我们将修改这里
+  seedNumber: { label?: string; type: string; default: string; isDataResetable: boolean; };
+  modelVersion: selectFieldsI;
 } = {
+  // --- 恢复 sampleCount 为正确的类型 ---
   sampleCount: {
-    label: '生成数量',
-    default: 1,
-    options: [{ value: 1, label: '1' }],
+    label: '输出数量',
+    default: '1',
+    options: ['1'], // 错误已修复：这里必须是 string[]
   },
   personGeneration: {
     label: '人物生成',
-    default: 'generate',
+    default: 'allow_adult',
     options: [
-      { value: 'generate', label: '生成新的人物' },
-      { value: 'preserve', label: '保留原有人物' },
+      { value: 'allow_adult', label: '仅限成人' },
+      { value: 'allow_all', label: '成人和儿童' },
+      { value: 'dont_allow', label: '不允许人物' },
     ],
   },
   safetySetting: {
     label: '安全设置',
-    default: 'block_most',
+    default: 'block_only_high',
     options: [
-      { value: 'block_most', label: '严格' },
-      { value: 'block_some', label: '中等' },
-      { value: 'block_few', label: '宽松' },
+      { value: 'block_low_and_above', label: '最强' },
+      { value: 'block_medium_and_above', label: '中等' },
+      { value: 'block_only_high', label: '较弱' },
       { value: 'block_none', label: '无' },
     ],
   },
   outputFormat: {
-    label: '输出格式',
-    default: 'PNG',
+    label: '格式',
+    default: 'image/png',
     options: [
-      { value: 'PNG', label: 'PNG' },
-      { value: 'JPEG', label: 'JPEG' },
+      { value: 'image/png', label: 'PNG' },
+      { value: 'image/jpeg', label: 'JPEG' },
     ],
   },
   seedNumber: {
-    label: '种子数 (0 表示随机)',
+    label: '种子数 (可选)',
     type: 'numberInput',
-    default: 0,
+    default: '',
     isDataResetable: true,
   },
-  // --- 这是关键修改点 ---
+  // --- 在您已有的 modelVersion 字段中添加新选项 ---
   modelVersion: {
-    label: '模型', // [汉化]
-    default: 'virtual-try-on-preview-08-04',
+    label: '模型',
+    default: 'vto-v1', // 更新默认模型
     options: [
-     { value: 'virtual-try-on-preview-08-04', label: 'Try-On' }
+      { value: 'virtual-try-on-preview-08-04', label: 'Try-On' }
     ]
   },
 };
 
-export const VtoImageDefaults: ImageI = {
+export const VtoImageDefaults: VtoImageObjectI = {
   base64Image: '',
-  gcsUri: '',
-  key: '',
-  prompt: '',
-  altText: '',
-  src: '',
-  format: 'PNG',
+  format: '',
   width: 0,
   height: 0,
+  key: '',
 };
 
 const formDataDefaults: VirtualTryOnFormI = {
-  model: virtualTryOnFormFields.modelVersion.default,
   humanImage: { ...VtoImageDefaults, key: 'human' },
   garmentImages: [{ ...VtoImageDefaults, key: Math.random().toString(36).substring(2, 15) }],
-  sampleCount: virtualTryOnFormFields.sampleCount.default,
-  personGeneration: virtualTryOnFormFields.personGeneration.default,
-  safetySetting: virtualTryOnFormFields.safetySetting.default,
-  seedNumber: virtualTryOnFormFields.seedNumber.default,
-  outputFormat: virtualTryOnFormFields.outputFormat.default,
+  sampleCount: String(virtualTryOnFormFields.sampleCount.default ?? '1'),
+  personGeneration: virtualTryOnFormFields.personGeneration.default ?? 'allow_adult',
+  safetySetting: virtualTryOnFormFields.safetySetting.default ?? 'block_only_high',
+  seedNumber: virtualTryOnFormFields.seedNumber.default ?? '',
+  outputFormat: virtualTryOnFormFields.outputFormat.default ?? 'image/png',
+  modelVersion: virtualTryOnFormFields.modelVersion.default, // 使用更新后的默认值
 };
 
 export const virtualTryOnFields = {
