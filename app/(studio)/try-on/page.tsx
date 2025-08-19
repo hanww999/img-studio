@@ -9,6 +9,7 @@ import VirtualTryOnForm from '../../ui/try-on-components/VirtualTryOnForm';
 import TryOnResultDisplay from '../../ui/try-on-components/TryOnResultDisplay';
 import { virtualTryOnFields } from '../../api/virtual-try-on-utils';
 import { ImageI } from '../../api/generate-image-utils';
+import { Grid } from '@mui/material';
 
 export default function TryOnPage() {
  const [isLoading, setIsLoading] = useState(false);
@@ -35,50 +36,34 @@ export default function TryOnPage() {
  };
 
  return (
-    // [布局修复] 使用 Flexbox 替换原有的布局
-  <Box sx={{
-      display: 'flex',
-      flexDirection: 'row',
-      gap: 3,
-      height: 'calc(100vh - 48px)',
-      p: 3, // 保持与 generate 页面一致的内边距
-    }}>
-      {/* 左侧表单区域 */}
-    <Box sx={{
-        flex: '0 1 40%',
-        minWidth: '450px',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-          <Typography variant="h1" color="text.secondary" sx={{ fontSize: '1.8rem', pb: 5 }}>
-            虚拟试穿
-          </Typography>
-          <VirtualTryOnForm
-            isLoading={isLoading}
-            errorMsg={errorMsg}
-            generationFields={virtualTryOnFields}
-            onRequestSent={handleRequestSent}
-            onNewErrorMsg={handleNewErrorMsg}
-            onImageGeneration={handleImageGeneration}
-          />
-        </Paper>
-    </Box>
-      {/* 右侧创意画布区域 */}
-    <Box sx={{
-        flex: '1 1 60%',
-        minWidth: '400px',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-          <TryOnResultDisplay
-            isLoading={isLoading}
-            errorMsg={errorMsg}
-            generatedImage={generatedImage}
-          />
-        </Paper>
-    </Box>
-  </Box>
- );
+  <Grid container spacing={{ xs: 2, md: 3 }} sx={{ height: '100%' }}>
+    {/* 左侧：表单区域 */}
+    <Grid item xs={12} md={5} lg={4} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <Typography variant="h1" color="text.secondary" sx={{ fontSize: '1.8rem', pb: 5 }}>
+          虚拟试穿
+        </Typography>
+        <VirtualTryOnForm
+          isLoading={isLoading}
+          errorMsg={errorMsg}
+          generationFields={virtualTryOnFields}
+          onRequestSent={handleRequestSent}
+          onNewErrorMsg={handleNewErrorMsg}
+          onImageGeneration={handleImageGeneration}
+        />
+      </Paper>
+    </Grid>
+
+    {/* 右侧：结果展示区域 */}
+    <Grid item xs={12} md={7} lg={8} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        <TryOnResultDisplay
+          isLoading={isLoading}
+          errorMsg={errorMsg}
+          generatedImage={generatedImage}
+        />
+      </Paper>
+    </Grid>
+  </Grid>
+);
 }
