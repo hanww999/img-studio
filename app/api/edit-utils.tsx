@@ -1,282 +1,233 @@
-// Copyright 2025 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 export interface EditImageFieldStyleI {
-  type: string
-  label: string
-  description?: string
-  default?: number | string
-  min?: number
-  max?: number
-  step?: number
-  isDataResetable: boolean
-  options?:
-    | {
-        value: string
-        label: string
-        indication?: string
-        description?: string
-        mandatoryPrompt?: boolean
-        mandatoryMask?: boolean
-        maskType?: string[]
-      }[]
-    | string[]
+ type: string
+ label: string
+ description?: string
+ default?: number | string
+ min?: number
+ max?: number
+ step?: number
+ isDataResetable: boolean
+ options?:
+  | {
+    value: string
+    label: string
+    indication?: string
+    description?: string
+    mandatoryPrompt?: boolean
+    mandatoryMask?: boolean
+    maskType?: string[]
+   }[]
+  | string[]
 }
 
 export interface EditImageFormFieldsI {
-  modelVersion: EditImageFieldStyleI
-  inputImage: EditImageFieldStyleI
-  inputMask: EditImageFieldStyleI
-  prompt: EditImageFieldStyleI
-  sampleCount: EditImageFieldStyleI
-  negativePrompt: EditImageFieldStyleI
-  editMode: EditImageFieldStyleI
-  maskDilation: EditImageFieldStyleI
-  baseSteps: EditImageFieldStyleI
-  outputOptions: EditImageFieldStyleI
-  personGeneration: EditImageFieldStyleI
+ modelVersion: EditImageFieldStyleI
+ inputImage: EditImageFieldStyleI
+ inputMask: EditImageFieldStyleI
+ prompt: EditImageFieldStyleI
+ sampleCount: EditImageFieldStyleI
+ negativePrompt: EditImageFieldStyleI
+ editMode: EditImageFieldStyleI
+ maskDilation: EditImageFieldStyleI
+ baseSteps: EditImageFieldStyleI
+ outputOptions: EditImageFieldStyleI
+ personGeneration: EditImageFieldStyleI
 }
 
 export const EditImageFormFields = {
-  modelVersion: {
-    type: 'select',
-    label: 'Model version',
-    default: 'imagen-3.0-capability-001',
-    options: [
-      {
-        value: 'imagen-3.0-capability-001',
-        label: 'Imagen 3',
-        indication: '',
-      },
-    ],
-    isDataResetable: false,
-  },
-  inputImage: {
-    type: 'base64 encoded string',
-    label: 'Input image',
-    isDataResetable: true,
-  },
-  inputMask: {
-    type: 'base64 encoded string',
-    label: 'Input mask',
-    isDataResetable: true,
-  },
-  prompt: {
-    type: 'textInput',
-    label: 'Prompt',
-    isDataResetable: true,
-  },
-  sampleCount: {
-    label: 'Quantity of outputs',
-    type: 'chip-group',
-    default: '4',
-    options: ['1', '2', '3', '4'],
-    isDataResetable: false,
-  },
-  negativePrompt: {
-    label: 'Negative prompt',
-    type: 'textInput',
-    isDataResetable: true,
-  },
-  editMode: {
-    type: 'in-place-menu',
-    label: 'What do you want to do with your image?',
-    default: 'EDIT_MODE_INPAINT_INSERTION',
-    options: [
-      {
-        value: 'EDIT_MODE_INPAINT_INSERTION',
-        label: 'Insert',
-        description: 'Add a new object',
-        icon: 'add_photo_alternate',
-        mandatoryPrompt: true,
-        promptIndication: 'Prompt - Describe what you want to insert to selected zone',
-        mandatoryMask: true,
-        maskButtonLabel: 'Select zone',
-        maskButtonIcon: 'ads_click',
-        maskDialogTitle: 'Select a zone where to insert',
-        maskDialogIndication: 'Only pixels within the zone can and will be edited',
-        maskType: ['manual', 'background', 'foreground', 'semantic', 'interactive', 'prompt'],
-        enabled: true,
-        defaultMaskDilation: 0.01,
-        defaultBaseSteps: 35,
-      },
-      {
-        value: 'EDIT_MODE_INPAINT_REMOVAL',
-        label: 'Remove',
-        description: 'Erase selected object(s)',
-        icon: 'cancel',
-        mandatoryPrompt: false,
-        mandatoryMask: true,
-        maskButtonLabel: 'Select object(s)',
-        maskButtonIcon: 'category',
-        maskDialogTitle: 'Select object(s) to be removed',
-        maskDialogIndication: 'Only selected pixels within can and will be edited',
-        maskType: ['manual', 'background', 'foreground', 'semantic', 'interactive', 'prompt'],
-        enabled: true,
-        defaultMaskDilation: 0.01,
-        defaultBaseSteps: 12,
-      },
-      {
-        value: 'EDIT_MODE_OUTPAINT',
-        label: 'Outpaint',
-        description: 'Extend the image',
-        icon: 'aspect_ratio',
-        mandatoryPrompt: false,
-        promptIndication: '(Optional) Prompt - If you want, be specific on what to put in extended space',
-        mandatoryMask: true,
-        maskButtonLabel: 'New ratio',
-        maskButtonIcon: 'crop',
-        maskDialogTitle: 'Select your new image format',
-        maskDialogIndication: 'Only pixels in outpaint zone will be edited',
-        maskType: ['outpaint'], // Vertical/ Horizontal zones generated from new ratio and image position within it
-        enabled: true,
-        defaultMaskDilation: 0.03,
-        defaultBaseSteps: 35,
-      },
-      {
-        value: 'EDIT_MODE_BGSWAP',
-        label: 'Swap background',
-        description: "Change what's happening",
-        icon: 'model_training',
-        mandatoryPrompt: true,
-        promptIndication: 'Prompt - Describe in what situation you want to put the product',
-        mandatoryMask: false,
-        enabled: true,
-        defaultMaskDilation: 0.0,
-        defaultBaseSteps: 75,
-      },
-      {
-        value: 'UPSCALE',
-        label: 'Upscale',
-        description: 'Boost image resolution',
-        icon: 'diamond',
-        mandatoryPrompt: false,
-        mandatoryMask: false,
-        enabled: true,
-        defaultMaskDilation: 0,
-        defaultBaseSteps: 0,
-      },
-    ],
-    isDataResetable: false,
-  },
-  maskDilation: {
-    type: 'float',
-    label: 'Mask dilation',
-    description: 'Determines the dilation percentage of the mask provided',
-    default: 0.01,
-    min: 0.0,
-    max: 0.3,
-    step: 0.01,
-    isDataResetable: true,
-  },
-  baseSteps: {
-    type: 'integer',
-    label: 'Base steps',
-    description: 'Controls how many steps should be used to generate output',
-    default: 35,
-    min: 1,
-    max: 100,
-    step: 1,
-    isDataResetable: true,
-  },
-  outputOptions: {
-    label: 'Ouput format',
-    type: 'select',
-    default: 'image/png',
-    options: [
-      {
-        value: 'image/png',
-        label: 'PNG',
-      },
-      {
-        value: 'image/jpeg',
-        label: 'JPEG',
-      },
-    ],
-    isDataResetable: false,
-  },
-  personGeneration: {
-    label: 'People generation',
-    type: 'select',
-    default: 'allow_adult',
-    options: [
-      {
-        value: 'dont_allow',
-        label: 'No people',
-      },
-      {
-        value: 'allow_adult',
-        label: 'Adults only',
-      },
-      {
-        value: 'allow_all',
-        label: 'Adults & Children',
-      },
-    ],
-    isDataResetable: false,
-  },
+ modelVersion: {
+  type: 'select',
+  label: '模型版本', // [汉化]
+  default: 'imagen-3.0-capability-001',
+  options: [
+   {
+    value: 'imagen-3.0-capability-001',
+    label: 'Imagen 3',
+    indication: '',
+   },
+  ],
+  isDataResetable: false,
+ },
+ inputImage: {
+  type: 'base64 encoded string',
+  label: '输入图片', // [汉化]
+  isDataResetable: true,
+ },
+ inputMask: {
+  type: 'base64 encoded string',
+  label: '输入蒙版', // [汉化]
+  isDataResetable: true,
+ },
+ prompt: {
+  type: 'textInput',
+  label: '提示词', // [汉化]
+  isDataResetable: true,
+ },
+ sampleCount: {
+  label: '输出数量', // [汉化]
+  type: 'chip-group',
+  default: '4',
+  options: ['1', '2', '3', '4'],
+  isDataResetable: false,
+ },
+ negativePrompt: {
+  label: '负面提示词', // [汉化]
+  type: 'textInput',
+  isDataResetable: true,
+ },
+ editMode: {
+  type: 'in-place-menu',
+  label: '您想对图片进行什么操作？', // [汉化]
+  default: 'EDIT_MODE_INPAINT_INSERTION',
+  options: [
+   {
+    value: 'EDIT_MODE_INPAINT_INSERTION',
+    label: '插入', // [汉化]
+    description: '添加新对象', // [汉化]
+    icon: 'add_photo_alternate',
+    mandatoryPrompt: true,
+    promptIndication: '提示词 - 描述您想在选定区域插入的内容', // [汉化]
+    mandatoryMask: true,
+    maskButtonLabel: '选择区域', // [汉化]
+    maskButtonIcon: 'ads_click',
+    maskDialogTitle: '选择要插入的区域', // [汉化]
+    maskDialogIndication: '只有区域内的像素可以且将被编辑', // [汉化]
+    maskType: ['manual', 'background', 'foreground', 'semantic', 'interactive', 'prompt'],
+    enabled: true,
+    defaultMaskDilation: 0.01,
+    defaultBaseSteps: 35,
+   },
+   {
+    value: 'EDIT_MODE_INPAINT_REMOVAL',
+    label: '移除', // [汉化]
+    description: '擦除选定的对象', // [汉化]
+    icon: 'cancel',
+    mandatoryPrompt: false,
+    mandatoryMask: true,
+    maskButtonLabel: '选择对象', // [汉化]
+    maskButtonIcon: 'category',
+    maskDialogTitle: '选择要移除的对象', // [汉化]
+    maskDialogIndication: '只有选定的像素可以且将被编辑', // [汉化]
+    maskType: ['manual', 'background', 'foreground', 'semantic', 'interactive', 'prompt'],
+    enabled: true,
+    defaultMaskDilation: 0.01,
+    defaultBaseSteps: 12,
+   },
+   {
+    value: 'EDIT_MODE_OUTPAINT',
+    label: '扩图', // [汉化]
+    description: '扩展图片', // [汉化]
+    icon: 'aspect_ratio',
+    mandatoryPrompt: false,
+    promptIndication: '提示词 (可选) - 具体说明要在扩展空间中放置什么', // [汉化]
+    mandatoryMask: true,
+    maskButtonLabel: '新比例', // [汉化]
+    maskButtonIcon: 'crop',
+    maskDialogTitle: '选择您的新图片格式', // [汉化]
+    maskDialogIndication: '只有扩图区域中的像素会被编辑', // [汉化]
+    maskType: ['outpaint'],
+    enabled: true,
+    defaultMaskDilation: 0.03,
+    defaultBaseSteps: 35,
+   },
+   {
+    value: 'EDIT_MODE_BGSWAP',
+    label: '替换背景', // [汉化]
+    description: '改变背景场景', // [汉化]
+    icon: 'model_training',
+    mandatoryPrompt: true,
+    promptIndication: '提示词 - 描述您想将产品置于何种情境中', // [汉化]
+    mandatoryMask: false,
+    enabled: true,
+    defaultMaskDilation: 0.0,
+    defaultBaseSteps: 75,
+   },
+   {
+    value: 'UPSCALE',
+    label: '放大', // [汉化]
+    description: '提升图片分辨率', // [汉化]
+    icon: 'diamond',
+    mandatoryPrompt: false,
+    mandatoryMask: false,
+    enabled: true,
+    defaultMaskDilation: 0,
+    defaultBaseSteps: 0,
+   },
+  ],
+  isDataResetable: false,
+ },
+ maskDilation: {
+  type: 'float',
+  label: '蒙版扩展', // [汉化]
+  description: '确定所提供蒙版的扩展百分比',
+  default: 0.01,
+  min: 0.0,
+  max: 0.3,
+  step: 0.01,
+  isDataResetable: true,
+ },
+ baseSteps: {
+  type: 'integer',
+  label: '基础步数', // [汉化]
+  description: '控制生成输出所使用的步数',
+  default: 35,
+  min: 1,
+  max: 100,
+  step: 1,
+  isDataResetable: true,
+ },
+ outputOptions: {
+  label: '输出格式', // [汉化]
+  type: 'select',
+  default: 'image/png',
+  options: [
+   { value: 'image/png', label: 'PNG' },
+   { value: 'image/jpeg', label: 'JPEG' },
+  ],
+  isDataResetable: false,
+ },
+ personGeneration: {
+  label: '人物生成', // [汉化]
+  type: 'select',
+  default: 'allow_adult',
+  options: [
+   { value: 'dont_allow', label: '不允许人物' }, // [汉化]
+   { value: 'allow_adult', label: '仅限成人' }, // [汉化]
+   { value: 'allow_all', label: '成人和儿童' }, // [汉化]
+  ],
+  isDataResetable: false,
+ },
 }
 
 export const maskTypes = [
-  {
-    value: 'manual',
-    label: 'Manual selection',
-    description: 'One or more zone(s) you manually brush over',
-    readOnlyCanvas: false,
-    requires: 'manualSelection',
-  },
-  {
-    value: 'background',
-    label: 'Background',
-    description: 'Everything except the primary object, person, or subject',
-    readOnlyCanvas: true,
-  },
-  {
-    value: 'foreground',
-    label: 'Foreground',
-    description: 'Primary object, person, or subject only',
-    readOnlyCanvas: true,
-  },
-  /*{ //TODO to be added back when feature fixed
-    value: 'semantic',
-    label: 'Semantic',
-    description: 'One or more element(s) by their semantic class(es)',
-    readOnlyCanvas: true,
-    requires: 'semanticDropdown',
-  },
-  {
-    value: 'interactive',
-    label: 'Interactive',
-    description: 'A zone targetted by circling or brushing over it',
-    readOnlyCanvas: false,
-    requires: 'manualSelection',
-  },
-  {
-    value: 'prompt',
-    label: 'Descriptive',
-    description: 'A zone targetted through a written description of it',
-    readOnlyCanvas: true,
-    requires: 'promptInput',
-  },*/
-  {
-    value: 'outpaint',
-    label: 'Configure outpaint zone',
-    description: 'A new image format to be edited in',
-    readOnlyCanvas: true,
-    requires: 'ratioSelection',
-  },
+ {
+  value: 'manual',
+  label: '手动选择', // [汉化]
+  description: '您手动刷过的一个或多个区域', // [汉化]
+  readOnlyCanvas: false,
+  requires: 'manualSelection',
+ },
+ {
+  value: 'background',
+  label: '背景', // [汉化]
+  description: '除了主要物体、人物或主体之外的所有东西', // [汉化]
+  readOnlyCanvas: true,
+ },
+ {
+  value: 'foreground',
+  label: '前景', // [汉化]
+  description: '仅主要物体、人物或主体', // [汉化]
+  readOnlyCanvas: true,
+ },
+ {
+  value: 'outpaint',
+  label: '配置扩图区域', // [汉化]
+  description: '要在其中编辑的新图像格式', // [汉化]
+  readOnlyCanvas: true,
+  requires: 'ratioSelection',
+ },
 ]
+
 
 export const semanticClasses = [
   { class_id: 43, value: 'Floor' },
