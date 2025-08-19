@@ -17,7 +17,7 @@ import { blurDataURL } from '../ux-components/BlurImage';
 import { appContextDataDefault, useAppContext } from '../../context/app-context';
 import { useRouter } from 'next/navigation';
 import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action';
-
+import { CustomDarkTooltip } from '../ux-components/Tooltip';
 interface ExampleImage { image: string; prompt: string; }
 
 // [最终修复] 修改 PromptDisplay 组件，让它接收一个 onCopy 回调函数，而不是自己管理 Snackbar 状态
