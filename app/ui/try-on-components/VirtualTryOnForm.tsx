@@ -14,7 +14,6 @@ import FormInputChipGroup from '../ux-components/InputChipGroup';
 import FormInputDropdown from '../ux-components/InputDropdown';
 import { FormInputNumberSmall } from '../ux-components/FormInputNumberSmall';
 import { CustomizedSendButton } from '../ux-components/Button-SX';
-import { CustomizedAccordionSummary } from '../ux-components/Accordion-SX'; // 仅保留需要的 import
 import theme from '../../theme';
 const { palette } = theme;
 
@@ -84,21 +83,28 @@ export default function VirtualTryOnForm({
   </Box>
  </Stack>
 
-    {/* [颜色修复] 移除对 CustomizedAccordion 的依赖，并直接、完整地定义样式 */}
  <Accordion sx={{
-      // 覆盖全局的 transparent 背景
-      backgroundColor: 'background.paper',
-      // 确保无边框和阴影，与 Paper 融为一体
+      backgroundColor: 'transparent', // 保持手风琴本身透明
       boxShadow: 'none',
       '&:before': {
         display: 'none',
       },
     }}>
-  <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} sx={CustomizedAccordionSummary}>
+    {/* [颜色修复] 直接为 AccordionSummary 设置背景色，确保覆盖所有其他样式 */}
+  <AccordionSummary 
+      expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} 
+      sx={{ 
+        bgcolor: 'background.paper', // 使用主题背景色
+        borderRadius: 2, // 添加圆角以匹配设计
+        minHeight: '48px',
+        '& .MuiAccordionSummary-content': {
+          margin: '12px 0',
+        }
+      }}
+    >
   <Typography variant="body1" sx={{ fontWeight: 500 }}>高级设置</Typography>
   </AccordionSummary>
-    {/* 明确为详情区域也设置背景色，防止透明 */}
-  <AccordionDetails sx={{ bgcolor: 'background.paper', p: 2 }}>
+  <AccordionDetails sx={{ bgcolor: 'transparent', p: 2 }}>
   <Stack spacing={2} sx={{ pt: 1 }}>
   <FormInputChipGroup
   name="sampleCount"
