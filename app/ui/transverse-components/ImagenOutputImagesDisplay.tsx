@@ -1,12 +1,20 @@
+// 文件路径: app/ui/transverse-components/ImagenOutputImagesDisplay.tsx
+
 'use client';
 
 import * as React from 'react';
 import { useState, useRef } from 'react';
-import { CreateNewFolderRounded, Download, Edit, Favorite, VideocamRounded, ChevronLeft, ChevronRight, ContentCopy } from '@mui/icons-material';
+// ==================== 新增导入 ====================
+import {
+  CreateNewFolderRounded, Download, Edit, Favorite, VideocamRounded,
+  ChevronLeft, ChevronRight, ContentCopy, InfoOutlined as InfoOutlinedIcon
+} from '@mui/icons-material';
+// =================================================
+
 import Image from 'next/image';
 import {
   Box, IconButton, Modal, Skeleton, ImageListItem, ImageList,
-  ImageListItemBar, Typography, Stack, Paper, Tooltip, Snackbar, Alert
+  ImageListItemBar, Typography, Stack, Paper, Tooltip, Snackbar, Alert, Grid
 } from '@mui/material';
 import { ImageI } from '../../api/generate-image-utils';
 import ExportStepper, { downloadBase64Media } from './ExportDialog';
@@ -40,9 +48,15 @@ const PromptDisplay = ({ prompt, onCopy }: { prompt: string, onCopy: () => void 
   );
 };
 
+// ==================== 修改 EmptyState 组件 ====================
 const EmptyState = () => {
   const [imageFullScreen, setImageFullScreen] = useState<ExampleImage | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  // 新增状态：用于追踪哪个提示词是激活状态
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
   const examplePrompts: ExampleImage[] = [
     { image: '/examples/222.png', prompt: 'A close up of a warm and fuzzy colorful Peruvian poncho laying on a top of a chair in a bright day' },
     { image: '/examples/111.png', prompt: 'A winning touchdown, fast shutter speed, movement tracking' },
@@ -56,6 +70,12 @@ const EmptyState = () => {
     }
   };
 
+  // 新增点击处理函数：用于切换提示词的显示/隐藏
+  const handleTogglePrompt = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation(); // 关键：阻止事件冒泡到上层Paper的onClick，避免打开全屏Modal
+    setActiveIndex(prevIndex => (prevIndex === index ? null : index));
+  };
+
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', p: 3 }}>
@@ -65,23 +85,59 @@ const EmptyState = () => {
         <Box sx={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'center' }}>
           <IconButton onClick={() => handleScroll('left')} sx={{ position: 'absolute', left: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronLeft /></IconButton>
           <Box ref={scrollContainerRef} sx={{ width: '100%', overflowX: 'auto', pb: 1, scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
-            <Stack direction="row" spacing={2} justifyContent="flex-start" sx={{ display: 'inline-flex', p: 1 }}>
+            <Grid container spacing={2} wrap="nowrap" sx={{ p: 1, display: 'inline-flex' }}>
               {examplePrompts.map((ex, index) => (
-                <Tooltip title={ex.prompt} placement="top" arrow key={index}>
-                  <Paper elevation={3} onClick={() => setImageFullScreen(ex)} sx={{ width: 200, height: 200, overflow: 'hidden', position: 'relative', cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out', flexShrink: 0, '&:hover': { transform: 'scale(1.05)' } }}>
-                    <Image src={ex.image} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
-                  </Paper>
-                </Tooltip>
+                <Grid item key={index} sx={{ minWidth: 200, display: 'flex' }}>
+                  <Stack direction="column" spacing={1}>
+                    <Paper 
+                      elevation={3} 
+                      onClick={() => setImageFullScreen(ex)} 
+                      sx={{ 
+                        width: 200, height: 200, overflow: 'hidden', position: 'relative', 
+                        cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out', 
+                        flexShrink: 0, '&:hover': { transform: 'scale(1.05)' } 
+                      }}
+                    >
+                      <Image src={ex.image} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
+                      {/* 新增的信息图标按钮 */}
+                      <Tooltip title="显示/隐藏提示词">
+                        <IconButton
+                          onClick={(e) => handleTogglePrompt(e, index)}
+                          sx={{
+                            position: 'absolute',
+                            bottom: 8,
+                            right: 8,
+                            color: 'white',
+                            backgroundColor: activeIndex === index ? 'primary.main' : 'rgba(0, 0, 0, 0.5)',
+                            '&:hover': { backgroundColor: activeIndex === index ? 'primary.dark' : 'rgba(0, 0, 0, 0.8)' }
+                          }}
+                        >
+                          <InfoOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Paper>
+                    {/* 条件渲染提示词，并用Box占位防止布局跳动 */}
+                    <Box sx={{ minHeight: { xs: '140px', md: '120px' } }}>
+                      {activeIndex === index && (
+                        <PromptDisplay prompt={ex.prompt} onCopy={() => setSnackbarOpen(true)} />
+                      )}
+                    </Box>
+                  </Stack>
+                </Grid>
               ))}
-            </Stack>
+            </Grid>
           </Box>
           <IconButton onClick={() => handleScroll('right')} sx={{ position: 'absolute', right: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronRight /></IconButton>
         </Box>
       </Box>
       {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}><Image src={imageFullScreen.image} alt={imageFullScreen.prompt} width={800} height={800} style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} /></Box></Modal>)}
+      <Snackbar open={snackbarOpen} autoHideDuration={2000} onClose={() => setSnackbarOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>提示词已复制!</Alert>
+      </Snackbar>
     </>
   );
 };
+// ============================================================
 
 export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, generatedCount, isPromptReplayAvailable, isUpscaledDLAvailable = true }: { isLoading: boolean; generatedImagesInGCS: ImageI[]; generatedCount: number; isPromptReplayAvailable: boolean; isUpscaledDLAvailable?: boolean; }) {
   const [imageFullScreen, setImageFullScreen] = useState<ImageI | undefined>();
@@ -157,9 +213,6 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
                   }
                 />
               </ImageListItem>
-              <Box sx={{ p: 1, pt: 0 }}>
-                <PromptDisplay prompt={image.prompt} onCopy={() => setSnackbarOpen(true)} />
-              </Box>
             </Paper>
           ))}
         </ImageList>
