@@ -1,5 +1,3 @@
-// 文件路径: app/ui/try-on-components/VirtualTryOnForm.tsx (完整汉化版)
-
 'use client';
 
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -79,21 +77,19 @@ export default function VirtualTryOnForm({
 
   <Stack direction="row" spacing={2}>
    <Box sx={{ flex: 1 }}>
-      {/* [汉化] */}
    <ImageDropzone name="humanImage" label="模特图片" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
    </Box>
    <Box sx={{ flex: 1 }}>
-      {/* [汉化] */}
    <ImageDropzone name={`garmentImages.0`} label="服装图片" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
    </Box>
   </Stack>
 
-  <Accordion sx={CustomizedAccordion}>
+    {/* [颜色修复] 直接在 sx 中为 Accordion 和其内容指定正确的背景色 */}
+  <Accordion sx={{ ...CustomizedAccordion, bgcolor: 'background.paper' }}>
    <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} sx={CustomizedAccordionSummary}>
-      {/* [汉化] */}
    <Typography variant="body1" sx={{ fontWeight: 500 }}>高级设置</Typography>
    </AccordionSummary>
-   <AccordionDetails>
+   <AccordionDetails sx={{ bgcolor: 'background.paper' }}>
    <Stack spacing={2} sx={{ pt: 1 }}>
     <FormInputChipGroup
     name="sampleCount"
@@ -147,11 +143,9 @@ export default function VirtualTryOnForm({
   </Accordion>
 
   <Stack direction="row" justifyContent="flex-end" spacing={2}>
-    {/* [汉化] */}
    <Button variant="text" onClick={onReset} disabled={isLoading} startIcon={<Autorenew />}>
    重置
    </Button>
-    {/* [汉化] */}
    <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>
    生成
    </Button>
