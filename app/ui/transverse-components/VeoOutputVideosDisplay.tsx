@@ -13,6 +13,7 @@ import {
 import { VideoI } from '../../api/generate-video-utils';
 import ExportStepper, { downloadBase64Media } from './ExportDialog';
 import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action';
+import { CustomDarkTooltip } from '../ux-components/Tooltip';
 
 interface ExampleVideo { thumbnail: string; videoSrc: string; prompt: string; }
 
@@ -131,11 +132,17 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
                 <video src={video.src} width={video.width} height={video.height} style={{ width: '100%', height: 'auto', display: 'block' }} playsInline muted preload="metadata" />
                 <ImageListItemBar className="actions-bar" sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }} position="bottom"
                   actionIcon={
-                    <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
-                      <Tooltip title="导出到媒体库"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setVideoToExport(video); }}><CreateNewFolderRounded /></IconButton></Tooltip>
-                      <Tooltip title="下载"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleDLvideo(video); }}>{isDLloading ? <CircularProgress size={20} color="inherit" /> : <Download />}</IconButton></Tooltip>
-                    </Stack>
-                  }
+  <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
+    <CustomDarkTooltip title="导出到媒体库">
+      <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setVideoToExport(video); }}><CreateNewFolderRounded /></IconButton>
+    </CustomDarkTooltip>
+    <CustomDarkTooltip title="下载">
+      <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleDLvideo(video); }}>
+        {isDLloading ? <CircularProgress size={20} color="inherit" /> : <Download />}
+      </IconButton>
+    </CustomDarkTooltip>
+  </Stack>
+}
                 />
                 <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none' }} />
               </ImageListItem>
