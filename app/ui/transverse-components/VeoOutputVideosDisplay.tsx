@@ -1,4 +1,4 @@
-// 文件路径: app/ui/transverse-components/VeoOutputVideosDisplay.tsx (完整代码)
+// 文件路径: app/ui/transverse-components/VeoOutputVideosDisplay.tsx (修复编译错误版)
 
 'use client'
 
@@ -16,7 +16,6 @@ import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action'
 
 interface ExampleVideo { thumbnail: string; videoSrc: string; prompt: string; }
 
-// [修改] PromptDisplay 组件现在只负责展示，不再有复杂的逻辑
 const PromptDisplay = ({ prompt }: { prompt: string }) => {
  const [openSnackbar, setOpenSnackbar] = useState(false);
  const handleCopy = () => {
@@ -87,7 +86,6 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
  const fullScreenVideoRef = useRef<HTMLVideoElement>(null);
  const [videoToExport, setVideoToExport] = useState<VideoI | undefined>();
  const [isDLloading, setIsDLloading] = useState(false);
-  // [新增] State to track the selected media for prompt display
  const [selectedMedia, setSelectedMedia] = useState<VideoI | null>(null);
 
  const handleCloseVideoFullScreen = () => { if (fullScreenVideoRef.current) { fullScreenVideoRef.current.pause(); fullScreenVideoRef.current.currentTime = 0; } setVideoFullScreen(undefined); };
@@ -109,50 +107,50 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
  }
 
  return (
-    // [修改] 使用一个 Box 包裹画廊和下方的 Prompt 区域
-  <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* 画廊区域，占据大部分空间 */}
-   <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16} sx={{ m: 0, flexGrow: 1, overflowY: 'auto' }}>
-    {generatedVideosInGCS.map((video) => video.src ? (
-     <ImageListItem key={video.key} 
-          onClick={() => setSelectedMedia(video)} // [修改] 点击时设置选中的视频
-          sx={{ 
-            '&:hover .actions-bar': { opacity: 1 }, 
-            borderRadius: 3, 
-            overflow: 'hidden', 
-            position: 'relative',
-            cursor: 'pointer',
-            // [新增] 为选中的视频添加边框
-            border: selectedMedia?.key === video.key ? '3px solid' : '3px solid transparent',
-            borderColor: selectedMedia?.key === video.key ? 'primary.main' : 'transparent',
-            transition: 'border-color 0.2s ease-in-out',
-          }}
-        >
-       <video src={video.src} width={video.width} height={video.height} style={{ width: '100%', height: 'auto', display: 'block' }} playsInline muted preload="metadata" />
-       <ImageListItemBar className="actions-bar" sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }} position="bottom"
-        actionIcon={
-         <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
-              {/* [修改] 在图标按钮上阻止事件冒泡 */}
-          <Tooltip title="导出到媒体库"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setVideoToExport(video); }}><CreateNewFolderRounded /></IconButton></Tooltip>
-          <Tooltip title="下载"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleDLvideo(video); }}>{isDLloading ? <CircularProgress size={20} color="inherit" /> : <Download />}</IconButton></Tooltip>
-         </Stack>
-        }
-       />
-       <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none' }} />
-      </ImageListItem>
-    ) : null)}
-   </ImageList>
-
-    {/* [新增] 统一的 Prompt 显示区域，只在有选中项时显示 */}
-    {selectedMedia && (
-      <Box sx={{ flexShrink: 0, mt: 2, minHeight: '60px' /* 预留最小高度 */ }}>
+    // [修复] 使用 React Fragment 作为顶层返回元素，与原始代码保持一致
+  <>
+      {/* [修复] 将布局和 Prompt 显示区域包裹在一个 Box 中 */}
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {/* 画廊区域 */}
+      <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16} sx={{ m: 0, flexGrow: 1, overflowY: 'auto' }}>
+       {generatedVideosInGCS.map((video) => video.src ? (
+        <ImageListItem key={video.key}
+              onClick={() => setSelectedMedia(video)}
+              sx={{
+                '&:hover .actions-bar': { opacity: 1 },
+                borderRadius: 3,
+                overflow: 'hidden',
+                position: 'relative',
+                cursor: 'pointer',
+                border: selectedMedia?.key === video.key ? '3px solid' : '3px solid transparent',
+                borderColor: selectedMedia?.key === video.key ? 'primary.main' : 'transparent',
+                transition: 'border-color 0.2s ease-in-out',
+              }}
+            >
+          <video src={video.src} width={video.width} height={video.height} style={{ width: '100%', height: 'auto', display: 'block' }} playsInline muted preload="metadata" />
+          <ImageListItemBar className="actions-bar" sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }} position="bottom"
+           actionIcon={
+            <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
+             <Tooltip title="导出到媒体库"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setVideoToExport(video); }}><CreateNewFolderRounded /></IconButton></Tooltip>
+             <Tooltip title="下载"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleDLvideo(video); }}>{isDLloading ? <CircularProgress size={20} color="inherit" /> : <Download />}</IconButton></Tooltip>
+            </Stack>
+           }
+          />
+          <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none' }} />
+        </ImageListItem>
+      ) : null)}
+      </ImageList>
+        {/* 统一的 Prompt 显示区域 */}
+      {selectedMedia && (
+       <Box sx={{ flexShrink: 0, mt: 2, minHeight: '60px' }}>
         <PromptDisplay prompt={selectedMedia.prompt} />
-      </Box>
-    )}
+       </Box>
+      )}
+    </Box>
 
-    {/* 弹窗 Modals */}
-   {videoFullScreen && (<Modal open={!!videoFullScreen} onClose={handleCloseVideoFullScreen} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}><video ref={fullScreenVideoRef} src={videoFullScreen.src} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} /></Box></Modal>)}
-   <ExportStepper open={!!videoToExport} upscaleAvailable={false} mediaToExport={videoToExport} handleMediaExportClose={handleVideoExportClose} />
+      {/* [修复] 将悬浮组件移回顶层，与布局分离 */}
+    {videoFullScreen && (<Modal open={!!videoFullScreen} onClose={handleCloseVideoFullScreen} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}><video ref={fullScreenVideoRef} src={videoFullScreen.src} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} /></Box></Modal>)}
+    <ExportStepper open={!!videoToExport} upscaleAvailable={false} mediaToExport={videoToExport} handleMediaExportClose={handleVideoExportClose} />
   </>
  )
 }
