@@ -1,5 +1,3 @@
-// 文件路径: app/(studio)/generate/GeneratePageClient.tsx (完整代码)
-
 'use client';
 
 import * as React from 'react';
@@ -192,43 +190,65 @@ export default function GeneratePageClient() {
  }
 
  return (
-    // [修改] 主容器始终为 flex row (并排)
+  // 上层容器：左侧固定宽度（响应式），右侧自适应填充
   <Box sx={{
    display: 'flex',
-    flexDirection: 'row',
+   flexDirection: 'row',
    gap: 3,
-    // [修改] 确保容器高度充满视口减去可能的顶部导航栏高度
    height: 'calc(100vh - 48px)',
   }}>
-    {/* [修改] 左侧表单区域，使用 flex 属性实现自适应宽度 */}
+    {/* 左侧：固定宽度（基础宽度 360px），带纵向滚动 */}
    <Box sx={{
-      // flex: <grow> <shrink> <basis>
-      // 不增长(0)，可收缩(1)，基础宽度为40%
-    flex: '0 1 40%',
-      minWidth: '450px', // 最小宽度，防止过度压缩
+    flex: '0 0 360px',
+    minWidth: { xs: '240px', sm: '300px', md: '360px' },
+    maxWidth: '420px',
+    overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
    }}>
     <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
      {generationMode === 'AI 图像创作' && (
-      <GenerateForm key="image-form" generationType="Image" isLoading={isLoading} onRequestSent={handleRequestSent} onImageGeneration={handleImageGeneration} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={ImageRandomPrompts} generationFields={imageGenerationUtils} initialPrompt={initialPrompt ?? ''} promptIndication={'描述您想要生成图片的提示词...'} />
+      <GenerateForm
+       key="image-form"
+       generationType="Image"
+       isLoading={isLoading}
+       onRequestSent={handleRequestSent}
+       onImageGeneration={handleImageGeneration}
+       onNewErrorMsg={handleNewErrorMsg}
+       errorMsg={generationErrorMsg}
+       randomPrompts={ImageRandomPrompts}
+       generationFields={imageGenerationUtils}
+       initialPrompt={initialPrompt ?? ''}
+       promptIndication={'描述您想要生成图片的提示词...'}
+      />
      )}
      {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && generationMode === 'AI 视频生成' && (
-      <GenerateForm key="video-form" generationType="Video" isLoading={isLoading} onRequestSent={handleRequestSent} onVideoPollingStart={handleVideoPollingStart} onNewErrorMsg={handleNewErrorMsg} errorMsg={generationErrorMsg} randomPrompts={VideoRandomPrompts} generationFields={videoGenerationUtils} initialPrompt={initialPrompt ?? ''} initialITVimage={initialITVimage ?? undefined} promptIndication={'描述您想要的视频的提示词...'} />
+      <GenerateForm
+       key="video-form"
+       generationType="Video"
+       isLoading={isLoading}
+       onRequestSent={handleRequestSent}
+       onVideoPollingStart={handleVideoPollingStart}
+       onNewErrorMsg={handleNewErrorMsg}
+       errorMsg={generationErrorMsg}
+       randomPrompts={VideoRandomPrompts}
+       generationFields={videoGenerationUtils}
+       initialPrompt={initialPrompt ?? ''}
+       initialITVimage={initialITVimage ?? undefined}
+       promptIndication={'描述您想要的视频的提示词...'}
+      />
      )}
     </Paper>
    </Box>
 
-    {/* [修改] 右侧画廊区域 (您的“创意画布”)，使用 flex 属性填充剩余空间 */}
+   {/* 右侧：自适应填充剩余空间 */}
    <Box sx={{
-      // 可增长(1)，可收缩(1)，基础宽度为60%
-    flex: '1 1 60%',
-      minWidth: '400px', // 最小宽度
+    flex: '1 1 auto',
+    minWidth: '400px',
     display: 'flex',
     flexDirection: 'column',
    }}>
-      {/* 这就是您的“创意画布”所在的容器 */}
-    <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+    <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
      {generationMode === 'AI 图像创作' ? (
       <OutputImagesDisplay isLoading={isLoading} generatedImagesInGCS={generatedImages} generatedCount={generatedCount} isPromptReplayAvailable={true} />
      ) : (
