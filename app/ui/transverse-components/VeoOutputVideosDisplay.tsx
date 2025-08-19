@@ -1,4 +1,4 @@
- 'use client'
+'use client'
 
 import * as React from 'react'
 import { useRef, useState } from 'react'
@@ -14,13 +14,6 @@ import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action'
 
 interface ExampleVideo { thumbnail: string; videoSrc: string; prompt: string; }
 
-/*
- Note:
- - If your Next version uses the new Image API, replace `layout="fill"` with `fill` and use style prop:
-   <Image src={...} alt={...} fill style={{ objectFit: 'cover' }} />
- - For generated videos we render a small <video> element as thumbnail (safe and avoids needing a `thumbnail` field).
-*/
-
 const PromptDisplay = ({ prompt }: { prompt: string }) => {
  const [openSnackbar, setOpenSnackbar] = useState(false);
  const handleCopy = () => {
@@ -31,7 +24,10 @@ const PromptDisplay = ({ prompt }: { prompt: string }) => {
  return (
   <>
    <Paper variant="outlined" sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1, borderColor: 'grey.800' }}>
-    <Typography variant="body2" sx={{ flexGrow: 1, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>{prompt}</Typography>
+      {/* [Prompt修复] 增加 maxHeight 和 overflowY 来处理超长文本 */}
+    <Typography variant="caption" sx={{ flexGrow: 1, wordBreak: 'break-word', maxHeight: '120px', overflowY: 'auto' }}>
+        {prompt}
+      </Typography>
     <Tooltip title="复制提示词"><IconButton size="small" onClick={handleCopy}><ContentCopy fontSize="inherit" /></IconButton></Tooltip>
    </Paper>
    <Snackbar open={openSnackbar} autoHideDuration={2000} onClose={() => setOpenSnackbar(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
@@ -61,32 +57,25 @@ const EmptyState = () => {
    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', p: 3 }}>
     <Image src="/cloudpuppy-illustration.svg" alt="CloudPuppy" width={150} height={150} />
     <Typography variant="h5" component="h2" sx={{ mt: 3, fontWeight: 'bold' }}>您的创意画廊</Typography>
-    <Typography color="text.secondary" sx={{ mt: 1, mb: 2, maxWidth: '450px' }}>生成的作品将会出现在这里。看看这些例子获取灵感吧！</Typography>
-
+    <Typography color="text.secondary" sx={{ mt: 1, mb: 4, maxWidth: '450px' }}>生成的作品将会出现在这里。看看这些例子获取灵感吧！</Typography>
     <Box sx={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'center' }}>
      <IconButton onClick={() => handleScroll('left')} sx={{ position: 'absolute', left: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronLeft /></IconButton>
      <Box ref={scrollContainerRef} sx={{ width: '100%', overflowX: 'auto', pb: 1, scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
       <Stack direction="row" spacing={2} justifyContent="flex-start" sx={{ display: 'inline-flex', p: 1 }}>
        {exampleVideos.map((ex, index) => (
-        <Paper key={index} elevation={3} onClick={() => setVideoFullScreen(ex)} sx={{ width: 200, height: 200, overflow: 'hidden', position: 'relative', cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out', flexShrink: 0, '&:hover': { transform: 'scale(1.05)' } }}>
-         <Image src={ex.thumbnail} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
-         <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none' }} />
-         <Box sx={{ position: 'absolute', left: 0, right: 0, bottom: 0, bgcolor: '#f1c40f', color: 'black', py: 0.5, px: 1, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ex.prompt}</Box>
-        </Paper>
+        <Tooltip title={ex.prompt} placement="top" arrow key={index}>
+         <Paper elevation={3} onClick={() => setVideoFullScreen(ex)} sx={{ width: 200, height: 200, overflow: 'hidden', position: 'relative', cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out', flexShrink: 0, '&:hover': { transform: 'scale(1.05)' } }}>
+          <Image src={ex.thumbnail} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
+          <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none' }} />
+         </Paper>
+        </Tooltip>
        ))}
       </Stack>
      </Box>
      <IconButton onClick={() => handleScroll('right')} sx={{ position: 'absolute', right: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronRight /></IconButton>
     </Box>
    </Box>
-
-   {videoFullScreen && (
-    <Modal open={!!videoFullScreen} onClose={() => setVideoFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-     <Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}>
-      <video src={videoFullScreen.videoSrc} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} />
-     </Box>
-    </Modal>
-   )}
+   {videoFullScreen && (<Modal open={!!videoFullScreen} onClose={() => setVideoFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}><video src={videoFullScreen.videoSrc} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} /></Box></Modal>)}
   </>
  );
 };
@@ -134,17 +123,7 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
               transition: 'border-color 0.2s ease-in-out',
             }}
           >
-         {/* —— 修复点 ——  
-              这里使用 <Box> + 内嵌 <video> 作为缩略显示（类型安全，不依赖 VideoI.thumbnail 字段）。
-              当视频没有可用缩略图时，这能正确展示一个可播放的小片段。
-         */}
-         <Box onClick={() => setVideoFullScreen(video)} sx={{ position: 'relative', width: '100%', pt: `${(video.height && video.width) ? Math.max(1, (video.height / video.width) * 100) : 56.25}%`, bgcolor: 'background.default', cursor: 'pointer' }}>
-           {/* 绝对定位填充父容器 */}
-           <Box component="video" src={video.src} sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} playsInline muted preload="metadata" />
-           <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255,255,255,0.9)', pointerEvents: 'none' }} />
-           <Box sx={{ position: 'absolute', left: 0, right: 0, bottom: 0, bgcolor: '#f1c40f', color: 'black', py: 0.5, px: 1, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{(video as any).prompt ?? ''}</Box>
-         </Box>
-
+         <video src={video.src} width={video.width} height={video.height} style={{ width: '100%', height: 'auto', display: 'block' }} playsInline muted preload="metadata" />
          <ImageListItemBar className="actions-bar" sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }} position="bottom"
           actionIcon={
            <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
@@ -153,29 +132,17 @@ export default function OutputVideosDisplay({ isLoading, generatedVideosInGCS, g
            </Stack>
           }
          />
-         <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none', opacity: 0 }} />
+         <PlayArrowRounded sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '4rem', color: 'rgba(255, 255, 255, 0.9)', pointerEvents: 'none' }} />
        </ImageListItem>
       ) : null)}
      </ImageList>
-
-     {/* footer prompt 区（保留） */}
-     <Box sx={{ flexShrink: 0, mt: 2, minHeight: '110px', maxHeight: '220px', overflowY: 'auto', px: 0 }}>
-      {selectedMedia ? (
-        <Box sx={{ p: 1 }}><PromptDisplay prompt={(selectedMedia as any).prompt} /></Box>
-      ) : (
-        <Box sx={{ p: 1, color: 'text.secondary' }}><Typography variant="body2">请选择一个视频（点击缩略图），它的提示词会显示在缩略图底部及此处。</Typography></Box>
-      )}
-     </Box>
-   </Box>
-
-   {videoFullScreen && (
-    <Modal open={!!videoFullScreen} onClose={handleCloseVideoFullScreen} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}>
-       <video ref={fullScreenVideoRef} src={(videoFullScreen as any).src ?? (videoFullScreen as any).videoSrc} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} />
+     {selectedMedia && (
+      <Box sx={{ flexShrink: 0, mt: 2, minHeight: '60px' }}>
+       <PromptDisplay prompt={selectedMedia.prompt} />
       </Box>
-    </Modal>
-   )}
-
+     )}
+   </Box>
+   {videoFullScreen && (<Modal open={!!videoFullScreen} onClose={handleCloseVideoFullScreen} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxWidth: '80vw', maxHeight: '80vh', bgcolor: 'black' }}><video ref={fullScreenVideoRef} src={videoFullScreen.src} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '80vh' }} /></Box></Modal>)}
    <ExportStepper open={!!videoToExport} upscaleAvailable={false} mediaToExport={videoToExport} handleMediaExportClose={handleVideoExportClose} />
   </>
  )
