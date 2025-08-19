@@ -70,7 +70,7 @@ const virtualTryOnFormFields: {
   // --- 在您已有的 modelVersion 字段中添加新选项 ---
   modelVersion: {
     label: '模型',
-    default: 'vto-v1', // 更新默认模型
+    default: 'virtual-try-on-preview-08-04', // 更新默认模型
     options: [
       { value: 'virtual-try-on-preview-08-04', label: 'Try-On' }
     ]
