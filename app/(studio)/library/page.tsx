@@ -71,7 +71,6 @@ export default function Page() {
 
           if (hasOldFormat) {
             setErrorMsg(
-                // [汉化]
               "注意：为确保与 ImgStudio 中新的 Veo 功能兼容，必须更新 Firestore 元数据数据库。请让您的系统管理员执行位于应用代码库中 library-update-script.md 文件里提供的说明。"
             )
             setIsMediasLoading(false)
@@ -83,7 +82,6 @@ export default function Page() {
         }
 
         if (isReplacingExistingData && documents.length === 0) {
-            // [汉化]
           setErrorMsg('抱歉，您的搜索没有返回任何结果')
           setFetchedMediasByPage([])
           setIsMorePageToLoad(false)
@@ -135,7 +133,6 @@ export default function Page() {
         })
       } catch (error: any) {
         console.error(error)
-            // [汉化]
         setErrorMsg(`获取媒体时发生错误。请重试。`)
 
         if (isReplacingExistingData) {
@@ -192,11 +189,9 @@ export default function Page() {
           setSelectedIdsForDeletion([])
           setDelStatus('init')
         } else if (typeof result === 'object' && 'error' in result) throw new Error(result.error)
-            // [汉化]
         else throw new Error('删除操作以未知状态完成。')
       } catch (error: any) {
         console.error('Deletion failed:', error)
-            // [汉化]
         setErrorMsg('删除过程中发生错误。请重试。')
         setDeletionSuccess(false)
         setDelStatus('init')
@@ -220,7 +215,6 @@ export default function Page() {
   } | null>(null)
 
   useEffect(() => {
-      // [汉化]
     if (deletionSuccess) setDisplayedAlertProps({ message: '媒体已成功删除！', style: 'success' })
     else if (errorMsg !== '') setDisplayedAlertProps({ message: errorMsg, style: 'error' })
   }, [deletionSuccess, errorMsg])
@@ -230,7 +224,6 @@ export default function Page() {
     else if (displayedAlertProps?.style === 'error') setErrorMsg('')
   }, [displayedAlertProps, setDeletionSuccess, setErrorMsg])
 
-    // [汉化]
   let delButtonLabel = '批量删除'
   if (deletionStatus === 'selecting') {
     if (selectedIdsForDeletion.length > 0)
@@ -239,10 +232,15 @@ export default function Page() {
   } else if (deletionStatus === 'deleting') delButtonLabel = '正在删除...'
 
   return (
-    <Box p={4} sx={{ maxHeight: '100vh', width: '100%', overflowY: 'scroll' }}>
-      <Box sx={{ pb: 5, pt: 1.5 }}>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%', // 占满父容器（main）的全部高度
+      gap: 2,
+    }}>
+      {/* 区域一：页面标题 */}
+      <Box sx={{ flexShrink: 0, pt: 1.5 }}> {/* flexShrink: 0 防止此区域被压缩 */}
         <Typography display="inline" variant="h1" color={palette.text.secondary} sx={{ fontSize: '1.8rem' }}>
-              {/* [汉化] */}
           {'媒体库/'}
         </Typography>
         <Typography
@@ -251,10 +249,11 @@ export default function Page() {
           color={palette.primary.main}
           sx={{ fontWeight: 500, fontSize: '2rem', pl: 1 }}
         >
-              {/* [汉化] */}
           {'我的媒体库'}
         </Typography>
       </Box>
+
+      {/* 区域二：警告信息 */}
       <Collapse
         in={deletionSuccess || errorMsg !== ''}
         onExited={() => {
@@ -270,12 +269,12 @@ export default function Page() {
         )}
       </Collapse>
 
+      {/* 区域三：过滤和删除控制栏 */}
       <Stack
         direction="row"
         gap={2}
         sx={{
-          pt: 2,
-          px: 0,
+          flexShrink: 0, // 防止此区域被压缩
           justifyContent: 'space-between',
           width: '100%',
         }}
@@ -290,7 +289,6 @@ export default function Page() {
         />
         <Box
           sx={{
-            width: 800,
             flexGrow: 1,
             display: 'flex',
             justifyContent: 'flex-end',
@@ -305,12 +303,9 @@ export default function Page() {
                   ? () => setSelectedIdsForDeletion([])
                   : () => setDelStatus('init')
               }
-                  // [汉化]
               aria-label="重置删除选择"
               disableRipple
-              sx={{
-                px: 0.5,
-              }}
+              sx={{ px: 0.5 }}
             >
               {selectedIdsForDeletion.length > 0 ? <Autorenew sx={iconSx} /> : <Close sx={iconSx} />}
             </IconButton>
@@ -336,15 +331,18 @@ export default function Page() {
         </Box>
       </Stack>
 
-      <LibraryMediasDisplay
-        isMediasLoading={isMediasLoading && deletionStatus !== 'deleting'}
-        fetchedMediasByPage={fetchedMediasByPage}
-        handleLoadMore={handleLoadMore}
-        isMorePageToLoad={isMorePageToLoad && deletionStatus !== 'deleting'}
-        isDeleteSelectActive={deletionStatus === 'selecting'}
-        selectedDocIdsForDelete={selectedIdsForDeletion}
-        onToggleDeleteSelect={handleMediaDeletionSelect}
-      />
+      {/* 区域四：媒体展示区 (这个区域将填充所有剩余空间并独立滚动) */}
+      <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
+        <LibraryMediasDisplay
+          isMediasLoading={isMediasLoading && deletionStatus !== 'deleting'}
+          fetchedMediasByPage={fetchedMediasByPage}
+          handleLoadMore={handleLoadMore}
+          isMorePageToLoad={isMorePageToLoad && deletionStatus !== 'deleting'}
+          isDeleteSelectActive={deletionStatus === 'selecting'}
+          selectedDocIdsForDelete={selectedIdsForDeletion}
+          onToggleDeleteSelect={handleMediaDeletionSelect}
+        />
+      </Box>
     </Box>
   )
 }
