@@ -7,13 +7,12 @@ import {
 } from '@mui/material';
 import { Check, Refresh, ExpandLess, ExpandMore } from '@mui/icons-material';
 import { promptTemplates, UseCaseTemplate } from '../../api/prompt-templates';
+import theme from '../../theme'; // 引入主题
 
-interface ImagenPromptBuilderProps {
+export default function ImagenPromptBuilder({ onApply, onClose }: {
   onApply: (prompt: string, negativePrompt: string, aspectRatio: string) => void;
   onClose: () => void;
-}
-
-export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBuilderProps) {
+}) {
   const industryKeys = Object.keys(promptTemplates);
   const firstIndustryKey = industryKeys[0];
   const firstUseCaseKey = Object.keys(promptTemplates[firstIndustryKey].useCases)[0];
@@ -85,13 +84,20 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
       <Grid container spacing={2}>
         {/* 列 1: 模板库 */}
         <Grid item xs={12} md={3}>
-          <Paper variant="outlined" sx={{ p: 1, height: '100%' }}>
+          <Paper variant="outlined" sx={{ p: 1, height: '100%', borderColor: 'rgba(255, 255, 255, 0.23)' }}>
             <Typography variant="h6" sx={{ mb: 1, p: 1 }}>模板库</Typography>
             <List component="nav" dense>
               {Object.entries(promptTemplates).map(([industryKey, industry]) => (
                 <React.Fragment key={industryKey}>
                   <ListItemButton onClick={() => handleIndustryClick(industryKey)}>
-                    <ListItemText primary={industry.label} primaryTypographyProps={{ fontWeight: 600 }} />
+                    <ListItemText 
+                      primary={industry.label} 
+                      primaryTypographyProps={{ 
+                        fontWeight: 500, 
+                        color: 'text.secondary',
+                        fontSize: '0.9rem',
+                      }} 
+                    />
                     {openIndustries[industryKey] ? <ExpandLess /> : <ExpandMore />}
                   </ListItemButton>
                   <Collapse in={openIndustries[industryKey]} timeout="auto" unmountOnExit>
@@ -101,7 +107,21 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
                           key={useCaseKey}
                           selected={selectedIndustry === industryKey && selectedUseCase === useCaseKey}
                           onClick={() => handleUseCaseSelect(industryKey, useCaseKey)}
-                          sx={{ pl: 4 }}
+                          sx={{ 
+                            pl: 4,
+                            // [UI优化] 增强选中项的视觉效果
+                            '&.Mui-selected': {
+                              backgroundColor: theme.palette.primary.main,
+                              color: theme.palette.primary.contrastText,
+                              '&:hover': {
+                                backgroundColor: theme.palette.primary.dark,
+                              }
+                            },
+                            '& .MuiListItemText-primary': {
+                                color: selectedIndustry === industryKey && selectedUseCase === useCaseKey ? theme.palette.primary.contrastText : 'text.primary',
+                                fontWeight: selectedIndustry === industryKey && selectedUseCase === useCaseKey ? 600 : 400,
+                            }
+                          }}
                         >
                           <ListItemText primary={useCase.label} />
                         </ListItemButton>
@@ -117,14 +137,14 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
         {/* 列 2: 交互式工作区 */}
         <Grid item xs={12} md={9}>
           <Stack spacing={2} sx={{ height: '100%' }}>
-            <Paper variant="outlined" sx={{ p: 2 }}>
+            <Paper variant="outlined" sx={{ p: 2, borderColor: 'rgba(255, 255, 255, 0.23)' }}>
               <Typography variant="h6" gutterBottom>实时提示词预览</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ minHeight: '60px', wordWrap: 'break-word' }}>
                 {generateLivePrompt()}
               </Typography>
             </Paper>
 
-            <Paper variant="outlined" sx={{ p: 2, flexGrow: 1 }}>
+            <Paper variant="outlined" sx={{ p: 2, flexGrow: 1, borderColor: 'rgba(255, 255, 255, 0.23)' }}>
               <Typography variant="h6" gutterBottom>参数化表单</Typography>
               <Grid container spacing={2}>
                 {currentTemplate && Object.entries(currentTemplate.fields).map(([key, field]) => (
@@ -159,18 +179,18 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
               </Grid>
             </Paper>
 
-            <Paper variant="outlined" sx={{ p: 2 }}>
+            <Paper variant="outlined" sx={{ p: 2, borderColor: 'rgba(255, 255, 255, 0.23)' }}>
               <Typography variant="h6" gutterBottom>全局设置</Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                    <FormControl fullWidth variant="outlined" size="small">
                       <InputLabel>宽高比</InputLabel>
+                      {/* [修正点] 更新宽高比下拉菜单选项 */}
                       <Select name="aspectRatio" value={formState.aspectRatio || '16:9'} onChange={handleFormChange} label="宽高比">
                         <MenuItem value="16:9">16:9 (宽屏)</MenuItem>
+                        <MenuItem value="9:16">9:16 (故事)</MenuItem>
                         <MenuItem value="4:3">4:3 (标准)</MenuItem>
                         <MenuItem value="1:1">1:1 (方形)</MenuItem>
-                        <MenuItem value="4:5">4:5 (垂直)</MenuItem>
-                        <MenuItem value="9:16">9:16 (故事)</MenuItem>
                       </Select>
                     </FormControl>
                 </Grid>
