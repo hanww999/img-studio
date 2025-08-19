@@ -24,7 +24,7 @@ import theme from '../../theme'
 import { CustomizedAvatarButton, CustomizedIconButton, CustomizedSendButton } from '../ux-components/Button-SX'
 import { useEffect, useRef } from 'react'
 import CustomTooltip from '../ux-components/Tooltip'
-import { CustomizedAccordionSummary } from '../ux-components/Accordion-SX' // [修改] 仅保留需要的 import
+import { CustomizedAccordionSummary } from '../ux-components/Accordion-SX'
 import { FilterMediaFormI } from '../../api/export-utils'
 import FormInputChipGroupMultiple from '../ux-components/InputChipGroupMultiple'
 import { useAppContext, appContextDataDefault } from '../../context/app-context'
@@ -99,7 +99,6 @@ export default function LibraryFiltering({
   <form onSubmit={handleSubmit(onSubmit)}>
    <Accordion
     disableGutters
-      // [颜色修复] 移除对 CustomizedAccordion 的依赖，并直接、完整地定义样式
     sx={{
         backgroundColor: 'background.paper',
         boxShadow: 'none',
@@ -117,17 +116,14 @@ export default function LibraryFiltering({
      sx={CustomizedAccordionSummary}
     >
      <Typography display="inline" variant="body1" sx={{ fontWeight: 500 }}>
-          {/* [汉化] */}
       {'设置筛选器'}
      </Typography>
     </AccordionSummary>
-      {/* [颜色修复] 明确为详情区域也设置背景色 */}
     <AccordionDetails sx={{ pt: 1, pl: 3, bgcolor: 'background.paper' }}>
      <Typography
       display="inline"
       sx={{ fontSize: '0.9rem', fontStyle: 'italic', color: palette.text.secondary, my: 2 }}
      >
-          {/* [汉化] */}
       {'筛选器可以有多个值，但一次只能使用一个筛选器'}
      </Typography>
      <Stack direction="row" spacing={5} sx={{ pr: 4, pt: 2 }}>
@@ -136,7 +132,8 @@ export default function LibraryFiltering({
         <Box key={key} width="100%" sx={{ px: 0 }}>
          <FormInputChipGroupMultiple
           name={key}
-          label={field.name}
+                // [汉化修复] 确保这里使用的是 field.label
+          label={field.label}
           key={key}
           control={control}
           setValue={setValue}
@@ -156,10 +153,8 @@ export default function LibraryFiltering({
        endIcon={isMediasLoading ? <WatchLaterIcon /> : <SendIcon />}
        sx={{ ...CustomizedSendButton, ...{ ml: 0 } }}
       >
-            {/* [汉化] */}
        {'获取'}
       </Button>
-          {/* [汉化] */}
       <CustomTooltip title="重置所有筛选器" size="small">
        <IconButton onClick={() => reset()} aria-label="重置表单" disableRipple sx={{ px: 0.5 }}>
         <Avatar sx={CustomizedAvatarButton}>
