@@ -1,3 +1,5 @@
+// 文件路径: app/ui/generate-components/ImagenPromptBuilder.tsx (最终完整版)
+
 'use client';
 
 import * as React from 'react';
@@ -37,13 +39,11 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
   const [previewOpen, setPreviewOpen] = useState(false);
   const [copySuccess, setCopySuccess] = useState('');
 
-  // [核心修复] 重新添加 const { name, value } = event.target;
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setFormState(prevState => ({ ...prevState, [name]: value }));
   };
 
-  // [核心修复] 重新添加 const { name, value } = event.target;
   const handleSelectChange = (event: SelectChangeEvent<string>) => {
     const { name, value } = event.target;
     setFormState(prevState => ({ ...prevState, [name]: value }));
@@ -90,10 +90,13 @@ export default function ImagenPromptBuilder({ onApply, onClose }: ImagenPromptBu
         <Grid item xs={12} md={4}><Paper variant="outlined" sx={{ p: 2, height: '100%' }}><Stack spacing={2.5}><Typography variant="h6">摄影风格</Typography>{renderSelect('composition', '构图 / 视角')}{renderSelect('lighting', '光照')}{renderSelect('colorScheme', '色系')}{renderSelect('lensType', '镜头类型')}{renderSelect('cameraSettings', '相机设置')}{renderSelect('filmType', '胶片类型')}{renderSelect('quality', '画质')}</Stack></Paper></Grid>
         <Grid item xs={12} md={4}><Paper variant="outlined" sx={{ p: 2, height: '100%' }}><Stack spacing={2}><Typography variant="h6">排除项 (负面提示词)</Typography>{renderTextField('negativePrompt', '负面提示词', 10)}</Stack></Paper></Grid>
       </Grid>
-      <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center" sx={{ mt: 2, p: 1 }}>
-        <Box><Button variant="outlined" onClick={() => setPreviewOpen(true)} startIcon={<Visibility />}>预览</Button><Button variant="text" onClick={handleReset} startIcon={<Refresh />} sx={{ ml: 2 }}>重置</Button></Box>
-        <Button variant="contained" onClick={handleApply} startIcon={<Check />}>应用到表单</Button>
+      
+      <Stack direction="row" spacing={2} justifyContent="flex-end" alignItems="center" sx={{ mt: 2, p: 1 }}>
+        <Button variant="outlined" onClick={() => setPreviewOpen(true)} startIcon={<Visibility />}>预览</Button>
+        <Button variant="text" onClick={handleReset} startIcon={<Refresh />}>重置</Button>
+        <Button variant="contained" onClick={handleApply} startIcon={<Check />} size="large">应用到表单</Button>
       </Stack>
+
       <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>生成的提示词预览<IconButton aria-label="close" onClick={() => setPreviewOpen(false)} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}><CloseIcon /></IconButton></DialogTitle>
         <DialogContent dividers sx={{ p: 3, bgcolor: 'background.default' }}>
