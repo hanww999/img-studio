@@ -14,7 +14,7 @@ export const pages = {
   status: process.env.NEXT_PUBLIC_VTO_ENABLED,
  },
  Edit: {
-  name: '生成式编辑',
+  name: 'AI 编辑图像',
   description: '对现有图像进行智能编辑、替换与变换',
   href: '/edit', // [修正] 确保 href 指向正确的页面
   status: process.env.NEXT_PUBLIC_EDIT_ENABLED,
