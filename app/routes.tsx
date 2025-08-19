@@ -8,7 +8,7 @@ export const pages = {
   status: 'true',
  },
  VirtualTryOn: {
-  name: '虚拟试穿',
+  name: 'AI 虚拟试穿',
   description: '上传模特与服装，生成逼真试穿效果',
   href: '/try-on', // [修正] 确保 href 指向正确的页面
   status: process.env.NEXT_PUBLIC_VTO_ENABLED,
