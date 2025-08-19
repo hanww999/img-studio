@@ -1,7 +1,7 @@
 {
   "contextAuthorTeam": {
-    "label": "In which team are you?",
-    "name": "Associated team(s)",
+    "label": "您在哪个团队？",
+    "name": "所属团队",
     "type": "multiple-select",
     "isUpdatable": true,
     "isMandatory": true,
@@ -10,29 +10,29 @@
     "options": [
       {
         "value": "marketing",
-        "label": "Content marketing"
+        "label": "内容营销"
       },
       {
         "value": "communityManagement",
-        "label": "Community Management"
+        "label": "社区管理"
       },
       {
         "value": "hr",
-        "label": "Human Ressources"
+        "label": "人力资源"
       },
       {
         "value": "product",
-        "label": "Product development"
+        "label": "产品开发"
       },
       {
         "value": "sales",
-        "label": "Sales enablement"
+        "label": "销售支持"
       }
     ]
   },
   "contextTargetPlatform": {
-    "label": "For which platform is it targetted?",
-    "name": "Targetted platform(s)",
+    "label": "它的目标平台是什么？",
+    "name": "目标平台",
     "type": "multiple-select",
     "isUpdatable": true,
     "isMandatory": true,
@@ -41,25 +41,25 @@
     "options": [
       {
         "value": "mailing",
-        "label": "Mailing compaign"
+        "label": "邮件营销"
       },
       {
         "value": "website",
-        "label": "Public website"
+        "label": "公共网站"
       },
       {
         "value": "socialMedias",
-        "label": "Social medias"
+        "label": "社交媒体"
       },
       {
         "value": "product",
-        "label": "Product development"
+        "label": "产品开发"
       }
     ]
   },
   "contextAssociatedBrand": {
-    "label": "For which brand(s) did you create this image?",
-    "name": "Associated brand(s)",
+    "label": "您为哪个品牌创建了此图片？",
+    "name": "相关品牌",
     "type": "multiple-select",
     "isUpdatable": true,
     "isMandatory": false,
@@ -68,7 +68,7 @@
     "options": [
       {
         "value": "gemo",
-        "label": "G\u00e9mo"
+        "label": "Gémo"
       },
       {
         "value": "mellowYellow",
@@ -88,7 +88,7 @@
       },
       {
         "value": "sessun",
-        "label": "Sess\u00f9n"
+        "label": "Sessùn"
       },
       {
         "value": "americanVintage",
@@ -101,8 +101,8 @@
     ]
   },
   "contextCollection": {
-    "label": "To which collection(s) is it associated?",
-    "name": "Associated collection(s)",
+    "label": "它与哪个系列相关？",
+    "name": "相关系列",
     "type": "multiple-select",
     "isUpdatable": true,
     "isMandatory": false,
@@ -111,19 +111,19 @@
     "options": [
       {
         "value": "spring",
-        "label": "Spring"
+        "label": "春季"
       },
       {
         "value": "summer",
-        "label": "Summer"
+        "label": "夏季"
       },
       {
         "value": "fall",
-        "label": "Fall"
+        "label": "秋季"
       },
       {
         "value": "winter",
-        "label": "Winter"
+        "label": "冬季"
       }
     ]
   }
