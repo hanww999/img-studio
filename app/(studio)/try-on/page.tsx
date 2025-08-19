@@ -1,69 +1,66 @@
-// 文件路径: app/(studio)/try-on/page.tsx (完整布局修复版)
-
 'use client';
 
 import { useState } from 'react';
-import { Box, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography, Grid } from '@mui/material';
 
 import VirtualTryOnForm from '../../ui/try-on-components/VirtualTryOnForm';
 import TryOnResultDisplay from '../../ui/try-on-components/TryOnResultDisplay';
 import { virtualTryOnFields } from '../../api/virtual-try-on-utils';
 import { ImageI } from '../../api/generate-image-utils';
-import { Grid } from '@mui/material';
 
 export default function TryOnPage() {
- const [isLoading, setIsLoading] = useState(false);
- const [errorMsg, setErrorMsg] = useState('');
- const [generatedImage, setGeneratedImage] = useState<ImageI | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [generatedImage, setGeneratedImage] = useState<ImageI | null>(null);
 
- const handleRequestSent = (loading: boolean) => {
-  setIsLoading(loading);
-  setErrorMsg('');
-  if (loading) {
-   setGeneratedImage(null);
-  }
- };
+  const handleRequestSent = (loading: boolean) => {
+    setIsLoading(loading);
+    setErrorMsg('');
+    if (loading) {
+      setGeneratedImage(null);
+    }
+  };
 
- const handleNewErrorMsg = (newError: string) => {
-  setErrorMsg(newError);
-  setIsLoading(false);
- };
+  const handleNewErrorMsg = (newError: string) => {
+    setErrorMsg(newError);
+    setIsLoading(false);
+  };
 
- const handleImageGeneration = (newImage: ImageI) => {
-  setGeneratedImage(newImage);
-  setIsLoading(false);
-  setErrorMsg('');
- };
+  const handleImageGeneration = (newImage: ImageI) => {
+    setGeneratedImage(newImage);
+    setIsLoading(false);
+    setErrorMsg('');
+  };
 
- return (
-  <Grid container spacing={{ xs: 2, md: 3 }} sx={{ height: '100%' }}>
-    {/* 左侧：表单区域 */}
-    <Grid item xs={12} md={5} lg={4} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-        <Typography variant="h1" color="text.secondary" sx={{ fontSize: '1.8rem', pb: 5 }}>
-          虚拟试穿
-        </Typography>
-        <VirtualTryOnForm
-          isLoading={isLoading}
-          errorMsg={errorMsg}
-          generationFields={virtualTryOnFields}
-          onRequestSent={handleRequestSent}
-          onNewErrorMsg={handleNewErrorMsg}
-          onImageGeneration={handleImageGeneration}
-        />
-      </Paper>
+  return (
+    <Grid container spacing={{ xs: 2, md: 3 }} sx={{ height: '100%' }}>
+      {/* 左侧：表单区域 */}
+      <Grid item xs={12} md={5} lg={4} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+          {/* ==================== 修改内容 ==================== */}
+          {/* 旧的 Typography 标题已被移除，新标题集成在 VirtualTryOnForm 内部 */}
+          <VirtualTryOnForm
+            isLoading={isLoading}
+            errorMsg={errorMsg}
+            generationFields={virtualTryOnFields}
+            onRequestSent={handleRequestSent}
+            onNewErrorMsg={handleNewErrorMsg}
+            onImageGeneration={handleImageGeneration}
+          />
+          {/* =============================================== */}
+        </Paper>
+      </Grid>
+
+      {/* 右侧：结果展示区域 */}
+      <Grid item xs={12} md={7} lg={8} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+          <TryOnResultDisplay
+            isLoading={isLoading}
+            errorMsg={errorMsg}
+            generatedImage={generatedImage}
+          />
+        </Paper>
+      </Grid>
     </Grid>
-
-    {/* 右侧：结果展示区域 */}
-    <Grid item xs={12} md={7} lg={8} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <TryOnResultDisplay
-          isLoading={isLoading}
-          errorMsg={errorMsg}
-          generatedImage={generatedImage}
-        />
-      </Paper>
-    </Grid>
-  </Grid>
-);
+  );
 }
