@@ -1,3 +1,5 @@
+// 文件路径: app/ui/try-on-components/VirtualTryOnForm.tsx
+
 'use client';
 
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -6,9 +8,7 @@ import { Send as SendIcon, WatchLater as WatchLaterIcon, Autorenew, ArrowDownwar
 
 import { useAppContext } from '../../context/app-context';
 import { ImageI } from '../../api/generate-image-utils';
-// ==================== 修改内容 ====================
-import { VirtualTryOnFormI, virtualTryOnFields, modelOptions } from '../../api/virtual-try-on-utils';
-// ===============================================
+import { VirtualTryOnFormI, virtualTryOnFields } from '../../api/virtual-try-on-utils';
 import { generateVtoImage } from '../../api/virtual-try-on/action';
 
 import ImageDropzone from './ImageDropzone';
@@ -70,20 +70,18 @@ export default function VirtualTryOnForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3}>
-        {/* ==================== 新增内容 ==================== */}
         <Stack direction="row" spacing={2} justifyContent="flex-start" alignItems="center">
             <Typography variant="h4" color="text.primary" sx={{ fontWeight: 600 }}>使用</Typography>
             <FormInputDropdown
                 name="model"
                 control={control}
                 label=""
-                field={{ options: modelOptions }}
+                field={generationFields.fields.modelVersion} // 使用 generationFields 中的定义
                 styleSize="big"
                 width=""
                 required={true}
             />
         </Stack>
-        {/* =============================================== */}
 
         {errorMsg && (
           <Alert severity="error" action={<IconButton size="small" onClick={() => onNewErrorMsg('')}><CloseIcon fontSize="inherit" /></IconButton>}>
