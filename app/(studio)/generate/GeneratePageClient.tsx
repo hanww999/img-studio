@@ -190,72 +190,56 @@ export default function GeneratePageClient() {
  }
 
  return (
-  // 上层容器：左侧固定宽度（响应式），右侧自适应填充
-  <Box sx={{
-   display: 'flex',
-   flexDirection: 'row',
-   gap: 3,
-   height: 'calc(100vh - 48px)',
-  }}>
-    {/* 左侧：固定宽度（基础宽度 360px），带纵向滚动 */}
-   <Box sx={{
-    flex: '0 0 360px',
-    minWidth: { xs: '240px', sm: '300px', md: '360px' },
-    maxWidth: '420px',
-    overflowY: 'auto',
-    display: 'flex',
-    flexDirection: 'column',
-   }}>
-    <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-     {generationMode === 'AI 图像创作' && (
-      <GenerateForm
-       key="image-form"
-       generationType="Image"
-       isLoading={isLoading}
-       onRequestSent={handleRequestSent}
-       onImageGeneration={handleImageGeneration}
-       onNewErrorMsg={handleNewErrorMsg}
-       errorMsg={generationErrorMsg}
-       randomPrompts={ImageRandomPrompts}
-       generationFields={imageGenerationUtils}
-       initialPrompt={initialPrompt ?? ''}
-       promptIndication={'描述您想要生成图片的提示词...'}
-      />
-     )}
-     {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && generationMode === 'AI 视频生成' && (
-      <GenerateForm
-       key="video-form"
-       generationType="Video"
-       isLoading={isLoading}
-       onRequestSent={handleRequestSent}
-       onVideoPollingStart={handleVideoPollingStart}
-       onNewErrorMsg={handleNewErrorMsg}
-       errorMsg={generationErrorMsg}
-       randomPrompts={VideoRandomPrompts}
-       generationFields={videoGenerationUtils}
-       initialPrompt={initialPrompt ?? ''}
-       initialITVimage={initialITVimage ?? undefined}
-       promptIndication={'描述您想要的视频的提示词...'}
-      />
-     )}
-    </Paper>
-   </Box>
+    <Grid container spacing={{ xs: 2, md: 3 }} sx={{ height: '100%' }}>
+      {/* 左侧：表单区域 */}
+      <Grid item xs={12} md={5} lg={4} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+          {generationMode === 'AI 图像创作' && (
+            <GenerateForm
+              key="image-form"
+              generationType="Image"
+              isLoading={isLoading}
+              onRequestSent={handleRequestSent}
+              onImageGeneration={handleImageGeneration}
+              onNewErrorMsg={handleNewErrorMsg}
+              errorMsg={generationErrorMsg}
+              randomPrompts={ImageRandomPrompts}
+              generationFields={imageGenerationUtils}
+              initialPrompt={initialPrompt ?? ''}
+              promptIndication={'描述您想要生成图片的提示词...'}
+            />
+          )}
+          {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && generationMode === 'AI 视频生成' && (
+            <GenerateForm
+              key="video-form"
+              generationType="Video"
+              isLoading={isLoading}
+              onRequestSent={handleRequestSent}
+              onVideoPollingStart={handleVideoPollingStart}
+              onNewErrorMsg={handleNewErrorMsg}
+              errorMsg={generationErrorMsg}
+              randomPrompts={VideoRandomPrompts}
+              generationFields={videoGenerationUtils}
+              initialPrompt={initialPrompt ?? ''}
+              initialITVimage={initialITVimage ?? undefined}
+              promptIndication={'描述您想要的视频的提示词...'}
+            />
+          )}
+        </Paper>
+      </Grid>
 
-   {/* 右侧：自适应填充剩余空间 */}
-   <Box sx={{
-    flex: '1 1 auto',
-    minWidth: '400px',
-    display: 'flex',
-    flexDirection: 'column',
-   }}>
-    <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-     {generationMode === 'AI 图像创作' ? (
-      <OutputImagesDisplay isLoading={isLoading} generatedImagesInGCS={generatedImages} generatedCount={generatedCount} isPromptReplayAvailable={true} />
-     ) : (
-      <OutputVideosDisplay isLoading={isLoading} generatedVideosInGCS={generatedVideos} generatedCount={generatedCount} />
-     )}
-    </Paper>
-   </Box>
-  </Box>
+      {/* 右侧：结果展示区域 */}
+      <Grid item xs={12} md={7} lg={8} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {generationMode === 'AI 图像创作' ? (
+            <OutputImagesDisplay isLoading={isLoading} generatedImagesInGCS={generatedImages} generatedCount={generatedCount} isPromptReplayAvailable={true} />
+          ) : (
+            <OutputVideosDisplay isLoading={isLoading} generatedVideosInGCS={generatedVideos} generatedCount={generatedCount} />
+          )}
+        </Paper>
+      </Grid>
+    </Grid>
+  );
+}
  );
 }
