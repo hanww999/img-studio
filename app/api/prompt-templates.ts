@@ -191,5 +191,3 @@ export const promptTemplates: Record<string, { label: string; useCases: Record<s
   },
 };
 
-
-/
