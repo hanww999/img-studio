@@ -78,7 +78,7 @@ const EmptyState = () => {
      <IconButton onClick={() => handleScroll('right')} sx={{ position: 'absolute', right: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronRight /></IconButton>
     </Box>
    </Box>
-   {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}><Image src={imageFullScreen.image} alt={imageFullScreen.prompt} width={800} height={800} style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} /></Box></Modal>)}
+   {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw', position: 'relative' }}><Image src={imageFullScreen.image} alt={imageFullScreen.prompt} layout="fill" objectFit="contain" quality={100} /></Box></Modal>)}
   </>
  );
 };
@@ -100,6 +100,7 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
   return (
    <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16}>
     {Array.from(new Array(generatedCount > 1 ? generatedCount : 2)).map((_, index) => (
+     // skeleton 保持原先方形占位（可按需改成按比例）
      <ImageListItem key={index}><Skeleton variant="rounded" sx={{ width: '100%', paddingTop: '100%', height: 0, borderRadius: 3 }} /></ImageListItem>
     ))}
    </ImageList>
@@ -114,34 +115,51 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
   <>
    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
      <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16} sx={{ m: 0, flexGrow: 1, overflowY: 'auto' }}>
-      {generatedImagesInGCS.map((image) => (
-       <ImageListItem key={image.key}
-            onClick={() => setSelectedMedia(image)}
-            sx={{
-              '&:hover .actions-bar': { opacity: 1 },
-              borderRadius: 3,
-              overflow: 'hidden',
-              position: 'relative',
-              cursor: 'pointer',
-              border: selectedMedia?.key === image.key ? '3px solid' : '3px solid transparent',
-              borderColor: selectedMedia?.key === image.key ? 'primary.main' : 'transparent',
-              transition: 'border-color 0.2s ease-in-out',
-            }}
-          >
-         <Image src={image.src} alt={image.altText} width={image.width} height={image.height} style={{ width: '100%', height: 'auto', display: 'block' }} placeholder="blur" blurDataURL={blurDataURL} quality={80} />
-         <ImageListItemBar className="actions-bar" sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }} position="bottom"
-          actionIcon={
-           <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
-            {isPromptReplayAvailable && !image.prompt.includes('[1]') && (<Tooltip title="More like this!"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleMoreLikeThisClick(image.prompt); }}><Favorite /></IconButton></Tooltip>)}
-            {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (<Tooltip title="Edit this image"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleEditClick(image.gcsUri); }}><Edit /></IconButton></Tooltip>)}
-            {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true' && (<Tooltip title="Image to video"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleITVClick(image.gcsUri); }}><VideocamRounded /></IconButton></Tooltip>)}
-            <Tooltip title="Export to library"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setImageToExport(image); }}><CreateNewFolderRounded /></IconButton></Tooltip>
-            <Tooltip title="Download"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); isUpscaledDLAvailable ? setImageToDL(image) : handleDLimage(image); }}><Download /></IconButton></Tooltip>
-           </Stack>
-          }
-         />
-       </ImageListItem>
-      ))}
+      {generatedImagesInGCS.map((image) => {
+        // 计算占位 padding-top (百分比) —— 防止除以 0
+        const ratioPercent = (image.width && image.height) ? Math.max(1, (image.height / image.width) * 100) : 100;
+        return (
+         <ImageListItem key={image.key}
+              onClick={() => setSelectedMedia(image)}
+              sx={{
+                '&:hover .actions-bar': { opacity: 1 },
+                borderRadius: 3,
+                overflow: 'hidden',
+                position: 'relative',
+                cursor: 'pointer',
+                border: selectedMedia?.key === image.key ? '3px solid' : '3px solid transparent',
+                borderColor: selectedMedia?.key === image.key ? 'primary.main' : 'transparent',
+                transition: 'border-color 0.2s ease-in-out',
+              }}
+            >
+           {/* 占位容器，根据原图宽高比设置 padding-top */}
+           <Box sx={{ position: 'relative', width: '100%', pt: `${ratioPercent}%`, bgcolor: 'background.default' }}>
+             {/* next/image 使用 fill/layout="fill" + objectFit="contain" 保证完整显示 */}
+             <Image
+               src={image.src}
+               alt={image.altText ?? 'generated image'}
+               layout="fill"
+               objectFit="contain"
+               placeholder="blur"
+               blurDataURL={blurDataURL}
+               quality={80}
+             />
+           </Box>
+
+           <ImageListItemBar className="actions-bar" sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }} position="bottom"
+            actionIcon={
+             <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
+              {isPromptReplayAvailable && !image.prompt.includes('[1]') && (<Tooltip title="More like this!"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleMoreLikeThisClick(image.prompt); }}><Favorite /></IconButton></Tooltip>)}
+              {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (<Tooltip title="Edit this image"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleEditClick(image.gcsUri); }}><Edit /></IconButton></Tooltip>)}
+              {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true' && (<Tooltip title="Image to video"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleITVClick(image.gcsUri); }}><VideocamRounded /></IconButton></Tooltip>)}
+              <Tooltip title="Export to library"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setImageToExport(image); }}><CreateNewFolderRounded /></IconButton></Tooltip>
+              <Tooltip title="Download"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); isUpscaledDLAvailable ? setImageToDL(image) : handleDLimage(image); }}><Download /></IconButton></Tooltip>
+             </Stack>
+            }
+           />
+         </ImageListItem>
+        );
+      })}
      </ImageList>
      {selectedMedia && (
       <Box sx={{ flexShrink: 0, mt: 2, minHeight: '60px' }}>
@@ -149,7 +167,8 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
       </Box>
      )}
    </Box>
-   {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(undefined)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}><Image src={imageFullScreen.src} alt={'displayed-image'} width={imageFullScreen.width} height={imageFullScreen.height} style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} quality={100} /></Box></Modal>)}
+   {/* 保持空状态例图的模态弹窗行为不变 */}
+   {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(undefined)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw', position: 'relative' }}><Image src={imageFullScreen.src} alt={'displayed-image'} layout="fill" objectFit="contain" quality={100} /></Box></Modal>)}
    <ExportStepper open={!!imageToExport} upscaleAvailable={true} mediaToExport={imageToExport} handleMediaExportClose={() => setImageToExport(undefined)} />
    <DownloadDialog open={!!imageToDL} mediaToDL={imageToDL} handleMediaDLClose={() => setImageToDL(undefined)} />
   </>
