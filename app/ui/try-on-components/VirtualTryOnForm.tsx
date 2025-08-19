@@ -14,7 +14,7 @@ import FormInputChipGroup from '../ux-components/InputChipGroup';
 import FormInputDropdown from '../ux-components/InputDropdown';
 import { FormInputNumberSmall } from '../ux-components/FormInputNumberSmall';
 import { CustomizedSendButton } from '../ux-components/Button-SX';
-import { CustomizedAccordion, CustomizedAccordionSummary } from '../ux-components/Accordion-SX';
+import { CustomizedAccordionSummary } from '../ux-components/Accordion-SX'; // 仅保留需要的 import
 import theme from '../../theme';
 const { palette } = theme;
 
@@ -42,115 +42,124 @@ export default function VirtualTryOnForm({
 
  const onSubmit: SubmitHandler<VirtualTryOnFormI> = async (formData) => {
  if (!appContext) {
-  onNewErrorMsg("应用程序上下文不可用。请尝试刷新页面。");
-  return;
+ onNewErrorMsg("应用程序上下文不可用。请尝试刷新页面。");
+ return;
  }
  if (!formData.humanImage.base64Image) {
-  onNewErrorMsg('请上传模特图片。');
-  return;
+ onNewErrorMsg('请上传模特图片。');
+ return;
  }
  if (!formData.garmentImages[0].base64Image) {
-  onNewErrorMsg('请上传服装图片。');
-  return;
+ onNewErrorMsg('请上传服装图片。');
+ return;
  }
 
  onRequestSent(true);
  try {
-  const result = await generateVtoImage(formData, appContext);
-  if ('error' in result) {
-  throw new Error(result.error);
-  }
-  onImageGeneration(result as ImageI);
+ const result = await generateVtoImage(formData, appContext);
+ if ('error' in result) {
+ throw new Error(result.error);
+ }
+ onImageGeneration(result as ImageI);
  } catch (error: any) {
-  onNewErrorMsg(error.message || '发生未知错误。');
+ onNewErrorMsg(error.message || '发生未知错误。');
  }
  };
 
  return (
  <form onSubmit={handleSubmit(onSubmit)}>
-  <Stack spacing={3}>
-  {errorMsg && (
-   <Alert severity="error" action={<IconButton size="small" onClick={() => onNewErrorMsg('')}><CloseIcon fontSize="inherit" /></IconButton>}>
-   {errorMsg}
-   </Alert>
-  )}
+ <Stack spacing={3}>
+ {errorMsg && (
+  <Alert severity="error" action={<IconButton size="small" onClick={() => onNewErrorMsg('')}><CloseIcon fontSize="inherit" /></IconButton>}>
+  {errorMsg}
+  </Alert>
+ )}
 
-  <Stack direction="row" spacing={2}>
-   <Box sx={{ flex: 1 }}>
-   <ImageDropzone name="humanImage" label="模特图片" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
-   </Box>
-   <Box sx={{ flex: 1 }}>
-   <ImageDropzone name={`garmentImages.0`} label="服装图片" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
-   </Box>
-  </Stack>
+ <Stack direction="row" spacing={2}>
+  <Box sx={{ flex: 1 }}>
+  <ImageDropzone name="humanImage" label="模特图片" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
+  </Box>
+  <Box sx={{ flex: 1 }}>
+  <ImageDropzone name={`garmentImages.0`} label="服装图片" control={control} setValue={setValue} onNewErrorMsg={onNewErrorMsg} />
+  </Box>
+ </Stack>
 
-    {/* [颜色修复] 直接在 sx 中为 Accordion 和其内容指定正确的背景色 */}
-  <Accordion sx={{ ...CustomizedAccordion, bgcolor: 'background.paper' }}>
-   <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} sx={CustomizedAccordionSummary}>
-   <Typography variant="body1" sx={{ fontWeight: 500 }}>高级设置</Typography>
-   </AccordionSummary>
-   <AccordionDetails sx={{ bgcolor: 'background.paper' }}>
-   <Stack spacing={2} sx={{ pt: 1 }}>
-    <FormInputChipGroup
-    name="sampleCount"
-    control={control}
-    setValue={setValue}
-    label={generationFields.fields.sampleCount.label}
-    field={generationFields.fields.sampleCount}
-    width="100%"
-    required={false}
-    />
-    <FormInputDropdown
-    name="personGeneration"
-    control={control}
-    label={generationFields.fields.personGeneration.label ?? ''}
-    field={generationFields.fields.personGeneration}
-    styleSize="small"
-    width="100%"
-    required={false}
-    />
-    <FormInputDropdown
-     name="safetySetting"
-     control={control}
-     label={generationFields.fields.safetySetting.label ?? ''}
-     field={generationFields.fields.safetySetting}
-     styleSize="small"
-     width="100%"
-     required={false}
-    />
-    <FormInputDropdown
-    name="outputFormat"
-    control={control}
-    label={generationFields.fields.outputFormat.label ?? ''}
-    field={generationFields.fields.outputFormat}
-    styleSize="small"
-    width="100%"
-    required={false}
-    />
-    <Box>
-    <Typography variant="caption" sx={{ color: palette.text.primary, fontSize: '0.75rem', fontWeight: 500, lineHeight: '1.3em', pb: 0.5 }}>
-     {generationFields.fields.seedNumber.label}
-    </Typography>
-    <FormInputNumberSmall
-     name="seedNumber"
-     control={control}
-     min={0}
-     max={4294967295}
-    />
-    </Box>
-   </Stack>
-   </AccordionDetails>
-  </Accordion>
+    {/* [颜色修复] 移除对 CustomizedAccordion 的依赖，并直接、完整地定义样式 */}
+ <Accordion sx={{
+      // 覆盖全局的 transparent 背景
+      backgroundColor: 'background.paper',
+      // 确保无边框和阴影，与 Paper 融为一体
+      boxShadow: 'none',
+      '&:before': {
+        display: 'none',
+      },
+    }}>
+  <AccordionSummary expandIcon={<ArrowDownwardIcon sx={{ color: palette.primary.main }} />} sx={CustomizedAccordionSummary}>
+  <Typography variant="body1" sx={{ fontWeight: 500 }}>高级设置</Typography>
+  </AccordionSummary>
+    {/* 明确为详情区域也设置背景色，防止透明 */}
+  <AccordionDetails sx={{ bgcolor: 'background.paper', p: 2 }}>
+  <Stack spacing={2} sx={{ pt: 1 }}>
+  <FormInputChipGroup
+  name="sampleCount"
+  control={control}
+  setValue={setValue}
+  label={generationFields.fields.sampleCount.label}
+  field={generationFields.fields.sampleCount}
+  width="100%"
+  required={false}
+  />
+  <FormInputDropdown
+  name="personGeneration"
+  control={control}
+  label={generationFields.fields.personGeneration.label ?? ''}
+  field={generationFields.fields.personGeneration}
+  styleSize="small"
+  width="100%"
+  required={false}
+  />
+  <FormInputDropdown
+   name="safetySetting"
+   control={control}
+   label={generationFields.fields.safetySetting.label ?? ''}
+   field={generationFields.fields.safetySetting}
+   styleSize="small"
+   width="100%"
+   required={false}
+  />
+  <FormInputDropdown
+  name="outputFormat"
+  control={control}
+  label={generationFields.fields.outputFormat.label ?? ''}
+  field={generationFields.fields.outputFormat}
+  styleSize="small"
+  width="100%"
+  required={false}
+  />
+  <Box>
+  <Typography variant="caption" sx={{ color: palette.text.primary, fontSize: '0.75rem', fontWeight: 500, lineHeight: '1.3em', pb: 0.5 }}>
+   {generationFields.fields.seedNumber.label}
+  </Typography>
+  <FormInputNumberSmall
+   name="seedNumber"
+   control={control}
+   min={0}
+   max={4294967295}
+  />
+  </Box>
+  </Stack>
+  </AccordionDetails>
+ </Accordion>
 
-  <Stack direction="row" justifyContent="flex-end" spacing={2}>
-   <Button variant="text" onClick={onReset} disabled={isLoading} startIcon={<Autorenew />}>
-   重置
-   </Button>
-   <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>
-   生成
-   </Button>
-  </Stack>
-  </Stack>
+ <Stack direction="row" justifyContent="flex-end" spacing={2}>
+  <Button variant="text" onClick={onReset} disabled={isLoading} startIcon={<Autorenew />}>
+  重置
+  </Button>
+  <Button type="submit" variant="contained" disabled={isLoading} endIcon={isLoading ? <WatchLaterIcon /> : <SendIcon />} sx={CustomizedSendButton}>
+  生成
+  </Button>
+ </Stack>
+ </Stack>
  </form>
  );
 }
