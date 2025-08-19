@@ -4,13 +4,10 @@
 
 import * as React from 'react';
 import { useState, useRef } from 'react';
-// ==================== 新增导入 ====================
 import {
   CreateNewFolderRounded, Download, Edit, Favorite, VideocamRounded,
   ChevronLeft, ChevronRight, ContentCopy, InfoOutlined as InfoOutlinedIcon
 } from '@mui/icons-material';
-// =================================================
-
 import Image from 'next/image';
 import {
   Box, IconButton, Modal, Skeleton, ImageListItem, ImageList,
@@ -48,13 +45,10 @@ const PromptDisplay = ({ prompt, onCopy }: { prompt: string, onCopy: () => void 
   );
 };
 
-// ==================== 修改 EmptyState 组件 ====================
 const EmptyState = () => {
   const [imageFullScreen, setImageFullScreen] = useState<ExampleImage | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  // 新增状态：用于追踪哪个提示词是激活状态
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const examplePrompts: ExampleImage[] = [
@@ -70,9 +64,8 @@ const EmptyState = () => {
     }
   };
 
-  // 新增点击处理函数：用于切换提示词的显示/隐藏
   const handleTogglePrompt = (e: React.MouseEvent, index: number) => {
-    e.stopPropagation(); // 关键：阻止事件冒泡到上层Paper的onClick，避免打开全屏Modal
+    e.stopPropagation();
     setActiveIndex(prevIndex => (prevIndex === index ? null : index));
   };
 
@@ -89,25 +82,21 @@ const EmptyState = () => {
               {examplePrompts.map((ex, index) => (
                 <Grid item key={index} sx={{ minWidth: 200, display: 'flex' }}>
                   <Stack direction="column" spacing={1}>
-                    <Paper 
-                      elevation={3} 
-                      onClick={() => setImageFullScreen(ex)} 
-                      sx={{ 
-                        width: 200, height: 200, overflow: 'hidden', position: 'relative', 
-                        cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out', 
-                        flexShrink: 0, '&:hover': { transform: 'scale(1.05)' } 
+                    <Paper
+                      elevation={3}
+                      onClick={() => setImageFullScreen(ex)}
+                      sx={{
+                        width: 200, height: 200, overflow: 'hidden', position: 'relative',
+                        cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out',
+                        flexShrink: 0, '&:hover': { transform: 'scale(1.05)' }
                       }}
                     >
                       <Image src={ex.image} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
-                      {/* 新增的信息图标按钮 */}
                       <Tooltip title="显示/隐藏提示词">
                         <IconButton
                           onClick={(e) => handleTogglePrompt(e, index)}
                           sx={{
-                            position: 'absolute',
-                            bottom: 8,
-                            right: 8,
-                            color: 'white',
+                            position: 'absolute', bottom: 8, right: 8, color: 'white',
                             backgroundColor: activeIndex === index ? 'primary.main' : 'rgba(0, 0, 0, 0.5)',
                             '&:hover': { backgroundColor: activeIndex === index ? 'primary.dark' : 'rgba(0, 0, 0, 0.8)' }
                           }}
@@ -116,7 +105,6 @@ const EmptyState = () => {
                         </IconButton>
                       </Tooltip>
                     </Paper>
-                    {/* 条件渲染提示词，并用Box占位防止布局跳动 */}
                     <Box sx={{ minHeight: { xs: '140px', md: '120px' } }}>
                       {activeIndex === index && (
                         <PromptDisplay prompt={ex.prompt} onCopy={() => setSnackbarOpen(true)} />
@@ -137,7 +125,6 @@ const EmptyState = () => {
     </>
   );
 };
-// ============================================================
 
 export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, generatedCount, isPromptReplayAvailable, isUpscaledDLAvailable = true }: { isLoading: boolean; generatedImagesInGCS: ImageI[]; generatedCount: number; isPromptReplayAvailable: boolean; isUpscaledDLAvailable?: boolean; }) {
   const [imageFullScreen, setImageFullScreen] = useState<ImageI | undefined>();
@@ -166,25 +153,44 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
     return <EmptyState />;
   }
 
+  // ==================== 这是核心修改区域 ====================
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16} sx={{ m: 0, flexGrow: 1, overflowY: 'auto' }}>
-          {generatedImagesInGCS.map((image) => (
-            <Paper key={image.key} elevation={3} sx={{ borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
+        {generatedImagesInGCS.length === 1 ? (
+          // --- 1. 单张图片的渲染路径 ---
+          (() => {
+            const image = generatedImagesInGCS[0];
+            return (
               <ImageListItem
+                key={image.key}
                 onClick={() => setImageFullScreen(image)}
                 sx={{
-                  '&:hover .actions-bar': { opacity: 1 },
-                  overflow: 'visible',
+                  width: 'auto',
+                  height: 'auto',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
                   position: 'relative',
                   cursor: 'pointer',
+                  '&:hover .actions-bar': { opacity: 1 },
                 }}
               >
-                <Image src={image.src} alt={image.altText} width={image.width} height={image.height} style={{ width: '100%', height: 'auto', display: 'block' }} placeholder="blur" blurDataURL={blurDataURL} quality={80} />
+                <Image
+                  src={image.src}
+                  alt={image.altText}
+                  width={image.width}
+                  height={image.height}
+                  style={{ width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: '100%', display: 'block', objectFit: 'contain', borderRadius: '12px' }}
+                  placeholder="blur"
+                  blurDataURL={blurDataURL}
+                  quality={90}
+                />
                 <ImageListItemBar
                   className="actions-bar"
-                  sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }}
+                  sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease', borderRadius: '12px' }}
                   position="bottom"
                   actionIcon={
                     <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
@@ -213,10 +219,61 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
                   }
                 />
               </ImageListItem>
-            </Paper>
-          ))}
-        </ImageList>
+            );
+          })()
+        ) : (
+          // --- 2. 多张图片的渲染路径 (保持不变) ---
+          <ImageList cols={2} gap={16} sx={{ m: 0, flexGrow: 1, overflowY: 'auto' }}>
+            {generatedImagesInGCS.map((image) => (
+              <Paper key={image.key} elevation={3} sx={{ borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <ImageListItem
+                  onClick={() => setImageFullScreen(image)}
+                  sx={{
+                    '&:hover .actions-bar': { opacity: 1 },
+                    overflow: 'visible',
+                    position: 'relative',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Image src={image.src} alt={image.altText} width={image.width} height={image.height} style={{ width: '100%', height: 'auto', display: 'block' }} placeholder="blur" blurDataURL={blurDataURL} quality={80} />
+                  <ImageListItemBar
+                    className="actions-bar"
+                    sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }}
+                    position="bottom"
+                    actionIcon={
+                      <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
+                        {isPromptReplayAvailable && !image.prompt.includes('[1]') && (
+                          <CustomDarkTooltip title="生成同款！">
+                            <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleMoreLikeThisClick(image.prompt); }}><Favorite /></IconButton>
+                          </CustomDarkTooltip>
+                        )}
+                        {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
+                          <CustomDarkTooltip title="编辑此图">
+                            <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleEditClick(image.gcsUri); }}><Edit /></IconButton>
+                          </CustomDarkTooltip>
+                        )}
+                        {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true' && (
+                          <CustomDarkTooltip title="图生视频">
+                            <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleITVClick(image.gcsUri); }}><VideocamRounded /></IconButton>
+                          </CustomDarkTooltip>
+                        )}
+                        <CustomDarkTooltip title="导出到媒体库">
+                          <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setImageToExport(image); }}><CreateNewFolderRounded /></IconButton>
+                        </CustomDarkTooltip>
+                        <CustomDarkTooltip title="下载">
+                          <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); isUpscaledDLAvailable ? setImageToDL(image) : handleDLimage(image); }}><Download /></IconButton>
+                        </CustomDarkTooltip>
+                      </Stack>
+                    }
+                  />
+                </ImageListItem>
+              </Paper>
+            ))}
+          </ImageList>
+        )}
       </Box>
+
+      {/* Modals 和 Snackbars 保持在外部，以便所有情况都能调用 */}
       {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(undefined)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}><Image src={imageFullScreen.src} alt={'displayed-image'} width={imageFullScreen.width} height={imageFullScreen.height} style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} quality={100} /></Box></Modal>)}
       <ExportStepper open={!!imageToExport} upscaleAvailable={true} mediaToExport={imageToExport} handleMediaExportClose={() => setImageToExport(undefined)} />
       <DownloadDialog open={!!imageToDL} mediaToDL={imageToDL} handleMediaDLClose={() => setImageToDL(undefined)} />
