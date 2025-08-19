@@ -1,7 +1,9 @@
+// 文件路径: app/(studio)/try-on/page.tsx
+
 'use client';
 
 import { useState } from 'react';
-import { Box, Paper, Typography, Grid } from '@mui/material';
+import { Paper, Grid } from '@mui/material';
 
 import VirtualTryOnForm from '../../ui/try-on-components/VirtualTryOnForm';
 import TryOnResultDisplay from '../../ui/try-on-components/TryOnResultDisplay';
@@ -37,8 +39,6 @@ export default function TryOnPage() {
       {/* 左侧：表单区域 */}
       <Grid item xs={12} md={5} lg={4} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-          {/* ==================== 修改内容 ==================== */}
-          {/* 旧的 Typography 标题已被移除，新标题集成在 VirtualTryOnForm 内部 */}
           <VirtualTryOnForm
             isLoading={isLoading}
             errorMsg={errorMsg}
@@ -47,7 +47,6 @@ export default function TryOnPage() {
             onNewErrorMsg={handleNewErrorMsg}
             onImageGeneration={handleImageGeneration}
           />
-          {/* =============================================== */}
         </Paper>
       </Grid>
 
