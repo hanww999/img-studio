@@ -1,4 +1,3 @@
-// 文件路径: app/(studio)/edit/page.tsx (完整布局修改版)
 'use client'
 
 import * as React from 'react'
@@ -54,13 +53,12 @@ export default function Page() {
   redirect('/generate')
  } else {
   return (
-    // [布局修复] 使用 Flexbox 替换 Grid，确保布局统一
+    // [布局修复] 使用 Flexbox 替换 Grid，并移除外层边距
    <Box sx={{
       display: 'flex',
       flexDirection: 'row',
       gap: 3,
       height: 'calc(100vh - 48px)',
-      p: 3, // 保持与 generate 页面一致的内边距
     }}>
       {/* 左侧表单区域 */}
      <Box sx={{
