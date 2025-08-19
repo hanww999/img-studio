@@ -138,14 +138,30 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
                 <Image src={image.src} alt={image.altText} width={image.width} height={image.height} style={{ width: '100%', height: 'auto', display: 'block' }} placeholder="blur" blurDataURL={blurDataURL} quality={80} />
                 <ImageListItemBar className="actions-bar" sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }} position="bottom"
                   actionIcon={
-                    <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
-                      {isPromptReplayAvailable && !image.prompt.includes('[1]') && (<Tooltip title="More like this!"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleMoreLikeThisClick(image.prompt); }}><Favorite /></IconButton></Tooltip>)}
-                      {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (<Tooltip title="Edit this image"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleEditClick(image.gcsUri); }}><Edit /></IconButton></Tooltip>)}
-                      {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true' && (<Tooltip title="Image to video"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleITVClick(image.gcsUri); }}><VideocamRounded /></IconButton></Tooltip>)}
-                      <Tooltip title="Export to library"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setImageToExport(image); }}><CreateNewFolderRounded /></IconButton></Tooltip>
-                      <Tooltip title="Download"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); isUpscaledDLAvailable ? setImageToDL(image) : handleDLimage(image); }}><Download /></IconButton></Tooltip>
-                    </Stack>
-                  }
+  <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
+    {isPromptReplayAvailable && !image.prompt.includes('[1]') && (
+      <CustomDarkTooltip title="生成同款！">
+        <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleMoreLikeThisClick(image.prompt); }}><Favorite /></IconButton>
+      </CustomDarkTooltip>
+    )}
+    {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (
+      <CustomDarkTooltip title="编辑此图">
+        <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleEditClick(image.gcsUri); }}><Edit /></IconButton>
+      </CustomDarkTooltip>
+    )}
+    {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true' && (
+      <CustomDarkTooltip title="图生视频">
+        <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleITVClick(image.gcsUri); }}><VideocamRounded /></IconButton>
+      </CustomDarkTooltip>
+    )}
+    <CustomDarkTooltip title="导出到媒体库">
+      <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setImageToExport(image); }}><CreateNewFolderRounded /></IconButton>
+    </CustomDarkTooltip>
+    <CustomDarkTooltip title="下载">
+      <IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); isUpscaledDLAvailable ? setImageToDL(image) : handleDLimage(image); }}><Download /></IconButton>
+    </CustomDarkTooltip>
+  </Stack>
+}
                 />
               </ImageListItem>
               {/* [最终修复] 在每个卡片的内部渲染 PromptDisplay */}
