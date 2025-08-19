@@ -16,6 +16,12 @@ import { appContextDataDefault, useAppContext } from '../../context/app-context'
 import { useRouter } from 'next/navigation';
 import { downloadMediaFromGcs } from '@/app/api/cloud-storage/action';
 
+/*
+ Note:
+ - If your Next version uses the new Image API, replace `layout="fill"` with `fill` and use style prop:
+   <Image src={...} alt={...} fill style={{ objectFit: 'contain' }} />
+*/
+
 interface ExampleImage { image: string; prompt: string; }
 
 const PromptDisplay = ({ prompt }: { prompt: string }) => {
@@ -28,9 +34,9 @@ const PromptDisplay = ({ prompt }: { prompt: string }) => {
  return (
   <>
    <Paper variant="outlined" sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1, borderColor: 'grey.800' }}>
-    <Typography variant="caption" sx={{ flexGrow: 1, wordBreak: 'break-word', maxHeight: '120px', overflowY: 'auto' }}>
-        {prompt}
-      </Typography>
+    <Typography variant="body2" sx={{ flexGrow: 1, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+      {prompt}
+    </Typography>
     <Tooltip title="复制提示词"><IconButton size="small" onClick={handleCopy}><ContentCopy fontSize="inherit" /></IconButton></Tooltip>
    </Paper>
    <Snackbar open={openSnackbar} autoHideDuration={2000} onClose={() => setOpenSnackbar(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
@@ -67,7 +73,7 @@ const EmptyState = () => {
      <Box ref={scrollContainerRef} sx={{ width: '100%', overflowX: 'auto', pb: 1, scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
       <Stack direction="row" spacing={2} justifyContent="flex-start" sx={{ display: 'inline-flex', p: 1 }}>
        {examplePrompts.map((ex, index) => (
-        <Tooltip title={ex.prompt} placement="top" arrow key={index}>
+        <Tooltip title="查看提示词" placement="top" arrow key={index}>
          <Paper elevation={3} onClick={() => setImageFullScreen(ex)} sx={{ width: 200, height: 200, overflow: 'hidden', position: 'relative', cursor: 'pointer', borderRadius: 3, transition: 'transform 0.2s ease-in-out', flexShrink: 0, '&:hover': { transform: 'scale(1.05)' } }}>
           <Image src={ex.image} alt={`Example ${index + 1}`} layout="fill" objectFit="cover" />
          </Paper>
@@ -78,7 +84,13 @@ const EmptyState = () => {
      <IconButton onClick={() => handleScroll('right')} sx={{ position: 'absolute', right: -10, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}><ChevronRight /></IconButton>
     </Box>
    </Box>
-   {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw', position: 'relative' }}><Image src={imageFullScreen.image} alt={imageFullScreen.prompt} layout="fill" objectFit="contain" quality={100} /></Box></Modal>)}
+   {imageFullScreen && (
+     <Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(null)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ maxHeight: '90vh', maxWidth: '90vw', position: 'relative' }}>
+        <Image src={imageFullScreen.image} alt={imageFullScreen.prompt} layout="fill" objectFit="contain" quality={100} />
+      </Box>
+     </Modal>
+   )}
   </>
  );
 };
@@ -100,7 +112,6 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
   return (
    <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16}>
     {Array.from(new Array(generatedCount > 1 ? generatedCount : 2)).map((_, index) => (
-     // skeleton 保持原先方形占位（可按需改成按比例）
      <ImageListItem key={index}><Skeleton variant="rounded" sx={{ width: '100%', paddingTop: '100%', height: 0, borderRadius: 3 }} /></ImageListItem>
     ))}
    </ImageList>
@@ -116,7 +127,6 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
      <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16} sx={{ m: 0, flexGrow: 1, overflowY: 'auto' }}>
       {generatedImagesInGCS.map((image) => {
-        // 计算占位 padding-top (百分比) —— 防止除以 0
         const ratioPercent = (image.width && image.height) ? Math.max(1, (image.height / image.width) * 100) : 100;
         return (
          <ImageListItem key={image.key}
@@ -132,9 +142,7 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
                 transition: 'border-color 0.2s ease-in-out',
               }}
             >
-           {/* 占位容器，根据原图宽高比设置 padding-top */}
            <Box sx={{ position: 'relative', width: '100%', pt: `${ratioPercent}%`, bgcolor: 'background.default' }}>
-             {/* next/image 使用 fill/layout="fill" + objectFit="contain" 保证完整显示 */}
              <Image
                src={image.src}
                alt={image.altText ?? 'generated image'}
@@ -161,14 +169,36 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
         );
       })}
      </ImageList>
-     {selectedMedia && (
-      <Box sx={{ flexShrink: 0, mt: 2, minHeight: '60px' }}>
-       <PromptDisplay prompt={selectedMedia.prompt} />
-      </Box>
-     )}
+
+     {/* 固定 footer 显示所选图片的 prompt */}
+     <Box sx={{
+       flexShrink: 0,
+       mt: 2,
+       minHeight: '110px',
+       maxHeight: '220px',
+       overflowY: 'auto',
+       px: 0,
+     }}>
+      {selectedMedia ? (
+        <Box sx={{ p: 1 }}>
+          <PromptDisplay prompt={selectedMedia.prompt} />
+        </Box>
+      ) : (
+        <Box sx={{ p: 1, color: 'text.secondary' }}>
+          <Typography variant="body2">请选择一张图片（点击缩略图），它的提示词会显示在这里。</Typography>
+        </Box>
+      )}
+     </Box>
    </Box>
-   {/* 保持空状态例图的模态弹窗行为不变 */}
-   {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(undefined)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw', position: 'relative' }}><Image src={imageFullScreen.src} alt={'displayed-image'} layout="fill" objectFit="contain" quality={100} /></Box></Modal>)}
+
+   {imageFullScreen && (
+     <Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(undefined)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ maxHeight: '90vh', maxWidth: '90vw', position: 'relative' }}>
+        <Image src={imageFullScreen.src} alt={'displayed-image'} layout="fill" objectFit="contain" quality={100} />
+      </Box>
+     </Modal>
+   )}
+
    <ExportStepper open={!!imageToExport} upscaleAvailable={true} mediaToExport={imageToExport} handleMediaExportClose={() => setImageToExport(undefined)} />
    <DownloadDialog open={!!imageToDL} mediaToDL={imageToDL} handleMediaDLClose={() => setImageToDL(undefined)} />
   </>
