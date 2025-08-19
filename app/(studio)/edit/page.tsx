@@ -10,6 +10,7 @@ import { Paper, Typography } from '@mui/material'
 import theme from '../../theme'
 import EditForm from '@/app/ui/edit-components/EditForm'
 import { redirect } from 'next/navigation'
+import { Grid } from '@mui/material'
 const { palette } = theme
 
 export default function Page() {
@@ -53,48 +54,33 @@ export default function Page() {
   redirect('/generate')
  } else {
   return (
-    // [布局修复] 使用 Flexbox 替换 Grid，并移除外层边距
-   <Box sx={{
-      display: 'flex',
-      flexDirection: 'row',
-      gap: 3,
-      height: 'calc(100vh - 48px)',
-    }}>
-      {/* 左侧表单区域 */}
-     <Box sx={{
-        flex: '0 1 40%',
-        minWidth: '450px',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-          <EditForm
-            isLoading={isEditLoading}
-            onRequestSent={handleRequestSent}
-            onImageGeneration={handleImageGeneration}
-            onNewErrorMsg={handleNewErrorMsg}
-            errorMsg={editErrorMsg}
-          />
-        </Paper>
-     </Box>
-      {/* 右侧创意画布区域 */}
-     <Box sx={{
-        flex: '1 1 60%',
-        minWidth: '400px',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-          <OutputImagesDisplay
-            isLoading={isEditLoading}
-            generatedImagesInGCS={editedImagesInGCS}
-            generatedCount={editedCount}
-            isPromptReplayAvailable={false}
-            isUpscaledDLAvailable={isUpscaledDLAvailable}
-          />
-        </Paper>
-     </Box>
-   </Box>
-  )
+  <Grid container spacing={{ xs: 2, md: 3 }} sx={{ height: '100%' }}>
+    {/* 左侧：表单区域 */}
+    <Grid item xs={12} md={5} lg={4} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <EditForm
+          isLoading={isEditLoading}
+          onRequestSent={handleRequestSent}
+          onImageGeneration={handleImageGeneration}
+          onNewErrorMsg={handleNewErrorMsg}
+          errorMsg={editErrorMsg}
+        />
+      </Paper>
+    </Grid>
+
+    {/* 右侧：结果展示区域 */}
+    <Grid item xs={12} md={7} lg={8} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Paper sx={{ p: 3, borderRadius: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        <OutputImagesDisplay
+          isLoading={isEditLoading}
+          generatedImagesInGCS={editedImagesInGCS}
+          generatedCount={editedCount}
+          isPromptReplayAvailable={false}
+          isUpscaledDLAvailable={isUpscaledDLAvailable}
+        />
+      </Paper>
+    </Grid>
+  </Grid>
+)
  }
 }
