@@ -1,5 +1,3 @@
-// 文件路径: app/ui/transverse-components/ImagenOutputImagesDisplay.tsx (修复编译错误版)
-
 'use client';
 
 import * as React from 'react';
@@ -30,7 +28,7 @@ const PromptDisplay = ({ prompt }: { prompt: string }) => {
  return (
   <>
    <Paper variant="outlined" sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1, borderColor: 'grey.800' }}>
-    <Typography variant="caption" sx={{ flexGrow: 1, wordBreak: 'break-word' }}>
+    <Typography variant="caption" sx={{ flexGrow: 1, wordBreak: 'break-word', maxHeight: '120px', overflowY: 'auto' }}>
         {prompt}
       </Typography>
     <Tooltip title="复制提示词"><IconButton size="small" onClick={handleCopy}><ContentCopy fontSize="inherit" /></IconButton></Tooltip>
@@ -113,52 +111,47 @@ export default function OutputImagesDisplay({ isLoading, generatedImagesInGCS, g
  }
 
  return (
-    // [修复] 使用 React Fragment 作为顶层返回元素
   <>
-      {/* [修复] 将布局和 Prompt 显示区域包裹在一个 Box 中 */}
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16} sx={{ m: 0, flexGrow: 1, overflowY: 'auto' }}>
-       {generatedImagesInGCS.map((image) => (
-        <ImageListItem key={image.key}
-              onClick={() => setSelectedMedia(image)}
-              sx={{
-                '&:hover .actions-bar': { opacity: 1 },
-                borderRadius: 3,
-                overflow: 'hidden',
-                position: 'relative',
-                cursor: 'pointer',
-                border: selectedMedia?.key === image.key ? '3px solid' : '3px solid transparent',
-                borderColor: selectedMedia?.key === image.key ? 'primary.main' : 'transparent',
-                transition: 'border-color 0.2s ease-in-out',
-              }}
-            >
-          <Image src={image.src} alt={image.altText} width={image.width} height={image.height} style={{ width: '100%', height: 'auto', display: 'block' }} placeholder="blur" blurDataURL={blurDataURL} quality={80} />
-          <ImageListItemBar className="actions-bar" sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }} position="bottom"
-           actionIcon={
-            <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
-             {isPromptReplayAvailable && !image.prompt.includes('[1]') && (<Tooltip title="More like this!"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleMoreLikeThisClick(image.prompt); }}><Favorite /></IconButton></Tooltip>)}
-             {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (<Tooltip title="Edit this image"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleEditClick(image.gcsUri); }}><Edit /></IconButton></Tooltip>)}
-             {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true' && (<Tooltip title="Image to video"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleITVClick(image.gcsUri); }}><VideocamRounded /></IconButton></Tooltip>)}
-             <Tooltip title="Export to library"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setImageToExport(image); }}><CreateNewFolderRounded /></IconButton></Tooltip>
-             <Tooltip title="Download"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); isUpscaledDLAvailable ? setImageToDL(image) : handleDLimage(image); }}><Download /></IconButton></Tooltip>
-            </Stack>
-           }
-          />
-        </ImageListItem>
-       ))}
-      </ImageList>
-        {/* 统一的 Prompt 显示区域 */}
-      {selectedMedia && (
-       <Box sx={{ flexShrink: 0, mt: 2, minHeight: '60px' }}>
-        <PromptDisplay prompt={selectedMedia.prompt} />
-       </Box>
-      )}
-    </Box>
-
-    {/* [修复] 将悬浮组件移回顶层 */}
-    {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(undefined)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}><Image src={imageFullScreen.src} alt={'displayed-image'} width={imageFullScreen.width} height={imageFullScreen.height} style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} quality={100} /></Box></Modal>)}
-    <ExportStepper open={!!imageToExport} upscaleAvailable={true} mediaToExport={imageToExport} handleMediaExportClose={() => setImageToExport(undefined)} />
-    <DownloadDialog open={!!imageToDL} mediaToDL={imageToDL} handleMediaDLClose={() => setImageToDL(undefined)} />
+   <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+     <ImageList cols={generatedCount > 1 ? 2 : 1} gap={16} sx={{ m: 0, flexGrow: 1, overflowY: 'auto' }}>
+      {generatedImagesInGCS.map((image) => (
+       <ImageListItem key={image.key}
+            onClick={() => setSelectedMedia(image)}
+            sx={{
+              '&:hover .actions-bar': { opacity: 1 },
+              borderRadius: 3,
+              overflow: 'hidden',
+              position: 'relative',
+              cursor: 'pointer',
+              border: selectedMedia?.key === image.key ? '3px solid' : '3px solid transparent',
+              borderColor: selectedMedia?.key === image.key ? 'primary.main' : 'transparent',
+              transition: 'border-color 0.2s ease-in-out',
+            }}
+          >
+         <Image src={image.src} alt={image.altText} width={image.width} height={image.height} style={{ width: '100%', height: 'auto', display: 'block' }} placeholder="blur" blurDataURL={blurDataURL} quality={80} />
+         <ImageListItemBar className="actions-bar" sx={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', opacity: 0, transition: 'opacity 0.3s ease' }} position="bottom"
+          actionIcon={
+           <Stack direction="row" justifyContent="flex-end" gap={0.5} sx={{ p: 1, width: '100%' }}>
+            {isPromptReplayAvailable && !image.prompt.includes('[1]') && (<Tooltip title="More like this!"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleMoreLikeThisClick(image.prompt); }}><Favorite /></IconButton></Tooltip>)}
+            {process.env.NEXT_PUBLIC_EDIT_ENABLED === 'true' && (<Tooltip title="Edit this image"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleEditClick(image.gcsUri); }}><Edit /></IconButton></Tooltip>)}
+            {process.env.NEXT_PUBLIC_VEO_ENABLED === 'true' && process.env.NEXT_PUBLIC_VEO_ITV_ENABLED === 'true' && (<Tooltip title="Image to video"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); handleITVClick(image.gcsUri); }}><VideocamRounded /></IconButton></Tooltip>)}
+            <Tooltip title="Export to library"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); setImageToExport(image); }}><CreateNewFolderRounded /></IconButton></Tooltip>
+            <Tooltip title="Download"><IconButton size="small" sx={{ color: 'white' }} onClick={(e) => { e.stopPropagation(); isUpscaledDLAvailable ? setImageToDL(image) : handleDLimage(image); }}><Download /></IconButton></Tooltip>
+           </Stack>
+          }
+         />
+       </ImageListItem>
+      ))}
+     </ImageList>
+     {selectedMedia && (
+      <Box sx={{ flexShrink: 0, mt: 2, minHeight: '60px' }}>
+       <PromptDisplay prompt={selectedMedia.prompt} />
+      </Box>
+     )}
+   </Box>
+   {imageFullScreen && (<Modal open={!!imageFullScreen} onClose={() => setImageFullScreen(undefined)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Box sx={{ maxHeight: '90vh', maxWidth: '90vw' }}><Image src={imageFullScreen.src} alt={'displayed-image'} width={imageFullScreen.width} height={imageFullScreen.height} style={{ width: 'auto', height: 'auto', maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} quality={100} /></Box></Modal>)}
+   <ExportStepper open={!!imageToExport} upscaleAvailable={true} mediaToExport={imageToExport} handleMediaExportClose={() => setImageToExport(undefined)} />
+   <DownloadDialog open={!!imageToDL} mediaToDL={imageToDL} handleMediaDLClose={() => setImageToDL(undefined)} />
   </>
  );
 }
