@@ -13,14 +13,19 @@ export interface TemplateOptions {
   platform?: { value: string; label:string }[];
 }
 
-export interface UseCaseTemplate {
+export interface SubTemplate {
+  key: string;
   label: string;
   promptTemplate: string;
   fields: Record<string, TemplateField>;
-  options: TemplateOptions;
   negativePrompt: string;
-  // [修正点] 在类型中添加 '3:4'
   aspectRatio: '16:9' | '1:1' | '9:16' | '4:3' | '3:4';
+}
+
+export interface UseCaseTemplate {
+  label:string;
+  subTemplates: SubTemplate[];
+  options: TemplateOptions;
 }
 
 export const promptTemplates: Record<string, { label: string; useCases: Record<string, UseCaseTemplate> }> = {
@@ -29,21 +34,301 @@ export const promptTemplates: Record<string, { label: string; useCases: Record<s
     useCases: {
       character_concept: {
         label: '角色概念艺术',
-        promptTemplate: '{style} character concept art of a {character_description}, wearing {equipment}, in a {pose}, {lighting}, {details}',
-        fields: {
-          style: { label: '风格', type: 'dropdown', defaultValue: 'Photorealistic 2D', optionsKey: 'style' },
-          character_description: { label: '角色描述', type: 'text', defaultValue: 'heroic fantasy elf mage' },
-          equipment: { label: '服装/装备', type: 'text', defaultValue: 'intricate leather armor with glowing runes, holding a staff' },
-          pose: { label: '姿态', type: 'text', defaultValue: 'dynamic pose' },
-          lighting: { label: '灯光与情绪', type: 'dropdown', defaultValue: 'natural lighting with accurate shadows', optionsKey: 'lighting' },
-          details: { label: '细节', type: 'text', defaultValue: 'high fidelity' },
-        },
+        subTemplates: [
+          // 幻想与魔法
+          {
+            key: 'abyssal_paladin',
+            label: '幻想 | 深海圣骑士',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, in a stance of {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Photorealistic, dark fantasy' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'an abyssal paladin' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'ancient, barnacle-encrusted plate armor with bioluminescent coral growing on it' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'standing guard in a sunken cathedral while wielding a trident that glows with faint blue light' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'dramatic underwater god rays' },
+              details: { label: '细节', type: 'text', defaultValue: 'highly detailed, cinematic, 8k' },
+            },
+            negativePrompt: 'painting, drawing, illustration, cartoon, anime, 3d render, deformed, disfigured, poorly drawn hands, blurry, low-resolution',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'magma_berserker',
+            label: '幻想 | 熔岩狂战士',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, in {pose}, lit by {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Digital, epic fantasy' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a female magma berserker with skin cracked like cooling lava and a fiery glow from within' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'armor forged from obsidian and dragon bones' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a roaring battle stance with a massive two-handed axe' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'the intense heat and glow of a volcano' },
+              details: { label: '细节', type: 'text', defaultValue: 'trending on ArtStation' },
+            },
+            negativePrompt: 'photo, photorealistic, 3d render, deformed, disfigured, malformed, poorly drawn hands, blurry, grainy, cute, peaceful',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'celestial_scribe',
+            label: '幻想 | 天空殿书记官',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, in a pose of {pose}, {lighting}, {details}, clean line art',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Cel-shaded, anime key visual style' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a celestial scribe, an androgynous figure with wings made of pure starlight' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'flowing white and gold silk robes' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'magically writing in a floating ethereal tome' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'soft and divine lighting' },
+              details: { label: '细节', type: 'text', defaultValue: 'ethereal, graceful' },
+            },
+            negativePrompt: 'photorealistic, realistic, photo, 3d render, detailed textures, messy lines, dark, gritty, deformed hands',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'plague_alchemist',
+            label: '幻想 | 瘟疫炼金术士',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, holding {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Gritty, horror fantasy' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a plague doctor alchemist' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'a dark leather coat and a crow-like mask with glowing green lenses' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a bubbling potion and a bone saw' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'eerie green alchemical lighting' },
+              details: { label: '细节', type: 'text', defaultValue: 'detailed textures, unsettling' },
+            },
+            negativePrompt: 'cartoon, anime, cute, clean, bright, cheerful, friendly, poorly drawn face, deformed, blurry',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'fungal_druid',
+            label: '幻想 | 真菌德鲁伊',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, calmly holding {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Mystical, fantasy' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a young female fungal druid with glowing mushrooms in her hair' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'clothes intertwined with moss' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a staff made of a giant, bioluminescent mushroom' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'ethereal glow in a misty forest' },
+              details: { label: '细节', type: 'text', defaultValue: 'detailed, atmospheric' },
+            },
+            negativePrompt: 'photorealistic, realistic, photo, bright, sunny, dry, urban, mechanical, deformed, disfigured',
+            aspectRatio: '16:9',
+          },
+          // 科幻与赛博朋克
+          {
+            key: 'void_assassin',
+            label: '科幻 | 虚空刺客',
+            promptTemplate: '{style}, photorealistic character concept art of {character_description}, wearing {equipment}, in a {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Sci-fi, cyberpunk' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a void assassin' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'a sleek, form-fitting stealth suit that bends light' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'crouched pose on a skyscraper edge wielding two short, glowing energy daggers' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'lit by neon signs from below' },
+              details: { label: '细节', type: 'text', defaultValue: 'stealthy, cinematic, sharp focus' },
+            },
+            negativePrompt: 'painting, drawing, illustration, cartoon, anime, daylight, bright, poorly drawn hands, blurry, disfigured',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'wasteland_mechanic',
+            label: '科幻 | 废土机械师',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, leaning against {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Photorealistic, Mad Max style' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a grizzled old wasteland mechanic with a cybernetic arm' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'patched-up coveralls' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a rusty post-apocalyptic vehicle' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'harsh desert sunlight' },
+              details: { label: '细节', type: 'text', defaultValue: 'ultra-detailed, gritty' },
+            },
+            negativePrompt: 'painting, drawing, cartoon, anime, clean, pristine, futuristic, sleek, lush, green, deformed, blurry',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'solarpunk_botanist',
+            label: '科幻 | 太阳朋克植物学家',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, tending to {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Bright, solarpunk aesthetic' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a young female solarpunk botanist with a robotic companion' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'practical, clean-tech clothing' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'genetically engineered glowing flora in a massive rooftop greenhouse' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'warm, bright, natural sunlight' },
+              details: { label: '细节', type: 'text', defaultValue: 'optimistic, detailed' },
+            },
+            negativePrompt: 'dark, gloomy, gritty, cyberpunk, post-apocalyptic, pollution, deformed, disfigured, blurry',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'gene_mod_gladiator',
+            label: '科幻 | 基因改造角斗士',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, in a {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Sci-fi, brutal' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a gene-mod gladiator, a massive brute whose body is a fusion of man and rhinoceros beetle' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'an iridescent carapace for armor' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'dynamic fighting pose in a futuristic arena' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'intense, dramatic arena floodlights' },
+              details: { label: '细节', type: 'text', defaultValue: '8k' },
+            },
+            negativePrompt: 'cartoon, anime, slender, weak, peaceful, poorly drawn face, extra limbs, blurry, low-resolution',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'chrono_historian',
+            label: '科幻 | 时空旅行历史学家',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, studying {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Intellectual sci-fi' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'an elegant older female time-traveling historian' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'a tweed suit fused with holographic devices' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a floating, glitching historical artifact' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'clean, high-key lighting' },
+              details: { label: '细节', type: 'text', defaultValue: 'thoughtful, detailed' },
+            },
+            negativePrompt: 'action, fighting, chaotic, dark, gritty, fantasy, poorly drawn hands, disfigured, blurry',
+            aspectRatio: '16:9',
+          },
+          // 混合题材
+          {
+            key: 'steampunk_captain',
+            label: '混合 | 蒸汽朋克船长',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, confidently {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Digital painting, steampunk' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a charismatic steampunk sky-pirate captain with a brass prosthetic eye' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'a leather duster over a waistcoat' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'at the helm of his airship' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'golden hour lighting over a sea of clouds' },
+              details: { label: '细节', type: 'text', defaultValue: 'adventurous, detailed' },
+            },
+            negativePrompt: 'photorealistic, modern, futuristic, minimalist, simple, poorly drawn face, deformed, blurry',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'undead_samurai',
+            label: '混合 | 亡灵武士',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, drawing {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Dark fantasy, Ghost of Tsushima style' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'an undead samurai warrior, an armored skeleton wreathed in faint blue soulfire' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'tattered samurai armor' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a cursed katana in a spooky bamboo forest' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'eerie moonlight' },
+              details: { label: '细节', type: 'text', defaultValue: 'atmospheric, cinematic' },
+            },
+            negativePrompt: 'alive, human, flesh, cute, cheerful, bright, daylight, poorly drawn hands, disfigured',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'atlantean_guard',
+            label: '混合 | 亚特兰蒂斯卫兵',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, standing {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Fantasy, majestic' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'an Atlantean royal guard' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'armor made of polished shells and enchanted coral' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'at attention before a massive underwater gate, holding a crystal-tipped spear' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'soft, magical light of the city of Atlantis' },
+              details: { label: '细节', type: 'text', defaultValue: 'detailed' },
+            },
+            negativePrompt: 'land, desert, sky, fire, dirty, gritty, poorly drawn face, deformed, blurry, disfigured',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'aether_gunslinger',
+            label: '混合 | 以太枪手',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, aiming {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Fantasy-western, cinematic' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a stoic female aether-gunslinger with glowing arcane tattoos' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'a duster' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a pair of ornate revolvers that crackle with magical energy' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'dramatic lens flare at sunset' },
+              details: { label: '细节', type: 'text', defaultValue: 'dynamic' },
+            },
+            negativePrompt: 'modern, sci-fi, futuristic, poorly drawn hands, extra fingers, deformed, blurry, low-resolution',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'cosmic_cultist',
+            label: '混合 | 宇宙邪教徒',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, raising {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Lovecraftian horror' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a cosmic cultist, face obscured by shadows' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'dark, tattered robes' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a strange, non-euclidean relic' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'unsettling, purple and green cosmic light' },
+              details: { label: '细节', type: 'text', defaultValue: 'atmospheric' },
+            },
+            negativePrompt: 'bright, cheerful, friendly, normal, human, safe, daylight, poorly drawn face, deformed',
+            aspectRatio: '16:9',
+          },
+          // 独特概念
+          {
+            key: 'living_ink_tattooist',
+            label: '独特 | 活体墨水纹身师',
+            promptTemplate: '{style} character concept art of {character_description}, using {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Urban fantasy' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a mystical tattooist whose own body is covered in animated tattoos' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a needle made of light to ink a glowing, magical pattern' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'warm, intimate, lantern-lit studio' },
+              details: { label: '细节', type: 'text', defaultValue: 'magical, detailed' },
+            },
+            negativePrompt: 'photorealistic, 3d render, bright daylight, fighting, chaotic, deformed hands, blurry, disfigured',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'echo_knight',
+            label: '独特 | 回声骑士',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, holding {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Digital painting, high-fantasy' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'an Echo Knight, a warrior followed by semi-transparent after-images' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'translucent, ghostly armor' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a shimmering greatsword in a desolate battlefield' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'ethereal and melancholic lighting' },
+              details: { label: '细节', type: 'text', defaultValue: 'dynamic' },
+            },
+            negativePrompt: 'solid, opaque, colorful, cheerful, poorly drawn face, extra limbs, blurry, low-resolution',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'dream_weaver',
+            label: '独特 | 梦境编织者',
+            promptTemplate: '{style} character concept art of {character_description}, sitting on {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Surreal, Lisa Frank meets fantasy' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a Dream Weaver, a child-like entity made of stardust' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'a crescent moon and weaving strands of light into tangible dreams' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'magical, swirling vortex of colorful dream-matter' },
+              details: { label: '细节', type: 'text', defaultValue: 'vibrant, whimsical' },
+            },
+            negativePrompt: 'realistic, photorealistic, dark, gritty, horror, scary, deformed, ugly, blurry',
+            aspectRatio: '16:9',
+          },
+          {
+            key: 'idol_guardian',
+            label: '独特 | 神像守护者',
+            promptTemplate: '{style} character concept art of {character_description}, wearing {equipment}, standing {pose}, {lighting}, {details}',
+            fields: {
+              style: { label: '风格', type: 'text', defaultValue: 'Fantasy, mysterious' },
+              character_description: { label: '角色描述', type: 'text', defaultValue: 'a guardian, a small, nimble creature with large, expressive eyes' },
+              equipment: { label: '服装/装备', type: 'text', defaultValue: 'makeshift armor' },
+              pose: { label: '姿态', type: 'text', defaultValue: 'protectively in front of a giant, moss-covered stone head of a god' },
+              lighting: { label: '灯光与情绪', type: 'text', defaultValue: 'dappled sunlight in a dense jungle' },
+              details: { label: '细节', type: 'text', defaultValue: 'atmospheric, detailed' },
+            },
+            negativePrompt: 'large, giant, human, modern, city, technology, poorly drawn face, deformed, blurry',
+            aspectRatio: '16:9',
+          },
+        ],
+        // 共享的下拉菜单选项，未来可以扩充
         options: {
-          style: [ { value: 'Photorealistic 2D', label: '2D照片级真实感' }, { value: 'Splash art style', label: '游戏闪屏艺术' }, { value: 'Realistic 3D render', label: '写实3D渲染' }, { value: 'Pixel art', label: '像素艺术' } ],
-          lighting: [ { value: 'natural lighting with accurate shadows', label: '自然光与精确阴影' }, { value: 'dramatic cinematic lighting', label: '戏剧性电影光照' }, { value: 'Mystical glow', label: '神秘辉光' } ],
+          style: [],
+          lighting: [],
+          composition: [],
         },
-        negativePrompt: 'cartoon, blurry, grainy, deformed hands, ugly, low quality',
-        aspectRatio: '16:9',
       },
       worldbuilding: {
         label: '世界构建与复杂场景',
