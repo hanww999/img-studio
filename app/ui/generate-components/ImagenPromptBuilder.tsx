@@ -15,12 +15,11 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
   onApply: (prompt: string, negativePrompt: string, aspectRatio: string) => void;
   onClose: () => void;
 }) {
-  // [最终修正点] 采用更安全的初始化方式
   const industryKeys = Object.keys(imagenTemplates) as Array<keyof typeof imagenTemplates>;
   const firstIndustryKey = industryKeys[0];
   const firstUseCasesObject = imagenTemplates[firstIndustryKey].useCases;
-  const firstUseCaseKey = Object.keys(firstUseCasesObject)[0] as keyof typeof firstUseCasesObject;
-  const firstSubTemplate = firstUseCasesObject[firstUseCaseKey].subTemplates[0];
+  const firstUseCaseKey = Object.keys(firstUseCasesObject)[0];
+  const firstSubTemplate = firstUseCasesObject[firstUseCaseKey as keyof typeof firstUseCasesObject].subTemplates[0];
 
   const [openIndustries, setOpenIndustries] = useState<Record<string, boolean>>({ [firstIndustryKey]: true });
   const [selectedIndustry, setSelectedIndustry] = useState(firstIndustryKey);
@@ -29,8 +28,8 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
   
   const [formState, setFormState] = useState<Record<string, string>>({});
 
-  const currentUseCase: UseCaseTemplate = useMemo(() => {
-    return imagenTemplates[selectedIndustry].useCases[selectedUseCase as keyof typeof imagenTemplates[typeof selectedIndustry]['useCases']];
+  const currentUseCase: UseCaseTemplate | undefined = useMemo(() => {
+    return imagenTemplates[selectedIndustry as keyof typeof imagenTemplates]?.useCases[selectedUseCase as keyof typeof imagenTemplates[keyof typeof imagenTemplates]['useCases']];
   }, [selectedIndustry, selectedUseCase]);
 
   const currentSubTemplate: SubTemplate | undefined = useMemo(() => {
@@ -39,10 +38,9 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
 
   useEffect(() => {
     if (currentUseCase?.subTemplates?.length > 0) {
-      // 当用例切换时，确保不会选择一个不存在的子模板
-      const newFirstSubTemplate = currentUseCase.subTemplates[0];
-      if (selectedSubTemplateKey !== newFirstSubTemplate.key) {
-        setSelectedSubTemplateKey(newFirstSubTemplate.key);
+      const currentSubTemplateExists = currentUseCase.subTemplates.some(st => st.key === selectedSubTemplateKey);
+      if (!currentSubTemplateExists) {
+        setSelectedSubTemplateKey(currentUseCase.subTemplates[0].key);
       }
     }
   }, [currentUseCase, selectedSubTemplateKey]);
@@ -63,7 +61,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
     setOpenIndustries(prev => ({ ...prev, [industryKey]: !prev[industryKey] }));
   };
 
-  const handleUseCaseSelect = (industryKey: keyof typeof imagenTemplates, useCaseKey: string) => {
+  const handleUseCaseSelect = (industryKey: string, useCaseKey: string) => {
     setSelectedIndustry(industryKey);
     setSelectedUseCase(useCaseKey);
   };
@@ -104,12 +102,11 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
   return (
     <Box sx={{ width: '100%', p: 1, bgcolor: 'background.paper' }}>
       <Grid container spacing={2}>
-        {/* 列 1: 模板库 */}
         <Grid item xs={12} md={3}>
           <Paper variant="outlined" sx={{ p: 1, height: '100%', borderColor: 'rgba(255, 255, 255, 0.23)' }}>
             <Typography variant="h6" sx={{ mb: 1, p: 1 }}>模板库</Typography>
             <List component="nav" dense>
-              {(Object.keys(imagenTemplates) as Array<keyof typeof imagenTemplates>).map((industryKey) => (
+              {industryKeys.map((industryKey) => (
                 <React.Fragment key={industryKey}>
                   <ListItemButton onClick={() => handleIndustryClick(industryKey)}>
                     <ListItemText primary={imagenTemplates[industryKey].label} primaryTypographyProps={{ fontWeight: 500, color: 'text.secondary', fontSize: '0.9rem' }} />
@@ -129,8 +126,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
             </List>
           </Paper>
         </Grid>
-
-        {/* 列 2: 交互式工作区 */}
         <Grid item xs={12} md={9}>
           <Stack spacing={2} sx={{ height: '100%' }}>
             <Paper variant="outlined" sx={{ p: 2, borderColor: 'rgba(255, 255, 255, 0.23)' }}>
@@ -139,23 +134,15 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
                 {generateLivePrompt()}
               </Typography>
             </Paper>
-
             <Paper variant="outlined" sx={{ p: 2, flexGrow: 1, borderColor: 'rgba(255, 255, 255, 0.23)' }}>
               <Box mb={3}>
                 <Typography variant="h6" gutterBottom>场景选择</Typography>
                 <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
                   {currentUseCase?.subTemplates.map(st => (
-                    <Chip
-                      key={st.key}
-                      label={st.label}
-                      onClick={() => setSelectedSubTemplateKey(st.key)}
-                      variant={selectedSubTemplateKey === st.key ? 'filled' : 'outlined'}
-                      color={selectedSubTemplateKey === st.key ? 'primary' : 'default'}
-                    />
+                    <Chip key={st.key} label={st.label} onClick={() => setSelectedSubTemplateKey(st.key)} variant={selectedSubTemplateKey === st.key ? 'filled' : 'outlined'} color={selectedSubTemplateKey === st.key ? 'primary' : 'default'} />
                   ))}
                 </Stack>
               </Box>
-
               <Typography variant="h6" gutterBottom>参数化表单</Typography>
               <Grid container spacing={2}>
                 {currentSubTemplate && Object.entries(currentSubTemplate.fields).map(([key, field]) => (
@@ -166,7 +153,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
                       <FormControl fullWidth variant="outlined" size="small">
                         <InputLabel>{field.label}</InputLabel>
                         <Select name={key} value={formState[key] || ''} onChange={handleFormChange} label={field.label}>
-                          {(currentUseCase.options[field.optionsKey!] || []).map(option => (
+                          {(currentUseCase?.options[field.optionsKey!] || []).map(option => (
                             <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                           ))}
                         </Select>
@@ -176,7 +163,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
                 ))}
               </Grid>
             </Paper>
-
             <Paper variant="outlined" sx={{ p: 2, borderColor: 'rgba(255, 255, 255, 0.23)' }}>
               <Typography variant="h6" gutterBottom>全局设置</Typography>
               <Grid container spacing={2}>
@@ -200,7 +186,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
           </Stack>
         </Grid>
       </Grid>
-      
       <Stack direction="row" spacing={2} justifyContent="flex-end" alignItems="center" sx={{ position: 'absolute', bottom: 16, right: 24 }}>
         <Button variant="text" onClick={handleReset} startIcon={<Refresh />}>重置为模板</Button>
         <Button variant="contained" onClick={handleApply} startIcon={<Check />} size="large">应用到表单</Button>
