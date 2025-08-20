@@ -19,7 +19,7 @@ export interface UseCaseTemplate {
   fields: Record<string, TemplateField>;
   options: TemplateOptions;
   negativePrompt: string;
-  // [修正点] 确保类型只包含支持的宽高比
+  // [修正点] 在类型中添加 '3:4'
   aspectRatio: '16:9' | '1:1' | '9:16' | '4:3' | '3:4';
 }
 
@@ -131,9 +131,9 @@ export const promptTemplates: Record<string, { label: string; useCases: Record<s
         options: {
             lighting: [ { value: 'luxury theme, studio lighting', label: '奢华主题摄影棚光' }, { value: 'dynamic and energetic lighting', label: '动感活力光' }, { value: 'minimalist and clean lighting', label: '极简干净光' } ],
         },
-        // [修正点] 将 4:5 改为支持的 4:3
         negativePrompt: 'boring, dull, cluttered, low resolution',
-        aspectRatio: '4:3',
+        // [修正点] 将广告创意图的默认值设为 3:4
+        aspectRatio: '3:4',
       },
     },
   },
@@ -186,9 +186,9 @@ export const promptTemplates: Record<string, { label: string; useCases: Record<s
             platform: [ { value: 'Facebook', label: 'Facebook' }, { value: 'Instagram', label: 'Instagram' }, { value: 'TikTok', label: 'TikTok' } ],
             lighting: [ { value: 'dramatic lighting', label: '戏剧性光照' }, { value: 'bright, high-contrast lighting', label: '明亮高对比度光' }, { value: 'natural, authentic lighting', label: '自然真实光' } ],
         },
-        // [修正点] 将 4:5 改为支持的 4:3
         negativePrompt: 'dull, low-contrast, blurry, generic',
-        aspectRatio: '4:3',
+        // [修正点] 将社交媒体广告创意的默认值设为 3:4
+        aspectRatio: '3:4',
       },
     },
   },
