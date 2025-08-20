@@ -6,17 +6,21 @@ import {
   Box, Button, Grid, Paper, Stack, Typography, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, TextField, List, ListItemButton, ListItemText, Collapse, Chip
 } from '@mui/material';
 import { Check, Refresh, ExpandLess, ExpandMore } from '@mui/icons-material';
-import { promptTemplates, UseCaseTemplate, SubTemplate } from '../../api/prompt-templates';
+// [修正点] 导入名为 templates 的主对象，并重命名为 promptTemplates 以适应现有代码
+import { templates as promptTemplates, UseCaseTemplate, SubTemplate } from '../../api/prompt-templates';
 import theme from '../../theme';
+
+// [修正点] 明确指出我们使用的是 imagen 的模板
+const imagenTemplates = promptTemplates.imagen;
 
 export default function ImagenPromptBuilder({ onApply, onClose }: {
   onApply: (prompt: string, negativePrompt: string, aspectRatio: string) => void;
   onClose: () => void;
 }) {
-  const industryKeys = Object.keys(promptTemplates);
+  const industryKeys = Object.keys(imagenTemplates);
   const firstIndustryKey = industryKeys[0];
-  const firstUseCaseKey = Object.keys(promptTemplates[firstIndustryKey].useCases)[0];
-  const firstSubTemplateKey = promptTemplates[firstIndustryKey].useCases[firstUseCaseKey].subTemplates[0].key;
+  const firstUseCaseKey = Object.keys(imagenTemplates[firstIndustryKey].useCases)[0];
+  const firstSubTemplateKey = imagenTemplates[firstIndustryKey].useCases[firstUseCaseKey].subTemplates[0].key;
 
   const [openIndustries, setOpenIndustries] = useState<Record<string, boolean>>({ [firstIndustryKey]: true });
   const [selectedIndustry, setSelectedIndustry] = useState(firstIndustryKey);
@@ -26,7 +30,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
   const [formState, setFormState] = useState<Record<string, string>>({});
 
   const currentUseCase: UseCaseTemplate = useMemo(() => {
-    return promptTemplates[selectedIndustry].useCases[selectedUseCase];
+    return imagenTemplates[selectedIndustry].useCases[selectedUseCase];
   }, [selectedIndustry, selectedUseCase]);
 
   const currentSubTemplate: SubTemplate | undefined = useMemo(() => {
@@ -45,8 +49,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
         for (const key in currentSubTemplate.fields) {
             defaultState[key] = currentSubTemplate.fields[key].defaultValue;
         }
-        // [关键逻辑] 自动加载子模板专属的负面提示词和宽高比
-        defaultState.aspectRatio = currentSubTemplate.aspectRatio;
+        defaultState.aspectRatio = currentSubTemplate.aspectRatio || '16:9';
         defaultState.negativePrompt = currentSubTemplate.negativePrompt;
     }
     setFormState(defaultState);
@@ -83,7 +86,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
         for (const key in currentSubTemplate.fields) {
           defaultState[key] = currentSubTemplate.fields[key].defaultValue;
         }
-        defaultState.aspectRatio = currentSubTemplate.aspectRatio;
+        defaultState.aspectRatio = currentSubTemplate.aspectRatio || '16:9';
         defaultState.negativePrompt = currentSubTemplate.negativePrompt;
         setFormState(defaultState);
     }
@@ -102,7 +105,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
           <Paper variant="outlined" sx={{ p: 1, height: '100%', borderColor: 'rgba(255, 255, 255, 0.23)' }}>
             <Typography variant="h6" sx={{ mb: 1, p: 1 }}>模板库</Typography>
             <List component="nav" dense>
-              {Object.entries(promptTemplates).map(([industryKey, industry]) => (
+              {Object.entries(imagenTemplates).map(([industryKey, industry]) => (
                 <React.Fragment key={industryKey}>
                   <ListItemButton onClick={() => handleIndustryClick(industryKey)}>
                     <ListItemText primary={industry.label} primaryTypographyProps={{ fontWeight: 500, color: 'text.secondary', fontSize: '0.9rem' }} />
@@ -186,7 +189,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
                     </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  {/* [关键逻辑] 这个输入框的值，由 formState.negativePrompt 决定，而该值已在 useEffect 中从子模板自动加载 */}
                   <TextField name="negativePrompt" label="排除项 (负面提示词)" value={formState.negativePrompt || ''} onChange={handleFormChange} fullWidth multiline rows={2} variant="outlined" size="small" />
                 </Grid>
               </Grid>
