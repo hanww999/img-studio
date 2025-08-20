@@ -11,7 +11,6 @@ export interface TemplateOptions {
   composition?: { value: string; label:string }[];
   mood?: { value: string; label:string }[];
   platform?: { value: string; label:string }[];
-  // [Veo 新增] 专业的运镜选项
   camera_movement?: { value: string; label: string }[];
 }
 
@@ -30,8 +29,11 @@ export interface UseCaseTemplate {
   options: TemplateOptions;
 }
 
-// [结构升级] 将 Imagen 和 Veo 的模板统一管理
-export const templates = {
+// [结构修正] 确保 imagen 和 veo 是平级的
+export const templates: {
+    imagen: Record<string, { label: string; useCases: Record<string, UseCaseTemplate> }>;
+    veo: Record<string, { label: string; useCases: Record<string, UseCaseTemplate> }>;
+} = {
   imagen: {
     gaming: {
       label: '游戏行业',
@@ -124,7 +126,7 @@ export const templates = {
             { key: 'chocolate_bar', label: '手工巧克力', promptTemplate: '{style} studio product photo of {description}, with {features}, on {surface}, {lighting}', fields: { style: { label: '风格', type: 'text', defaultValue: 'Appetizing' }, description: { label: '描述', type: 'text', defaultValue: 'a gourmet dark chocolate bar, partially unwrapped from its elegant paper packaging' }, features: { label: '特征', type: 'text', defaultValue: 'a few cocoa beans scattered nearby' }, surface: { label: '表面', type: 'text', defaultValue: 'a slate surface' }, lighting: { label: '光照', type: 'text', defaultValue: 'warm, soft lighting' } }, negativePrompt: 'unappetizing, messy, melted, poor lighting, blurry', aspectRatio: '4:3', },
             { key: 'sneaker', label: '运动鞋', promptTemplate: '{style} studio product photo of {description}, angled to show {features}, on {background}, {lighting}', fields: { style: { label: '风格', type: 'text', defaultValue: 'Dynamic' }, description: { label: '描述', type: 'text', defaultValue: 'a single, clean, high-tech sneaker' }, features: { label: '特征', type: 'text', defaultValue: 'its design and sole' }, background: { label: '背景', type: 'text', defaultValue: 'a pure white background' }, lighting: { label: '光照', type: 'text', defaultValue: 'crisp, bright, energetic studio lighting' } }, negativePrompt: 'dirty, worn, scuffed, dark, blurry, flat', aspectRatio: '1:1', },
             { key: 'perfume_bottle', label: '香水瓶', promptTemplate: '{style} studio product photo of {description}, with {features}, on {surface}, {lighting}', fields: { style: { label: '风格', type: 'text', defaultValue: 'Elegant' }, description: { label: '描述', type: 'text', defaultValue: 'a crystal perfume bottle' }, features: { label: '特征', type: 'text', defaultValue: 'light refracting through the glass and liquid, surrounded by a subtle mist' }, surface: { label: '表面', type: 'text', defaultValue: 'a reflective black surface' }, lighting: { label: '光照', type: 'text', defaultValue: 'dramatic, high-contrast lighting' } }, negativePrompt: 'plain, boring, flat lighting, blurry, dust', aspectRatio: '3:4', },
-            { key: 'smartphone', label: '智能手机', promptTemplate: '{style} studio product photo of {description}, showing {features}, floating at {angle} against {background}, {lighting}', fields: { style: { label: '风格', type: 'text', defaultValue: 'Clean, tech-focused' }, description: { label: '描述', type: 'text', defaultValue: 'a new smartphone' }, features: { label: '特征', type: 'text', defaultValue: 'its slim profile and vibrant screen' }, angle: { label: '角度', type: 'text', defaultValue: 'a slight angle' }, background: { label: '背景', type: 'text', defaultValue: 'a minimalist gradient background' }, lighting: { label: '光照', type: 'text', defaultValue: 'perfect, edge-to-edge screen lighting' } }, negativePrompt: 'fingerprints, smudges, scratches, glare, outdated model, blurry', aspectRatio: '1:1', },
+            { key: 'smartphone', label: '智能手机', promptTemplate: '{style} studio product photo of {description}, showing {features}, floating at {angle} against {background}, {lighting}', fields: { style: { label: '风格', type: 'text', defaultValue: 'Clean, tech-focused' }, description: { label: '描述', type: 'text', defaultValue: 'a new smartphone' }, features: { label: '特征', type: 'text', defaultValue: 'its slim profile and vibrant screen' }, angle: { label: '角度', type: 'text', defaultValue: 'a slight angle' }, background: { label: '背景', type: 'text', defaultValue: 'a minimalist gradient background that matches the brand\'s packaging' }, lighting: { label: '光照', type: 'text', defaultValue: 'perfect, edge-to-edge screen lighting' } }, negativePrompt: 'fingerprints, smudges, scratches, glare, outdated model, blurry', aspectRatio: '1:1', },
             { key: 'wine_bottle', label: '红酒瓶', promptTemplate: '{style} studio product photo of {description}, next to {features}, on {surface}, {lighting} with a single key light highlighting the bottle\'s shape', fields: { style: { label: '风格', type: 'text', defaultValue: 'Sophisticated' }, description: { label: '描述', type: 'text', defaultValue: 'an unlabeled red wine bottle with a pristine wax seal' }, features: { label: '特征', type: 'text', defaultValue: 'an elegant wine glass' }, surface: { label: '表面', type: 'text', defaultValue: 'a dark, rustic wooden surface' }, lighting: { label: '光照', type: 'text', defaultValue: 'moody, low-key lighting' } }, negativePrompt: 'cheap, label, bright, messy, dust, blurry', aspectRatio: '3:4', },
             { key: 'engagement_ring', label: '订婚戒指', promptTemplate: '{style} studio product photo of {description}, focusing on {features}, on {background}, {lighting} to maximize brilliance', fields: { style: { label: '风格', type: 'text', defaultValue: 'Macro' }, description: { label: '描述', type: 'text', defaultValue: 'a diamond engagement ring in its box' }, features: { label: '特征', type: 'text', defaultValue: 'the sparkle and cut of the diamond' }, background: { label: '背景', type: 'text', defaultValue: 'a black velvet background' }, lighting: { label: '光照', type: 'text', defaultValue: 'bright, sparkling, multi-point lighting' } }, negativePrompt: 'dull, blurry, out of focus, yellow diamond, distracting elements', aspectRatio: '1:1', },
             { key: 'handbag', label: '手提包', promptTemplate: '{style} studio product photo of {description}, standing upright to show {features}, on {background}, {lighting}', fields: { style: { label: '风格', type: 'text', defaultValue: 'Luxury fashion' }, description: { label: '描述', type: 'text', defaultValue: 'a leather handbag' }, features: { label: '特征', type: 'text', defaultValue: 'its structure and details like stitching and hardware' }, background: { label: '背景', type: 'text', defaultValue: 'a neutral, seamless paper background' }, lighting: { label: '光照', type: 'text', defaultValue: 'soft, diffused, even lighting' } }, negativePrompt: 'cheap, fake leather, worn, misshapen, harsh shadows, blurry', aspectRatio: '4:3', },
@@ -346,7 +348,7 @@ export const templates = {
               fields: {
                 subject: { label: '主体', type: 'text', defaultValue: 'a Navigator pilot watch with a black dial, bold white Arabic numerals, and a tan leather strap' },
                 context: { label: '场景/背景', type: 'text', defaultValue: 'a vintage convertible' },
-                camera_movement: { label: '镜头运动', type: 'dropdown', defaultValue: 'The camera slowly pans out, revealing the car', optionsKey: 'camera_movement' },
+                camera_movement: { label: '镜头运动', type: 'dropdown', defaultValue: 'A slow pan out, revealing the car', optionsKey: 'camera_movement' },
                 lighting: { label: '光照', type: 'dropdown', defaultValue: 'the golden hour sun, creating a warm, adventurous glow', optionsKey: 'lighting' },
                 mood: { label: '情绪', type: 'text', defaultValue: 'aspirational and free-spirited' },
               },
@@ -372,15 +374,13 @@ export const templates = {
             camera_movement: [
               { value: 'A slow, sweeping aerial shot', label: '慢速扫视航拍' },
               { value: 'A smooth, slow push-in shot', label: '平滑慢速推进' },
-              { value: 'A dramatic reveal shot, panning up', label: '戏剧性上摇揭示' },
-              { value: 'A handheld, follow-cam shot', label: '手持跟随镜头' },
               { value: 'A slow zoom-in to build suspense', label: '慢速变焦推进制造悬念' },
               { value: 'A descending crane shot', label: '下降式吊臂镜头' },
               { value: 'A tilting pan to enhance unease', label: '倾斜平移增强不安' },
               { value: 'A smooth horizontal pan', label: '平滑水平平移' },
               { value: 'A vertical tilt for focus shift', label: '垂直倾斜焦点转移' },
               { value: 'The camera is static as the watch completes a slow, smooth 360-degree rotation', label: '静态相机，手表慢速360旋转' },
-              { value: 'The camera slowly pans out, revealing the car', label: '相机慢速拉远，揭示汽车' },
+              { value: 'A slow pan out, revealing the car', label: '慢速拉远，揭示汽车' },
               { value: 'The camera starts with a sharp focus on the engraved logo on the crown, then slowly pulls focus to the textured, wave-patterned blue dial. The movement is extremely smooth and controlled', label: '从冠部刻字锐焦开始，慢速拉焦到波纹蓝色表盘' },
             ],
             lighting: [
@@ -619,7 +619,7 @@ export const templates = {
                 lighting: { label: '光照', type: 'dropdown', defaultValue: 'the golden hour sun, creating a warm, adventurous glow', optionsKey: 'lighting' },
                 mood: { label: '情绪', type: 'text', defaultValue: 'aspirational and free-spirited' },
               },
-              negativePrompt: 'static shot, indoor scene, cold lighting, blurry details, non-cinematic',
+              negativePrompt: 'static, indoor scene, cold lighting, blurry details, non-cinematic',
               aspectRatio: '16:9',
             },
             {
@@ -817,7 +817,7 @@ export const templates = {
                 lighting: { label: '光照', type: 'dropdown', defaultValue: 'golden hour for warm glow', optionsKey: 'lighting' },
                 mood: { label: '情绪', type: 'text', defaultValue: 'aspirational and free-spirited' },
               },
-              negativePrompt: 'no story flow, cold tones, static, non-engaging',
+              negativePrompt: 'static, cold tones, no story flow, non-engaging',
               aspectRatio: '9:16',
             },
             {
@@ -863,4 +863,3 @@ export const templates = {
     },
   },
 };
-  
