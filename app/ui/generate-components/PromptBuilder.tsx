@@ -3,32 +3,34 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Box, Button, Grid, Paper, Stack, Typography, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, TextField, List, ListItemButton, ListItemText, Collapse, Chip, Accordion, AccordionSummary, AccordionDetails
+  Box, Button, Grid, Paper, Stack, Typography, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, TextField, List, ListItemButton, ListItemText, Collapse, Chip
 } from '@mui/material';
-import { Check, Refresh, ExpandLess, ExpandMore, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
-import { promptTemplates, UseCaseTemplate, SubTemplate } from '../../api/prompt-templates';
+import { Check, Refresh, ExpandLess, ExpandMore } from '@mui/icons-material';
+// [Veo 修正] 引入统一的模板，并指定为 veo 的模板
+import { templates, UseCaseTemplate, SubTemplate } from '../../api/prompt-templates';
 import theme from '../../theme';
-import ChipInput from '../ux-components/ChipInput'; // 引入新的 ChipInput 组件
 
-const veoTemplates = promptTemplates.veo;
+const veoTemplates = templates.veo;
 
 export default function PromptBuilder({ onApply, onClose }: {
   onApply: (prompt: string, negativePrompt: string) => void;
   onClose: () => void;
 }) {
-  const industryKeys = Object.keys(veoTemplates.useCases);
+  const industryKeys = Object.keys(veoTemplates);
   const firstIndustryKey = industryKeys[0];
-  const firstUseCase = veoTemplates.useCases[firstIndustryKey];
-  const firstSubTemplateKey = firstUseCase.subTemplates[0].key;
+  const firstUseCaseKey = Object.keys(veoTemplates[firstIndustryKey].useCases)[0];
+  const firstSubTemplateKey = veoTemplates[firstIndustryKey].useCases[firstUseCaseKey].subTemplates[0].key;
 
-  const [selectedUseCaseKey, setSelectedUseCaseKey] = useState(firstIndustryKey);
+  const [openIndustries, setOpenIndustries] = useState<Record<string, boolean>>({ [firstIndustryKey]: true });
+  const [selectedIndustry, setSelectedIndustry] = useState(firstIndustryKey);
+  const [selectedUseCase, setSelectedUseCase] = useState(firstUseCaseKey);
   const [selectedSubTemplateKey, setSelectedSubTemplateKey] = useState(firstSubTemplateKey);
   
   const [formState, setFormState] = useState<Record<string, string>>({});
 
   const currentUseCase: UseCaseTemplate = useMemo(() => {
-    return veoTemplates.useCases[selectedUseCaseKey];
-  }, [selectedUseCaseKey]);
+    return veoTemplates[selectedIndustry].useCases[selectedUseCase];
+  }, [selectedIndustry, selectedUseCase]);
 
   const currentSubTemplate: SubTemplate | undefined = useMemo(() => {
     return currentUseCase?.subTemplates.find(st => st.key === selectedSubTemplateKey);
@@ -51,31 +53,29 @@ export default function PromptBuilder({ onApply, onClose }: {
     setFormState(defaultState);
   }, [currentSubTemplate]);
 
-  const handleUseCaseSelect = (useCaseKey: string) => {
-    setSelectedUseCaseKey(useCaseKey);
+  const handleIndustryClick = (industryKey: string) => {
+    setOpenIndustries(prev => ({ ...prev, [industryKey]: !prev[industryKey] }));
+  };
+
+  const handleUseCaseSelect = (industryKey: string, useCaseKey: string) => {
+    setSelectedIndustry(industryKey);
+    setSelectedUseCase(useCaseKey);
   };
 
   const handleFormChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {
     const { name, value } = event.target;
     setFormState(prevState => ({ ...prevState, [name]: value }));
   };
-  
-  // [新增] 专门处理关键词字段的变化
-  const handleKeywordsChange = (value: string) => {
-    setFormState(prevState => ({ ...prevState, keywords: value }));
-  };
 
   const generateLivePrompt = () => {
     if (!currentSubTemplate) return '';
     let livePrompt = currentSubTemplate.promptTemplate;
     for (const key in formState) {
-      // 确保只替换模板中存在的占位符
-      if (livePrompt.includes(`{${key}}`)) {
+      if (currentSubTemplate.fields[key]) {
         livePrompt = livePrompt.replace(`{${key}}`, formState[key] || '');
       }
     }
-    // 清理空的占位符和多余的标点
-    return livePrompt.replace(/\{[a-zA-Z_]+\}/g, '').replace(/, \./g, '.').replace(/\s\s+/g, ' ').replace(/,\s*$/, '').trim();
+    return livePrompt.replace(/, \s*$/, '').replace(/,\s*,/g, ',').trim();
   };
 
   const handleReset = () => {
@@ -102,10 +102,22 @@ export default function PromptBuilder({ onApply, onClose }: {
           <Paper variant="outlined" sx={{ p: 1, height: '100%', borderColor: 'rgba(255, 255, 255, 0.23)' }}>
             <Typography variant="h6" sx={{ mb: 1, p: 1 }}>模板库</Typography>
             <List component="nav" dense>
-              {Object.entries(veoTemplates.useCases).map(([useCaseKey, useCase]) => (
-                <ListItemButton key={useCaseKey} selected={selectedUseCaseKey === useCaseKey} onClick={() => handleUseCaseSelect(useCaseKey)} sx={{ '&.Mui-selected': { backgroundColor: theme.palette.primary.main, color: theme.palette.primary.contrastText, '&:hover': { backgroundColor: theme.palette.primary.dark, } }, '& .MuiListItemText-primary': { color: selectedUseCaseKey === useCaseKey ? theme.palette.primary.contrastText : 'text.primary', fontWeight: selectedUseCaseKey === useCaseKey ? 600 : 400, } }}>
-                  <ListItemText primary={useCase.label} />
-                </ListItemButton>
+              {Object.entries(veoTemplates).map(([industryKey, industry]) => (
+                <React.Fragment key={industryKey}>
+                  <ListItemButton onClick={() => handleIndustryClick(industryKey)}>
+                    <ListItemText primary={industry.label} primaryTypographyProps={{ fontWeight: 500, color: 'text.secondary', fontSize: '0.9rem' }} />
+                    {openIndustries[industryKey] ? <ExpandLess /> : <ExpandMore />}
+                  </ListItemButton>
+                  <Collapse in={openIndustries[industryKey]} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                      {Object.entries(industry.useCases).map(([useCaseKey, useCase]) => (
+                        <ListItemButton key={useCaseKey} selected={selectedIndustry === industryKey && selectedUseCase === useCaseKey} onClick={() => handleUseCaseSelect(industryKey, useCaseKey)} sx={{ pl: 4, '&.Mui-selected': { backgroundColor: theme.palette.primary.main, color: theme.palette.primary.contrastText, '&:hover': { backgroundColor: theme.palette.primary.dark, } }, '& .MuiListItemText-primary': { color: selectedIndustry === industryKey && selectedUseCase === useCaseKey ? theme.palette.primary.contrastText : 'text.primary', fontWeight: selectedIndustry === industryKey && selectedUseCase === useCaseKey ? 600 : 400, } }}>
+                          <ListItemText primary={useCase.label} />
+                        </ListItemButton>
+                      ))}
+                    </List>
+                  </Collapse>
+                </React.Fragment>
               ))}
             </List>
           </Paper>
@@ -126,19 +138,23 @@ export default function PromptBuilder({ onApply, onClose }: {
                 <Typography variant="h6" gutterBottom>场景选择</Typography>
                 <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
                   {currentUseCase?.subTemplates.map(st => (
-                    <Chip key={st.key} label={st.label} onClick={() => setSelectedSubTemplateKey(st.key)} variant={selectedSubTemplateKey === st.key ? 'filled' : 'outlined'} color={selectedSubTemplateKey === st.key ? 'primary' : 'default'} />
+                    <Chip
+                      key={st.key}
+                      label={st.label}
+                      onClick={() => setSelectedSubTemplateKey(st.key)}
+                      variant={selectedSubTemplateKey === st.key ? 'filled' : 'outlined'}
+                      color={selectedSubTemplateKey === st.key ? 'primary' : 'default'}
+                    />
                   ))}
                 </Stack>
               </Box>
 
               <Typography variant="h6" gutterBottom>参数化表单</Typography>
               <Grid container spacing={2}>
-                {currentSubTemplate && Object.entries(currentSubTemplate.fields)
-                  .filter(([key]) => key !== 'keywords') // 不渲染隐藏的关键词字段
-                  .map(([key, field]) => (
+                {currentSubTemplate && Object.entries(currentSubTemplate.fields).map(([key, field]) => (
                   <Grid item xs={12} sm={6} key={key}>
                     {field.type === 'text' ? (
-                      <TextField name={key} label={field.label} value={formState[key] || ''} onChange={handleFormChange} fullWidth multiline rows={2} variant="outlined" size="small" />
+                      <TextField name={key} label={field.label} value={formState[key] || ''} onChange={handleFormChange} fullWidth variant="outlined" size="small" />
                     ) : (
                       <FormControl fullWidth variant="outlined" size="small">
                         <InputLabel>{field.label}</InputLabel>
@@ -152,23 +168,15 @@ export default function PromptBuilder({ onApply, onClose }: {
                   </Grid>
                 ))}
               </Grid>
-              
-              {/* [新增UI] 专业关键词库 */}
-              <Accordion sx={{ mt: 3, bgcolor: 'transparent', boxShadow: 'none', '&:before': { display: 'none' } }}>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}><Typography variant="h6">专业关键词库</Typography></AccordionSummary>
-                <AccordionDetails>
-                  <Stack spacing={3}>
-                    <ChipInput label="附加关键词" value={formState.keywords || ''} onChange={handleKeywordsChange} keywords={currentUseCase.options.veo_cinematography_keywords || []} />
-                    <ChipInput label="游戏风格" value={formState.keywords || ''} onChange={handleKeywordsChange} keywords={currentUseCase.options.veo_gaming_keywords || []} />
-                    <ChipInput label="电商风格" value={formState.keywords || ''} onChange={handleKeywordsChange} keywords={currentUseCase.options.veo_ecommerce_keywords || []} />
-                  </Stack>
-                </AccordionDetails>
-              </Accordion>
             </Paper>
 
             <Paper variant="outlined" sx={{ p: 2, borderColor: 'rgba(255, 255, 255, 0.23)' }}>
               <Typography variant="h6" gutterBottom>全局设置</Typography>
-              <TextField name="negativePrompt" label="排除项 (负面提示词)" value={formState.negativePrompt || ''} onChange={handleFormChange} fullWidth multiline rows={2} variant="outlined" size="small" />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField name="negativePrompt" label="排除项 (负面提示词)" value={formState.negativePrompt || ''} onChange={handleFormChange} fullWidth multiline rows={2} variant="outlined" size="small" />
+                </Grid>
+              </Grid>
             </Paper>
           </Stack>
         </Grid>
