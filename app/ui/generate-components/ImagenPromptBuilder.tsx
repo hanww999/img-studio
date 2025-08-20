@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import { Check, Refresh, ExpandLess, ExpandMore } from '@mui/icons-material';
 import { promptTemplates, UseCaseTemplate } from '../../api/prompt-templates';
-import theme from '../../theme'; // 引入主题
+import theme from '../../theme';
 
 export default function ImagenPromptBuilder({ onApply, onClose }: {
   onApply: (prompt: string, negativePrompt: string, aspectRatio: string) => void;
@@ -109,7 +109,6 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
                           onClick={() => handleUseCaseSelect(industryKey, useCaseKey)}
                           sx={{ 
                             pl: 4,
-                            // [UI优化] 增强选中项的视觉效果
                             '&.Mui-selected': {
                               backgroundColor: theme.palette.primary.main,
                               color: theme.palette.primary.contrastText,
@@ -185,12 +184,13 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
                 <Grid item xs={12} sm={6}>
                    <FormControl fullWidth variant="outlined" size="small">
                       <InputLabel>宽高比</InputLabel>
-                      {/* [修正点] 更新宽高比下拉菜单选项 */}
                       <Select name="aspectRatio" value={formState.aspectRatio || '16:9'} onChange={handleFormChange} label="宽高比">
                         <MenuItem value="16:9">16:9 (宽屏)</MenuItem>
-                        <MenuItem value="9:16">9:16 (故事)</MenuItem>
                         <MenuItem value="4:3">4:3 (标准)</MenuItem>
                         <MenuItem value="1:1">1:1 (方形)</MenuItem>
+                        {/* [修正点] 添加 3:4 选项 */}
+                        <MenuItem value="3:4">3:4 (垂直)</MenuItem>
+                        <MenuItem value="9:16">9:16 (故事)</MenuItem>
                       </Select>
                     </FormControl>
                 </Grid>
