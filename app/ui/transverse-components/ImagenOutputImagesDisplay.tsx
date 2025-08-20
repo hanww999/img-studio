@@ -52,10 +52,15 @@ const EmptyState = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const examplePrompts: ExampleImage[] = [
+    { image: '/examples/8.png', prompt: 'A photo of fantasy, mysterious character concept art of a guardian, a small, nimble creature with large, expressive eyes, wearing makeshift armor from pottery shards and cloth, in a protective stance in front of a giant, moss-covered stone head of a forgotten god, armed with a sharp obsidian shard, dappled sunlight through the canopy of a dense jungle, atmospheric, detailed, aspect ratio 16:9.' },
+    { image: '/examples/5.png', prompt: 'A photo of photorealistic 2d character concept art of a heroic fantasy elf mage, wearing intricate leather armor with glowing runes, holding a staff, dynamic pose, natural lighting with accurate shadows, high fidelity, aspect ratio' },
+    { image: '/examples/6.png', prompt: 'A photo of digital painting, concept art, a striking female warrior with light grey skin, dark flowing hair with braids, intricate facial markings, and a futuristic headpiece, wearing detailed metallic armor on her shoulder, her gaze intense and determined, positioned in the foreground. Behind her, a shadowy, spectral male figure with glowing cyan eyes and features, appearing to emerge from or dissolve into darkness, surrounded by crackling white energy and floating debris. Set against a minimalist, gradient grey background. A medium shot with dramatic, high-contrast lighting, bright highlights on the female, and strong internal luminescence from the male figure. A cool, monochromatic color palette dominated by greys, blacks, and vibrant cyan accents, 8k, hyperdetailed, intricate, cinematic quality.' },
+    { image: '/examples/7.png', prompt: 'A photo of high-performance photo for a facebook ad, featuring a person joyfully leaping in the air at the start of their workday, holding a coffee cup, with the visual concept of "conquering the morning", with bright, energetic morning sunlight, ample negative space for text overlay, negative prompt: tired, sad, sitting, dark, office, aspect ratio' },
     { image: '/examples/222.png', prompt: 'A close up of a warm and fuzzy colorful Peruvian poncho laying on a top of a chair in a bright day' },
     { image: '/examples/111.png', prompt: 'A winning touchdown, fast shutter speed, movement tracking' },
     { image: '/examples/333.png', prompt: 'Aerial shot of a river flowing up a mystical valley' },
     { image: '/examples/444.png', prompt: 'A photo of a forest canopy with blue skies from below' },
+    
   ];
 
   const handleScroll = (direction: 'left' | 'right') => {
