@@ -18,13 +18,14 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
   const industryKeys = Object.keys(imagenTemplates) as Array<keyof typeof imagenTemplates>;
   const firstIndustryKey = industryKeys[0];
   
-  // [修正点] 使用类型断言来确保类型安全
-  const firstUseCaseKey = Object.keys(imagenTemplates[firstIndustryKey].useCases)[0] as keyof typeof imagenTemplates[typeof firstIndustryKey]['useCases'];
-  const firstSubTemplateKey = imagenTemplates[firstIndustryKey].useCases[firstUseCaseKey].subTemplates[0].key;
+  // [修正点] 分步获取，让 TypeScript 能够正确推断类型
+  const firstUseCasesObject = imagenTemplates[firstIndustryKey].useCases;
+  const firstUseCaseKey = Object.keys(firstUseCasesObject)[0] as keyof typeof firstUseCasesObject;
+  const firstSubTemplateKey = firstUseCasesObject[firstUseCaseKey].subTemplates[0].key;
 
   const [openIndustries, setOpenIndustries] = useState<Record<string, boolean>>({ [firstIndustryKey]: true });
   const [selectedIndustry, setSelectedIndustry] = useState<keyof typeof imagenTemplates>(firstIndustryKey);
-  const [selectedUseCase, setSelectedUseCase] = useState<keyof typeof imagenTemplates[typeof firstIndustryKey]['useCases']>(firstUseCaseKey);
+  const [selectedUseCase, setSelectedUseCase] = useState<keyof typeof firstUseCasesObject>(firstUseCaseKey);
   const [selectedSubTemplateKey, setSelectedSubTemplateKey] = useState(firstSubTemplateKey);
   
   const [formState, setFormState] = useState<Record<string, string>>({});
