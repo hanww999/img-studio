@@ -6,10 +6,11 @@ import {
   Box, Button, Grid, Paper, Stack, Typography, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, TextField, List, ListItemButton, ListItemText, Collapse, Chip
 } from '@mui/material';
 import { Check, Refresh, ExpandLess, ExpandMore } from '@mui/icons-material';
-// [Veo 修正] 引入统一的模板，并指定为 veo 的模板
+// [修正点] 导入名为 templates 的主对象
 import { templates, UseCaseTemplate, SubTemplate } from '../../api/prompt-templates';
 import theme from '../../theme';
 
+// [修正点] 明确指出我们使用的是 veo 的模板
 const veoTemplates = templates.veo;
 
 export default function PromptBuilder({ onApply, onClose }: {
