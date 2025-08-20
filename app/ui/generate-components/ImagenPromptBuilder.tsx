@@ -15,23 +15,22 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
   onApply: (prompt: string, negativePrompt: string, aspectRatio: string) => void;
   onClose: () => void;
 }) {
+  // [最终修正点] 采用更安全的初始化方式
   const industryKeys = Object.keys(imagenTemplates) as Array<keyof typeof imagenTemplates>;
   const firstIndustryKey = industryKeys[0];
-  
-  // [修正点] 分步获取，让 TypeScript 能够正确推断类型
   const firstUseCasesObject = imagenTemplates[firstIndustryKey].useCases;
   const firstUseCaseKey = Object.keys(firstUseCasesObject)[0] as keyof typeof firstUseCasesObject;
-  const firstSubTemplateKey = firstUseCasesObject[firstUseCaseKey].subTemplates[0].key;
+  const firstSubTemplate = firstUseCasesObject[firstUseCaseKey].subTemplates[0];
 
   const [openIndustries, setOpenIndustries] = useState<Record<string, boolean>>({ [firstIndustryKey]: true });
-  const [selectedIndustry, setSelectedIndustry] = useState<keyof typeof imagenTemplates>(firstIndustryKey);
-  const [selectedUseCase, setSelectedUseCase] = useState<keyof typeof firstUseCasesObject>(firstUseCaseKey);
-  const [selectedSubTemplateKey, setSelectedSubTemplateKey] = useState(firstSubTemplateKey);
+  const [selectedIndustry, setSelectedIndustry] = useState(firstIndustryKey);
+  const [selectedUseCase, setSelectedUseCase] = useState(firstUseCaseKey);
+  const [selectedSubTemplateKey, setSelectedSubTemplateKey] = useState(firstSubTemplate.key);
   
   const [formState, setFormState] = useState<Record<string, string>>({});
 
   const currentUseCase: UseCaseTemplate = useMemo(() => {
-    return imagenTemplates[selectedIndustry].useCases[selectedUseCase];
+    return imagenTemplates[selectedIndustry].useCases[selectedUseCase as keyof typeof imagenTemplates[typeof selectedIndustry]['useCases']];
   }, [selectedIndustry, selectedUseCase]);
 
   const currentSubTemplate: SubTemplate | undefined = useMemo(() => {
@@ -40,9 +39,13 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
 
   useEffect(() => {
     if (currentUseCase?.subTemplates?.length > 0) {
-      setSelectedSubTemplateKey(currentUseCase.subTemplates[0].key);
+      // 当用例切换时，确保不会选择一个不存在的子模板
+      const newFirstSubTemplate = currentUseCase.subTemplates[0];
+      if (selectedSubTemplateKey !== newFirstSubTemplate.key) {
+        setSelectedSubTemplateKey(newFirstSubTemplate.key);
+      }
     }
-  }, [currentUseCase]);
+  }, [currentUseCase, selectedSubTemplateKey]);
 
   useEffect(() => {
     const defaultState: Record<string, string> = {};
@@ -60,7 +63,7 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
     setOpenIndustries(prev => ({ ...prev, [industryKey]: !prev[industryKey] }));
   };
 
-  const handleUseCaseSelect = (industryKey: keyof typeof imagenTemplates, useCaseKey: keyof typeof imagenTemplates[typeof industryKey]['useCases']) => {
+  const handleUseCaseSelect = (industryKey: keyof typeof imagenTemplates, useCaseKey: string) => {
     setSelectedIndustry(industryKey);
     setSelectedUseCase(useCaseKey);
   };
@@ -114,9 +117,9 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
                   </ListItemButton>
                   <Collapse in={openIndustries[industryKey]} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
-                      {(Object.keys(imagenTemplates[industryKey].useCases) as Array<keyof typeof imagenTemplates[typeof industryKey]['useCases']>).map((useCaseKey) => (
+                      {Object.keys(imagenTemplates[industryKey].useCases).map((useCaseKey) => (
                         <ListItemButton key={useCaseKey} selected={selectedIndustry === industryKey && selectedUseCase === useCaseKey} onClick={() => handleUseCaseSelect(industryKey, useCaseKey)} sx={{ pl: 4, '&.Mui-selected': { backgroundColor: theme.palette.primary.main, color: theme.palette.primary.contrastText, '&:hover': { backgroundColor: theme.palette.primary.dark, } }, '& .MuiListItemText-primary': { color: selectedIndustry === industryKey && selectedUseCase === useCaseKey ? theme.palette.primary.contrastText : 'text.primary', fontWeight: selectedIndustry === industryKey && selectedUseCase === useCaseKey ? 600 : 400, } }}>
-                          <ListItemText primary={imagenTemplates[industryKey].useCases[useCaseKey].label} />
+                          <ListItemText primary={imagenTemplates[industryKey].useCases[useCaseKey as keyof typeof imagenTemplates[typeof industryKey]['useCases']].label} />
                         </ListItemButton>
                       ))}
                     </List>
