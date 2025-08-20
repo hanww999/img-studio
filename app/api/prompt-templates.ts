@@ -226,7 +226,7 @@ export const templates = {
       },
     },
   },
-  export const templates = {
+  //veo
   veo: {
     common: {
       label: '通用场景',
@@ -635,6 +635,55 @@ export const templates = {
               negativePrompt: 'turbulent water, quick focus shift, dark underwater, shaky motion, low-res',
               aspectRatio: '16:9',
             },
+            {
+              key: 'watch_showcase_video',
+              label: '产品展示视频 | 奢侈皮表',
+              promptTemplate: 'A product showcase video of {subject} on {background}, {camera_movement}, {lighting}, {shot} highlighting {features}, {aesthetic}, no shadows, {resolution}.',
+              fields: {
+                subject: { label: '主体', type: 'text', defaultValue: 'a luxury leather watch' },
+                background: { label: '背景', type: 'text', defaultValue: 'a seamless white background' },
+                camera_movement: { label: '镜头运动', type: 'dropdown', defaultValue: 'rotating slowly', optionsKey: 'camera_movement' },
+                lighting: { label: '光照', type: 'dropdown', defaultValue: 'soft and even studio lighting', optionsKey: 'lighting' },
+                shot: { label: '拍摄', type: 'text', defaultValue: 'macro shot' },
+                features: { label: '特征', type: 'text', defaultValue: 'the watch face and detailed stitching' },
+                aesthetic: { label: '美学', type: 'text', defaultValue: 'clean, minimalist, modern aesthetic' },
+                resolution: { label: '分辨率', type: 'text', defaultValue: '4K resolution' },
+              },
+              negativePrompt: 'shadows, cluttered background, blurry details, fast rotation, harsh lighting',
+              aspectRatio: '16:9',
+            },
+            {
+              key: 'coffee_maker_lifestyle',
+              label: '生活方式拍摄 | AeroPress Go咖啡机',
+              promptTemplate: 'A lifestyle shot of {subject} using {product} while {context}, {lighting} streaming through the trees, {depth_of_field}, {mood}, uplifting background music, shot on {camera}.',
+              fields: {
+                subject: { label: '主体', type: 'text', defaultValue: 'a young man happily' },
+                product: { label: '产品', type: 'text', defaultValue: 'the AeroPress Go coffee maker' },
+                context: { label: '场景/背景', type: 'text', defaultValue: 'camping next to a serene lake at sunrise' },
+                lighting: { label: '光照', type: 'dropdown', defaultValue: 'warm natural sunlight', optionsKey: 'lighting' },
+                depth_of_field: { label: '景深', type: 'text', defaultValue: 'shallow depth of field' },
+                mood: { label: '情绪', type: 'text', defaultValue: 'candid and authentic mood' },
+                camera: { label: '相机', type: 'text', defaultValue: 'a high-end cinema camera' },
+              },
+              negativePrompt: 'staged pose, artificial lighting, blurry subject, indoor setting, sad mood',
+              aspectRatio: '16:9',
+            },
+            {
+              key: 'smartphone_water_demo',
+              label: '极端特写 | 智能手机防水演示',
+              promptTemplate: 'An extreme close-up, slow-motion video of {action} onto {subject}, demonstrating its {feature}, {aesthetic}, {lighting}, {effects}, satisfying and clean, vertical video {aspect_ratio}.',
+              fields: {
+                action: { label: '动作', type: 'text', defaultValue: 'water splashing' },
+                subject: { label: '主体', type: 'text', defaultValue: 'a smartphone screen' },
+                feature: { label: '特征', type: 'text', defaultValue: 'water-resistance' },
+                aesthetic: { label: '美学', type: 'text', defaultValue: 'sleek and dynamic' },
+                lighting: { label: '光照', type: 'dropdown', defaultValue: 'high-contrast lighting', optionsKey: 'lighting' },
+                effects: { label: '效果', type: 'text', defaultValue: 'water droplets splashing dramatically' },
+                aspect_ratio: { label: '纵横比', type: 'text', defaultValue: '9:16 aspect ratio' },
+              },
+              negativePrompt: 'fast motion, low contrast, dirty water, horizontal orientation, blurry droplets',
+              aspectRatio: '9:16',
+            },
           ],
           options: {
             camera_movement: [
@@ -646,16 +695,20 @@ export const templates = {
               { value: 'The camera is static as the watch completes a slow, smooth 360-degree rotation', label: '静态相机，手表慢速360旋转' },
               { value: 'The scene opens with a close-up on the watch, then the camera slowly pans out, revealing the car', label: '从手表特写开始，慢速拉远揭示汽车' },
               { value: 'The camera starts with a sharp focus on the engraved logo on the crown, then slowly pulls focus to the textured, wave-patterned blue dial. The movement is extremely smooth and controlled', label: '从冠部刻字锐焦开始，慢速拉焦到波纹蓝色表盘' },
+              { value: 'rotating slowly', label: '缓慢旋转' },
             ],
             lighting: [
               { value: 'natural daylight for realism', label: '真实自然日光' },
               { value: 'soft studio lights', label: '柔和工作室光' },
               { value: 'even, neutral lighting', label: '均匀中性光' },
-              { value: 'warm natural environments', label: '温暖温暖自然环境' },
+              { value: 'warm natural environments', label: '温暖自然环境' },
               { value: 'vibrant digital glow', label: '活力数字光芒' },
               { value: 'soft and multi-directional studio light to prevent harsh glare', label: '柔和多方向工作室光，避免眩光' },
               { value: 'the golden hour sun, creating a warm, adventurous glow', label: '黄金时刻阳光，温暖冒险光芒' },
               { value: 'above, creating beautiful caustics that dance across the watch face', label: '上方照明，美丽水光舞动' },
+              { value: 'soft and even studio lighting', label: '柔和均匀工作室光' },
+              { value: 'warm natural sunlight', label: '温暖自然阳光' },
+              { value: 'high-contrast lighting', label: '高对比光照' },
             ],
           },
         },
@@ -810,5 +863,4 @@ export const templates = {
     },
   },
 };
-  },
-};
+  
