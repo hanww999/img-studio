@@ -3,10 +3,10 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Box, Button, Grid, Paper, Stack, Typography, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, TextField, List, ListItemButton, ListItemText, Collapse
+  Box, Button, Grid, Paper, Stack, Typography, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, TextField, List, ListItemButton, ListItemText, Collapse, Chip
 } from '@mui/material';
 import { Check, Refresh, ExpandLess, ExpandMore } from '@mui/icons-material';
-import { promptTemplates, UseCaseTemplate } from '../../api/prompt-templates';
+import { promptTemplates, UseCaseTemplate, SubTemplate } from '../../api/prompt-templates';
 import theme from '../../theme';
 
 export default function ImagenPromptBuilder({ onApply, onClose }: {
@@ -16,28 +16,41 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
   const industryKeys = Object.keys(promptTemplates);
   const firstIndustryKey = industryKeys[0];
   const firstUseCaseKey = Object.keys(promptTemplates[firstIndustryKey].useCases)[0];
+  const firstSubTemplateKey = promptTemplates[firstIndustryKey].useCases[firstUseCaseKey].subTemplates[0].key;
 
   const [openIndustries, setOpenIndustries] = useState<Record<string, boolean>>({ [firstIndustryKey]: true });
   const [selectedIndustry, setSelectedIndustry] = useState(firstIndustryKey);
   const [selectedUseCase, setSelectedUseCase] = useState(firstUseCaseKey);
+  const [selectedSubTemplateKey, setSelectedSubTemplateKey] = useState(firstSubTemplateKey);
   
   const [formState, setFormState] = useState<Record<string, string>>({});
 
-  const currentTemplate: UseCaseTemplate = useMemo(() => {
+  const currentUseCase: UseCaseTemplate = useMemo(() => {
     return promptTemplates[selectedIndustry].useCases[selectedUseCase];
   }, [selectedIndustry, selectedUseCase]);
 
+  const currentSubTemplate: SubTemplate | undefined = useMemo(() => {
+    return currentUseCase?.subTemplates.find(st => st.key === selectedSubTemplateKey);
+  }, [currentUseCase, selectedSubTemplateKey]);
+
+  useEffect(() => {
+    if (currentUseCase?.subTemplates?.length > 0) {
+      setSelectedSubTemplateKey(currentUseCase.subTemplates[0].key);
+    }
+  }, [currentUseCase]);
+
   useEffect(() => {
     const defaultState: Record<string, string> = {};
-    if (currentTemplate) {
-        for (const key in currentTemplate.fields) {
-            defaultState[key] = currentTemplate.fields[key].defaultValue;
+    if (currentSubTemplate) {
+        for (const key in currentSubTemplate.fields) {
+            defaultState[key] = currentSubTemplate.fields[key].defaultValue;
         }
-        defaultState.aspectRatio = currentTemplate.aspectRatio;
-        defaultState.negativePrompt = currentTemplate.negativePrompt;
+        // [关键逻辑] 自动加载子模板专属的负面提示词和宽高比
+        defaultState.aspectRatio = currentSubTemplate.aspectRatio;
+        defaultState.negativePrompt = currentSubTemplate.negativePrompt;
     }
     setFormState(defaultState);
-  }, [currentTemplate]);
+  }, [currentSubTemplate]);
 
   const handleIndustryClick = (industryKey: string) => {
     setOpenIndustries(prev => ({ ...prev, [industryKey]: !prev[industryKey] }));
@@ -54,10 +67,10 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
   };
 
   const generateLivePrompt = () => {
-    if (!currentTemplate) return '';
-    let livePrompt = currentTemplate.promptTemplate;
+    if (!currentSubTemplate) return '';
+    let livePrompt = currentSubTemplate.promptTemplate;
     for (const key in formState) {
-      if (currentTemplate.fields[key]) {
+      if (currentSubTemplate.fields[key]) {
         livePrompt = livePrompt.replace(`{${key}}`, formState[key] || '');
       }
     }
@@ -66,12 +79,14 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
 
   const handleReset = () => {
     const defaultState: Record<string, string> = {};
-    for (const key in currentTemplate.fields) {
-      defaultState[key] = currentTemplate.fields[key].defaultValue;
+    if (currentSubTemplate) {
+        for (const key in currentSubTemplate.fields) {
+          defaultState[key] = currentSubTemplate.fields[key].defaultValue;
+        }
+        defaultState.aspectRatio = currentSubTemplate.aspectRatio;
+        defaultState.negativePrompt = currentSubTemplate.negativePrompt;
+        setFormState(defaultState);
     }
-    defaultState.aspectRatio = currentTemplate.aspectRatio;
-    defaultState.negativePrompt = currentTemplate.negativePrompt;
-    setFormState(defaultState);
   };
 
   const handleApply = () => {
@@ -90,38 +105,13 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
               {Object.entries(promptTemplates).map(([industryKey, industry]) => (
                 <React.Fragment key={industryKey}>
                   <ListItemButton onClick={() => handleIndustryClick(industryKey)}>
-                    <ListItemText 
-                      primary={industry.label} 
-                      primaryTypographyProps={{ 
-                        fontWeight: 500, 
-                        color: 'text.secondary',
-                        fontSize: '0.9rem',
-                      }} 
-                    />
+                    <ListItemText primary={industry.label} primaryTypographyProps={{ fontWeight: 500, color: 'text.secondary', fontSize: '0.9rem' }} />
                     {openIndustries[industryKey] ? <ExpandLess /> : <ExpandMore />}
                   </ListItemButton>
                   <Collapse in={openIndustries[industryKey]} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
                       {Object.entries(industry.useCases).map(([useCaseKey, useCase]) => (
-                        <ListItemButton
-                          key={useCaseKey}
-                          selected={selectedIndustry === industryKey && selectedUseCase === useCaseKey}
-                          onClick={() => handleUseCaseSelect(industryKey, useCaseKey)}
-                          sx={{ 
-                            pl: 4,
-                            '&.Mui-selected': {
-                              backgroundColor: theme.palette.primary.main,
-                              color: theme.palette.primary.contrastText,
-                              '&:hover': {
-                                backgroundColor: theme.palette.primary.dark,
-                              }
-                            },
-                            '& .MuiListItemText-primary': {
-                                color: selectedIndustry === industryKey && selectedUseCase === useCaseKey ? theme.palette.primary.contrastText : 'text.primary',
-                                fontWeight: selectedIndustry === industryKey && selectedUseCase === useCaseKey ? 600 : 400,
-                            }
-                          }}
-                        >
+                        <ListItemButton key={useCaseKey} selected={selectedIndustry === industryKey && selectedUseCase === useCaseKey} onClick={() => handleUseCaseSelect(industryKey, useCaseKey)} sx={{ pl: 4, '&.Mui-selected': { backgroundColor: theme.palette.primary.main, color: theme.palette.primary.contrastText, '&:hover': { backgroundColor: theme.palette.primary.dark, } }, '& .MuiListItemText-primary': { color: selectedIndustry === industryKey && selectedUseCase === useCaseKey ? theme.palette.primary.contrastText : 'text.primary', fontWeight: selectedIndustry === industryKey && selectedUseCase === useCaseKey ? 600 : 400, } }}>
                           <ListItemText primary={useCase.label} />
                         </ListItemButton>
                       ))}
@@ -144,30 +134,32 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
             </Paper>
 
             <Paper variant="outlined" sx={{ p: 2, flexGrow: 1, borderColor: 'rgba(255, 255, 255, 0.23)' }}>
+              <Box mb={3}>
+                <Typography variant="h6" gutterBottom>场景选择</Typography>
+                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                  {currentUseCase?.subTemplates.map(st => (
+                    <Chip
+                      key={st.key}
+                      label={st.label}
+                      onClick={() => setSelectedSubTemplateKey(st.key)}
+                      variant={selectedSubTemplateKey === st.key ? 'filled' : 'outlined'}
+                      color={selectedSubTemplateKey === st.key ? 'primary' : 'default'}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+
               <Typography variant="h6" gutterBottom>参数化表单</Typography>
               <Grid container spacing={2}>
-                {currentTemplate && Object.entries(currentTemplate.fields).map(([key, field]) => (
+                {currentSubTemplate && Object.entries(currentSubTemplate.fields).map(([key, field]) => (
                   <Grid item xs={12} sm={6} key={key}>
                     {field.type === 'text' ? (
-                      <TextField
-                        name={key}
-                        label={field.label}
-                        value={formState[key] || ''}
-                        onChange={handleFormChange}
-                        fullWidth
-                        variant="outlined"
-                        size="small"
-                      />
+                      <TextField name={key} label={field.label} value={formState[key] || ''} onChange={handleFormChange} fullWidth variant="outlined" size="small" />
                     ) : (
                       <FormControl fullWidth variant="outlined" size="small">
                         <InputLabel>{field.label}</InputLabel>
-                        <Select
-                          name={key}
-                          value={formState[key] || ''}
-                          onChange={handleFormChange}
-                          label={field.label}
-                        >
-                          {(currentTemplate.options[field.optionsKey!] || []).map(option => (
+                        <Select name={key} value={formState[key] || ''} onChange={handleFormChange} label={field.label}>
+                          {(currentUseCase.options[field.optionsKey!] || []).map(option => (
                             <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                           ))}
                         </Select>
@@ -188,24 +180,14 @@ export default function ImagenPromptBuilder({ onApply, onClose }: {
                         <MenuItem value="16:9">16:9 (宽屏)</MenuItem>
                         <MenuItem value="4:3">4:3 (标准)</MenuItem>
                         <MenuItem value="1:1">1:1 (方形)</MenuItem>
-                        {/* [修正点] 添加 3:4 选项 */}
                         <MenuItem value="3:4">3:4 (垂直)</MenuItem>
                         <MenuItem value="9:16">9:16 (故事)</MenuItem>
                       </Select>
                     </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField
-                    name="negativePrompt"
-                    label="排除项 (负面提示词)"
-                    value={formState.negativePrompt || ''}
-                    onChange={handleFormChange}
-                    fullWidth
-                    multiline
-                    rows={2}
-                    variant="outlined"
-                    size="small"
-                  />
+                  {/* [关键逻辑] 这个输入框的值，由 formState.negativePrompt 决定，而该值已在 useEffect 中从子模板自动加载 */}
+                  <TextField name="negativePrompt" label="排除项 (负面提示词)" value={formState.negativePrompt || ''} onChange={handleFormChange} fullWidth multiline rows={2} variant="outlined" size="small" />
                 </Grid>
               </Grid>
             </Paper>
