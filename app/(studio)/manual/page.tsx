@@ -50,9 +50,7 @@ export default function ManualPage() {
               </ul>
             </div>
           </div>
-          {/* 2. 移除了原来多余的 </div> */}
-          {/* --- 修复结束 --- */}
-
+          {/*
           <h3 className="text-xl font-medium mb-4 text-gray-200">操作流程截图</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Image src="/examples/generate-step1.png" alt="图像创作截图1: 图片转 Prompt（可选）" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
@@ -60,11 +58,8 @@ export default function ManualPage() {
             <Image src="/examples/generate-step2.png" alt="图像创作截图3: 调整设置" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
             <Image src="/examples/generate-step4.png" alt="图像创作截图4: 查看结果/编辑选项" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
           </div>
+          */}
         </section>
-
-        {/* --- 其他功能模块 (已按您的内容更新) --- */}
-        {/* ... (此处省略其他模块的完整代码，因为它们没有结构错误) ... */}
-        {/* 您可以保留您文件中其他模块的代码，它们是正确的 */}
 
         {/* --- 功能模块 2: AI 虚拟试穿 --- */}
         <section className="mb-20">
@@ -78,11 +73,13 @@ export default function ManualPage() {
             <li>点击 “生成试穿效果” 按钮，系统将自动完成匹配和渲染。</li>
             <li>在结果区域预览并下载您满意的图片（也可进行编辑图片稍加修改）。</li>
           </ul>
+          {/*
           <h3 className="text-xl font-medium mb-4 text-gray-200">操作流程截图</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Image src="/examples/tryon-step1.png" alt="虚拟试穿截图1: 上传模特和服装图" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
             <Image src="/examples/tryon-step2.png" alt="虚拟试穿截图2: 查看试穿结果" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
           </div>
+          */}
         </section>
 
         {/* --- 功能模块 3: AI 编辑图像 --- */}
@@ -97,12 +94,14 @@ export default function ManualPage() {
             <li>在输入框中描述您希望在该区域出现什么内容。</li>
             <li>点击 “应用编辑” 按钮，AI 将只在您选择的区域内进行重绘。</li>
           </ul>
+          {/*
           <h3 className="text-xl font-medium mb-4 text-gray-200">操作流程截图</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Image src="/examples/edit-step1.png" alt="编辑图像截图1: 上传图片" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
             <Image src="/examples/edit-step2.png" alt="编辑图像截图2: 绘制Mask" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
             <Image src="/examples/edit-step3.png" alt="编辑图像截图3: 查看编辑结果" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
           </div>
+          */}
         </section>
 
         {/* --- 功能模块 4: AI 视频生成 --- */}
@@ -119,6 +118,7 @@ export default function ManualPage() {
             <li>在设置面板调整视频时长、清晰度等参数。</li>
             <li>点击 “生成视频” 按钮，AI 将开始渲染您的视频。</li>
           </ul>
+          {/*
           <h3 className="text-xl font-medium mb-4 text-gray-200">操作流程截图</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Image src="/examples/video-step1.png" alt="视频生成截图1: 选择模式和参数（可选）" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
@@ -126,6 +126,7 @@ export default function ManualPage() {
             <Image src="/examples/video-step3.png" alt="视频生成截图3: veo 构建器（预制参数）" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
             <Image src="/examples/video-step4.png" alt="视频生成截图4: 查看结果/导入选项" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
           </div>
+          */}
         </section>
 
         {/* --- 功能模块 5: 我的素材库 --- */}
@@ -138,10 +139,12 @@ export default function ManualPage() {
             <li><strong>下载与导出:</strong> 支持下载高清原图或导出带有元数据的版本。</li>
             <li><strong>再次创作:</strong> 可以直接从素材库中选择一张图片，跳转到“AI 编辑图像”功能进行二次创作。</li>
           </ul>
+          {/*
           <h3 className="text-xl font-medium mb-4 text-gray-200">界面截图</h3>
           <div className="grid grid-cols-1">
             <Image src="/examples/library-view.png" alt="我的素材库界面截图" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
           </div>
+          */}
         </section>
 
         {/* --- 页脚 --- */}
