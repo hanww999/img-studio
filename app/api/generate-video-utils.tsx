@@ -60,7 +60,7 @@ export const GenerateVideoFormFields = {
   },
   isVideoWithAudio: {
     type: 'toggleSwitch',
-    default: false,
+    default: true,
     isDataResetable: false,
     isFullPromptAdditionalField: false,
   },
