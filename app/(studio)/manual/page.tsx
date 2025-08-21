@@ -42,9 +42,9 @@ export default function ManualPage() {
           </div>
           <h3 className="text-xl font-medium mb-4 text-gray-200">操作流程截图</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Image src="/examples/generate-step1.png" alt="图像创作截图1: 图片转提示词 Prompt" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
-            <Image src="/examples/generate-step2.png" alt="图像创作截图2: 调整设置" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
-            <Image src="/examples/generate-step3.png" alt="图像创作截图3: Imagen 构建器" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
+            <Image src="/examples/generate-step1.png" alt="图像创作截图1: 图片转 Prompt（可选）" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
+            <Image src="/examples/generate-step3.png" alt="图像创作截图2: Imagen 构建器" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
+            <Image src="/examples/generate-step2.png" alt="图像创作截图3: 调整设置" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
             <Image src="/examples/generate-step4.png" alt="图像创作截图4: 查看结果/编辑选项" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
           </div>
         </section>
@@ -110,8 +110,10 @@ export default function ManualPage() {
           </ul>
           <h3 className="text-xl font-medium mb-4 text-gray-200">操作流程截图</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Image src="/examples/video-step1.png" alt="视频生成截图1: 选择模式" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
-            <Image src="/examples/video-step2.png" alt="视频生成截图2: 输入Prompt和参数" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
+            <Image src="/examples/video-step1.png" alt="视频生成截图1: 选择模式和参数（可选）" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
+            <Image src="/examples/video-step2.png" alt="视频生成截图2: 视频转 Prompt(可选)" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
+            <Image src="/examples/video-step3.png" alt="视频生成截图3: veo 构建器（预制参数）" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
+            <Image src="/examples/video-step4.png" alt="视频生成截图4: 查看结果/导入选项" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
           </div>
         </section>
 
