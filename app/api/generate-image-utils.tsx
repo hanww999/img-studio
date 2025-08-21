@@ -141,7 +141,7 @@ export const GenerateImageFormFields = {
  safetySetting: {
  label: '安全过滤级别',
  type: 'select',
- default: 'block_only_high',
+ default: 'block_none',
  options: [
   {
    value: 'block_low_and_above',
