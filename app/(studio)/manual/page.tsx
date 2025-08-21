@@ -2,15 +2,14 @@ import React from 'react';
 import Image from 'next/image';
 
 // --- 配置区 ---
-// 截图的尺寸，您可以根据实际截图的宽高比进行调整
-const SCREENSHOT_WIDTH = 1200; // 建议使用截图的原始宽度
-const SCREENSHOT_HEIGHT = 800; // 建议使用截图的原始高度
+const SCREENSHOT_WIDTH = 1200;
+const SCREENSHOT_HEIGHT = 800;
 // --- 配置区结束 ---
 
 export default function ManualPage() {
   return (
     <div className="h-full w-full overflow-y-auto bg-gray-900 text-white p-6 md:p-10">
-      <div className="max-w-5xl mx-auto"> {/* 调整了最大宽度以适应更宽的图片网格 */}
+      <div className="max-w-5xl mx-auto">
         
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-100 border-b border-gray-700 pb-4">
           CloudPuppy 使用手册
@@ -26,20 +25,34 @@ export default function ManualPage() {
             通过强大的 Imagen 模型，您可以将文字描述或参考图片转化为高质量的图像。我们针对行业预制了大量prompt，稍加修改可为您提供创作灵感。
           </p>
           <h3 className="text-xl font-medium mb-3 text-gray-200">操作步骤</h3>
-          <ul className="list-decimal list-inside space-y-2 mb-8 text-gray-300 bg-gray-800 p-4 rounded-lg">
-            <li>在左侧导航栏点击 “AI 图像创作”。</li>
-            <li>在输入框中详细描述您想生成的画面 (Prompt)。</li>
-            <li>(灵感) 打开 Imagen 构建器 生成图片(可修改)。</li>
-            <li>(可选) 上传一张图获取图片的所有元素，自动生成(prompt)。</li>
-            <li>(可选) 上传一张或多张参考图，以影响构图、风格或颜色。</li>
-            <li>在设置面板调整高级设置，如图像数量、格式、分辨率等。</li>
-            <li>点击 “生成” 按钮，稍等片刻即可在右侧看到您的作品。</li>
-            <li>作品生成后，也可进行编辑图片、视频生成(满意后导入库/下载本地即可)。</li>
-          </ul>
-          <p className="mt-4 text-gray-400 text-sm border-t border-gray-700 pt-3">
-            <strong>提示:</strong> Imagen 4：生成高质量、自然光感的图片 | Imagen 4 Fast：在速度和质量之间提供较高对比度的平衡 | Imagen 4 Ultra：以最高质量输出单张图片，适用于对视觉效果要求极高的场景
-          </p>
+          
+          {/* --- FIX: 这里是修复的关键 --- */}
+          {/* 1. 添加了开头的 <div className="..."> */}
+          <div className="bg-gray-800 p-4 rounded-lg mb-8">
+            <ul className="list-decimal list-inside space-y-2 text-gray-300">
+              <li>在左侧导航栏点击 “AI 图像创作”。</li>
+              <li>在输入框中详细描述您想生成的画面 (Prompt)。</li>
+              <li>(灵感) 打开 Imagen 构建器 生成图片(可修改)。</li>
+              <li>(可选) 上传一张图获取图片的所有元素，自动生成(prompt)。</li>
+              <li>(可选) 上传一张或多张参考图，以影响构图、风格或颜色。</li>
+              <li>在设置面板调整高级设置，如图像数量、格式、分辨率等。</li>
+              <li>点击 “生成” 按钮，稍等片刻即可在右侧看到您的作品。</li>
+              <li>作品生成后，也可进行编辑图片、视频生成(满意后导入库/下载本地即可)。</li>
+            </ul>
+            
+            {/* REFINEMENT: 将长段提示优化为列表，更易读 */}
+            <div className="mt-4 text-gray-400 text-sm border-t border-gray-700 pt-3">
+              <p className="font-bold mb-2">模型提示:</p>
+              <ul className="list-disc list-inside pl-2 space-y-1">
+                <li><strong>Imagen 4:</strong> 生成高质量、自然光感的图片。</li>
+                <li><strong>Imagen 4 Fast:</strong> 在速度和质量之间提供较高对比度的平衡。</li>
+                <li><strong>Imagen 4 Ultra:</strong> 以最高质量输出单张图片，适用于对视觉效果要求极高的场景。</li>
+              </ul>
+            </div>
           </div>
+          {/* 2. 移除了原来多余的 </div> */}
+          {/* --- 修复结束 --- */}
+
           <h3 className="text-xl font-medium mb-4 text-gray-200">操作流程截图</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Image src="/examples/generate-step1.png" alt="图像创作截图1: 图片转 Prompt（可选）" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
@@ -49,12 +62,14 @@ export default function ManualPage() {
           </div>
         </section>
 
+        {/* --- 其他功能模块 (已按您的内容更新) --- */}
+        {/* ... (此处省略其他模块的完整代码，因为它们没有结构错误) ... */}
+        {/* 您可以保留您文件中其他模块的代码，它们是正确的 */}
+
         {/* --- 功能模块 2: AI 虚拟试穿 --- */}
         <section className="mb-20">
           <h2 className="text-3xl font-semibold mb-4 text-green-400 border-l-4 border-green-400 pl-4">2. AI 虚拟试穿</h2>
-          <p className="text-base text-gray-300 mb-6">
-            为电商、设计等行业提供高效的服装展示方案。上传模特图和服装图，即可生成逼真的试穿效果。
-          </p>
+          <p className="text-base text-gray-300 mb-6">为电商、设计等行业提供高效的服装展示方案。上传模特图和服装图，即可生成逼真的试穿效果。</p>
           <h3 className="text-xl font-medium mb-3 text-gray-200">操作步骤</h3>
           <ul className="list-decimal list-inside space-y-2 mb-8 text-gray-300 bg-gray-800 p-4 rounded-lg">
             <li>在左侧导航栏点击 “AI 虚拟试穿”。</li>
@@ -73,9 +88,7 @@ export default function ManualPage() {
         {/* --- 功能模块 3: AI 编辑图像 --- */}
         <section className="mb-20">
           <h2 className="text-3xl font-semibold mb-4 text-yellow-400 border-l-4 border-yellow-400 pl-4">3. AI 编辑图像</h2>
-          <p className="text-base text-gray-300 mb-6">
-            对现有图像进行精细化修改。无论是智能修复、移除对象、扩展画面 (Outpainting) 还是替换局部内容 (Inpainting)，都能轻松实现。
-          </p>
+          <p className="text-base text-gray-300 mb-6">对现有图像进行精细化修改。无论是智能修复、移除对象、扩展画面 (Outpainting) 还是替换局部内容 (Inpainting)，都能轻松实现。</p>
           <h3 className="text-xl font-medium mb-3 text-gray-200">操作步骤</h3>
           <ul className="list-decimal list-inside space-y-2 mb-8 text-gray-300 bg-gray-800 p-4 rounded-lg">
             <li>在左侧导航栏点击 “AI 编辑图像”，或在任何图片预览下方点击编辑按钮。</li>
@@ -95,9 +108,7 @@ export default function ManualPage() {
         {/* --- 功能模块 4: AI 视频生成 --- */}
         <section className="mb-20">
           <h2 className="text-3xl font-semibold mb-4 text-cyan-400 border-l-4 border-cyan-400 pl-4">4. AI 视频生成</h2>
-          <p className="text-base text-gray-300 mb-6">
-            利用 Google 顶尖的 Veo 模型，将您的静态图像或文字描述转化为生动流畅的高清短视频，为您的内容注入动态活力。
-          </p>
+          <p className="text-base text-gray-300 mb-6">利用 Google 顶尖的 Veo 模型，将您的静态图像或文字描述转化为生动流畅的高清短视频，为您的内容注入动态活力。</p>
           <h3 className="text-xl font-medium mb-3 text-gray-200">操作步骤</h3>
           <ul className="list-decimal list-inside space-y-2 mb-8 text-gray-300 bg-gray-800 p-4 rounded-lg">
             <li>在左侧导航栏点击 “AI 视频生成”，或在图片生成结果下方选择生成视频。</li>
@@ -117,14 +128,10 @@ export default function ManualPage() {
           </div>
         </section>
 
-        
-
         {/* --- 功能模块 5: 我的素材库 --- */}
         <section className="mb-16">
           <h2 className="text-3xl font-semibold mb-4 text-purple-400 border-l-4 border-purple-400 pl-4">5. 我的素材库</h2>
-          <p className="text-base text-gray-300 mb-6">
-            您所有的创作都会被安全地保存在这里。方便您随时回顾、管理和再次使用。
-          </p>
+          <p className="text-base text-gray-300 mb-6">您所有的创作都会被安全地保存在这里。方便您随时回顾、管理和再次使用。</p>
           <h3 className="text-xl font-medium mb-3 text-gray-200">核心功能</h3>
           <ul className="list-disc list-inside space-y-2 mb-8 text-gray-300 bg-gray-800 p-4 rounded-lg">
             <li><strong>浏览与筛选:</strong> 按创作时间、类型（图片/视频）或关键词快速找到您的素材。</li>
@@ -132,19 +139,15 @@ export default function ManualPage() {
             <li><strong>再次创作:</strong> 可以直接从素材库中选择一张图片，跳转到“AI 编辑图像”功能进行二次创作。</li>
           </ul>
           <h3 className="text-xl font-medium mb-4 text-gray-200">界面截图</h3>
-          <div className="grid grid-cols-1"> {/* 素材库通常一张大图就够了 */}
+          <div className="grid grid-cols-1">
             <Image src="/examples/library-view.png" alt="我的素材库界面截图" width={SCREENSHOT_WIDTH} height={SCREENSHOT_HEIGHT} className="rounded-lg shadow-lg border border-gray-700 w-full h-auto"/>
           </div>
         </section>
 
         {/* --- 页脚 --- */}
         <footer className="text-center mt-20 border-t border-gray-700 pt-6">
-          <p className="text-gray-400">
-            所有功能均构建于强大的 Google Cloud Platform (GCP) 之上。
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            遇到问题？请联系您的项目管理员。
-          </p>
+          <p className="text-gray-400">所有功能均构建于强大的 Google Cloud Platform (GCP) 之上。</p>
+          <p className="text-sm text-gray-500 mt-2">遇到问题？请联系您的项目管理员。</p>
         </footer>
       </div>
     </div>
