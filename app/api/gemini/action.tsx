@@ -280,7 +280,8 @@ export async function getPromptFromImageFromGemini(
   2. Vary the scenes and contexts to avoid repetition.
   3. Ensure the prompts are suitable for generating realistic and engaging video content with Veo3.
   4. Focus on creating prompts that capture authentic and natural moments.
-  5. Avoid any elements that would result in unrealistic or artificial-looking videos, as specified in the Negative prompt.`; 
+  5. Avoid any elements that would result in unrealistic or artificial-looking videos, as specified in the Negative prompt.
+  6.In your response, do not include any introductory or explanatory statements, such as 'Here is a video prompt based on the provided image, following the specified structure and guidelines.'`; 
 
   let finalPrompt = '';
   const basePrompt = target === 'Image' ? imagenPromptTemplate : veoPromptTemplate;
